@@ -1,0 +1,98 @@
+                    GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+The GNU Lesser General Public License is a free software license
+that allows you to run, share, and modify the software while
+providing certain conditions to protect the freedom of users.
+
+This version of the License applies to any program or other work
+which contains a notice placed by the copyright holder saying
+it may be distributed under the terms of this License. You can
+apply it to your programs, too.
+
+When we speak of free software, we are referring to freedom, not price.
+Our General Public Licenses are designed to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users. This license, the Lesser General Public
+License, permits more flexibility in linking with non-free programs,
+while still preserving your rights to the library itself.
+
+                            TERMS AND CONDITIONS
+
+0. Definitions.
+
+"This License" refers to version 3 of the GNU Lesser General Public License.
+"A Library" refers to a covered work governed by this License.
+"You" refers to any person who conveys the work.
+"To modify" means to copy from or adapt all or part of the work in a fashion requiring copyright permission.
+
+1. Exception to Section 3 of the GNU GPL.
+
+You may convey a combined work under terms of your choice
+that permit modification of the library by the user, provided that
+the terms do not conflict with this License.
+
+2. Conveying modified versions.
+
+You may modify your copy of the library or any portion of it
+and convey the modified work under the terms of Section 4,
+provided that you also meet the following conditions:
+
+   a) The modified work must carry prominent notices stating
+      that you changed it and the date of any change.
+   b) The work must remain licensed as a whole under this License.
+
+3. Object code and executable forms.
+
+You may convey the object code form of a work under this License
+provided you also convey the source code or a written offer to provide
+the source code, consistent with Section 6.
+
+4. Combined works.
+
+You may combine the library with other code and convey the resulting
+work under terms of your choice, provided that you respect the
+terms of this License regarding the library portion.
+
+5. Application to non-software works.
+
+This License applies to any work containing portions of the Library,
+regardless of whether it is software or documentation.
+
+6. Disclaimer of warranty.
+
+The library is provided "as is", without any warranty of any kind,
+either expressed or implied, including but not limited to
+the warranties of merchantability or fitness for a particular purpose.
+
+7. Limitation of liability.
+
+In no event will the copyright holders or anyone
+conveying the library be liable for any damages arising from
+the use of the library or inability to use it.
+
+8. Acceptance.
+
+You accept this License by copying, modifying, or distributing
+the Library (or any work based on the Library).
+
+9. Termination.
+
+If you violate any terms of this License, your rights under it
+terminate automatically.
+
+10. Miscellaneous.
+
+If any provision of this License is held invalid, the remainder
+of the License shall continue in effect.
+
+11. Complete License.
+
+The complete text of the GNU Lesser General Public License version 3.0
+can be found at: https://www.gnu.org/licenses/lgpl-3.0.txt

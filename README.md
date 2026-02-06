@@ -204,7 +204,8 @@ class DefaultController extends IController {
      * @router / -> index
      */
     function index() {
-        // Load view
+
+        // Load view 
         $this->load("default/start.php");
     }
 }
@@ -240,14 +241,13 @@ class UserController extends IController {
     /**
      * User profile
      * 
-     * @router user/profile/{number:id} -> profile
+     * @router user/profile/{number(1,11):id} -> profile
      */
-    function profile() {
-        $userId = $this->getParam('id');
-        
+    function profile($id) {
+       
         // Fetch data from model
         $userModel = new UserModel();
-        $user = $userModel->getUserById($userId);
+        $user = $userModel->getUserById($id);
         
         // Send data to view
         $this->setData('user', $user)->load("user/profile.php");

@@ -1,0 +1,80 @@
+# Turn on URL rewriting
+RewriteEngine On
+Options -Indexes
+
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# RewriteCond %{HTTP:X-Forwarded-Proto} !https
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Protect application and system files from being viewed
+RewriteRule ^(?:app|site|upload)\b.* index.php/$0 [L]
+
+# Allow any files or directories that exist to be displayed directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteBase /  
+RewriteRule ^(.*)$ index.php?/$1 [L]
+
+
+
+# path to config
+
+SetEnvIfNoCase Request_URI "^.*$" HTTP_CONTROLLER=|||    
+
+# This for page / 
+SetEnvIfNoCase Request_URI "^(\/res\/css\/[A-Za-z0-9\/]{1,16})\.minify\.(CSS|css|js|JS)$" HTTP_CONTROLLER=minify|$1|$2|
+
+# Start comment
+
+# This for page /
+SetEnvIfNoCase Request_URI "^[/]{0,1}$" HTTP_CONTROLLER=default/default.class.php|default|index|
+# End comments                               
+
+
+# Environment Variables – Path Configuration
+# Base: DocumentRoot (www folder)
+
+# Path to config
+RewriteRule ^ - [E=HTTP_path_config:%{DOCUMENT_ROOT}/app/config/]
+
+# Path to system
+RewriteRule ^ - [E=HTTP_path_sys:%{DOCUMENT_ROOT}/app/Sys/]
+
+# Path to system controller
+RewriteRule ^ - [E=HTTP_path_controller:%{DOCUMENT_ROOT}/app/controller/]
+
+# Path to Dynamic-link library
+RewriteRule ^ - [E=HTTP_path_dll:%{DOCUMENT_ROOT}/app/Dll/]
+
+# Path to Dynamic-link function library
+RewriteRule ^ - [E=HTTP_path_funs:%{DOCUMENT_ROOT}/app/funs/]
+
+# Path to log
+RewriteRule ^ - [E=HTTP_path_log:%{DOCUMENT_ROOT}/app/log/]
+
+# Path to MySQL config
+RewriteRule ^ - [E=HTTP_path_mysql:%{DOCUMENT_ROOT}/app/config/mysql/]
+
+# Path to widgets
+RewriteRule ^ - [E=HTTP_path_widget:%{DOCUMENT_ROOT}/app/site/widgets/]
+
+# Path to site
+RewriteRule ^ - [E=HTTP_path_site:%{DOCUMENT_ROOT}/site/]
+
+
+# Environment Variables – Runtime Flags
+
+# MySQL logging
+SetEnv HTTP_mysql_log false
+
+# Error mode
+SetEnv HTTP_errmode true
+
+# Development mode
+SetEnv HTTP_devmode true
+
+# Default language
+SetEnv HTTP_language "en_US"

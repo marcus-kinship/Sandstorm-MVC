@@ -10,7 +10,7 @@
  * @author Marcus Larsson
  * @version 2014.1.1
  * @copyright (c) 2011, Marcus Larsson
- * @category Config class
+ * @category _("Config class")
  */
 class config
 {

@@ -75,7 +75,7 @@ The following diagram illustrates how the controller system components work toge
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Application Request                       │
+│                        Application Request                      │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
                                  ▼
@@ -87,7 +87,7 @@ The following diagram illustrates how the controller system components work toge
                                 │ routes to
                                 ▼
             ┌───────────────────────────────────────┐
-            │      YourController extends          │
+            │      YourController extends           │
             │         IController (abstract)        │
             ├───────────────────────────────────────┤
             │  Methods:                             │
@@ -97,26 +97,26 @@ The following diagram illustrates how the controller system components work toge
             │  • embed(template)       │    │       │
             │  • widget(name, method)  │    │       │
             │  • callback(json)        │    │       │
-            └──────────────┬────────────┘    │       │
-                           │                 │       │
-                           │ uses            │       │
-                           ▼                 │       │
-            ┌──────────────────────────┐     │       │
-            │   Iproperty (static)     │     │       │
-            ├──────────────────────────┤     │       │
-            │ • static $data = []  ◄───┘     │       │
-            │ • static $path = []  ◄─────────┘       │
-            │                               │       │
-            │ Methods:                      │       │
-            │ • setdata(key, value)        │       │
-            │ • getdata() → array          │       │
-            │ • setpath(filepath)          │       │
-            │ • getpath() → array          │       │
-            └──────────────┬───────────────┘       │
+            └──────────────┬───────────┘    │       │
+                           │                │       │
+                           │ uses           │       │
+                           ▼                │       │
+            ┌──────────────────────────┐    │       │
+            │   Iproperty (static)     │    │       │
+            ├──────────────────────────┤    │       │
+            │ • static $data = []  ◄───┘    │       │
+            │ • static $path = []  ◄────────┘       │
+            │                              │        │
+            │ Methods:                     │        │
+            │ • setdata(key, value)        │        │
+            │ • getdata() → array          │        │
+            │ • setpath(filepath)          │        │
+            │ • getpath() → array          │        │
+            └──────────────┬───────────────┘        │
                            │                        │
-         When controller  │                        │
-         is destroyed     │                        │
-         (__destruct)     │                        │
+         When controller   │                        │
+         is destroyed      │                        │
+         (__destruct)      │                        │
                            ▼                        │
             ┌──────────────────────────┐            │
             │  IController::__destruct │            │
@@ -144,7 +144,7 @@ The following diagram illustrates how the controller system components work toge
             │  • $this->embed()   ─────┘            │
             │  • $pageTitle, $posts,                │
             │    etc. (extracted vars)              │
-            └──────────────┬────────────┘            │
+            └──────────────┬────────────┘           │
                            │                        │
                            ▼                        │
             ┌──────────────────────────┐            │

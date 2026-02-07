@@ -80,7 +80,7 @@ The following diagram illustrates how the controller system components work toge
                                  │
                                  ▼
                     ┌────────────────────────┐
-                    │     SiteRouter         │
+                    │  .htaccess and start   │
                     │  (Route Dispatcher)    │
                     └───────────┬────────────┘
                                 │

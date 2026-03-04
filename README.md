@@ -143,9 +143,9 @@ sandstorm/
 │   ├── config/                   # Configuration files
 │   │   └── mysql/               # MySQL configuration
 │   │       └── default.db.php   # Default database pool
-│   ├── dll/                     # Dynamic-link library (Models)
+│   ├── Dll/                     # Dynamic-link library (Models)
 │   │   └── myModel.php          # Example model
-│   └── core/                    # Core framework files
+│   └── sys/                    # Core framework files
 │
 ├── res/                         # Resources
 │   ├── css/                     # Stylesheets

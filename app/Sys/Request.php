@@ -115,7 +115,7 @@ class Request
      * @param string $mode   Optional validation mode ('valid' triggers validation)
      * @return mixed         Variable content (value), false, or Validator object
      */
-    public static function post(string $key = "*", string $mode = null)
+    public static function post(string $key = "*", ?string $mode = null)
     {
         if ($mode === 'valid') {
             return new Sys\Request\Validator($_POST[$key] ?? null, 'post', $key);
@@ -140,7 +140,7 @@ class Request
      * @param string $mode   Optional validation mode ('valid' triggers validation)
      * @return mixed         Value for the specified key, false if key doesn't exist, or Validator object
      */
-    public static function req(string $key = "*", string $mode = null)
+    public static function req(string $key = "*", ?string $mode = null)
     {
         if (self::$req == null) {
             self::$req = self::makereq();
@@ -170,7 +170,7 @@ class Request
      * @param string $mode   Optional validation mode ('valid' triggers validation)
      * @return mixed         Value for the specified key, false if key doesn't exist, or Validator object
      */
-    public static function get(string $key = "*", string $mode = null)
+    public static function get(string $key = "*", ?string $mode = null)
     {
         if (self::$req == null) {
             self::$req = self::makereq();

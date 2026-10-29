@@ -1,5 +1,7 @@
 <?php
 
+use Dll\Validation\Password;
+
 
 /**
  * Validation class for form validation.
@@ -437,5 +439,21 @@ class Validation
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Check that a new password is good enough (see Password::check()).
+	 *
+	 * <code>
+	 * $form->set('password')->rule(_('Choose a stronger password'), ['password' => 8]);
+	 * </code>
+	 *
+	 * @param string $value
+	 * @param int    $minLength Shortest allowed password (default 8)
+	 * @return bool
+	 */
+	function password($value, $minLength = Password::MIN_LENGTH)
+	{
+		return Password::isStrong((string) $value, (int) ($minLength ?: Password::MIN_LENGTH));
 	}
 }

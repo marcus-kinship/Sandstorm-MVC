@@ -55,7 +55,7 @@ class Get
      * @param mixed       $default Default value if key doesn't exist
      * @return mixed               Variable content, default value, or Validator object
      */
-    public static function get(string $key, string $mode = null, $default = null)
+    public static function get(string $key, ?string $mode = null, $default = null)
     {
         $params = self::parseParams();
 

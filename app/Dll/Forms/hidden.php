@@ -1,4 +1,4 @@
-<?
+<?php 
 class hidden extends element{
 	
 	public $options = array();

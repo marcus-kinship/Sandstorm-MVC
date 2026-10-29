@@ -1,4 +1,4 @@
-<?
+<?php 
 class tableboxs extends element{
 	
 	public $options = array();

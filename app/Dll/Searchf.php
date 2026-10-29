@@ -1,4 +1,4 @@
-<?
+<?php 
 class Searchf{
 
     public $data = array();

@@ -1,4 +1,4 @@
-<?
+<?php 
 class Rtable{
 	private $data = array();
 	public $sort = array();

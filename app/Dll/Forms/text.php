@@ -1,4 +1,4 @@
-<?
+<?php 
 class text extends element{
 	
 	public $options = array();

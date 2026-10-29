@@ -1,4 +1,4 @@
-<?
+<?php 
 class view extends element{
 	public $optionsform = array();
 	public $store;

@@ -1,4 +1,4 @@
-<?
+<?php 
 class time extends element{
 	
 	public $options = array();

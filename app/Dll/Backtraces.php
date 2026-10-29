@@ -1,4 +1,4 @@
-<?
+<?php 
 class backtraces extends record{
 	function __construct($value = "backtraces_log"){
 		parent::__construct($value);

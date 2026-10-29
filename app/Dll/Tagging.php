@@ -1,4 +1,4 @@
-<?
+<?php 
 class Tagging{
     
     private $data = array();

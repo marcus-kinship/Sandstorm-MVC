@@ -1,4 +1,4 @@
-<?
+<?php 
 class Wtime{
     private $time ="";
     function __construct($time){

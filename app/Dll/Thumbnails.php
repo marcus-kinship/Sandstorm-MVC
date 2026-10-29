@@ -1,4 +1,4 @@
-<? class thumbnails{
+<?php  class thumbnails{
 
      function __construct($user=false){
 	 	

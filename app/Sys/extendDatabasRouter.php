@@ -1,4 +1,4 @@
-<?
+<?php 
 	class extendDatabasRouter {
 		
 		public $table;

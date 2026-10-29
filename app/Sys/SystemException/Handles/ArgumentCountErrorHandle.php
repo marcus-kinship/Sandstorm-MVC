@@ -1,4 +1,4 @@
-<?
+<?php 
 namespace Sys\SystemException\Handles;
 use Sys\SystemException\OutputData;
 

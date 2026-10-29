@@ -1,4 +1,4 @@
-<?
+<?php 
 class table extends element{
 	
 	public $element ="";

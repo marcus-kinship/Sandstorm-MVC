@@ -1,4 +1,4 @@
-<?
+<?php 
 class textarea extends element{
 	
 	public $options = array();

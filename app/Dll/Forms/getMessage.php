@@ -1,4 +1,4 @@
-<?
+<?php 
 class getMessage extends element{
 	
 	public $element ="";

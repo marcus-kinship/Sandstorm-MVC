@@ -17,7 +17,7 @@
         hljs.highlightAll();
         // Skapa ett nytt Image-objekt för bildförbelastning
         var image = new Image();
-        image.src = "/res/images/sys/desert-sand-dune-sand-waves-africa-sunset.jpg";
+        setTimeout(function () { image.src = getComputedStyle(document.body).backgroundImage.slice(4, -1).replace(/"/g, ""); });
 
         // När bilden har laddats klart
         $(image).on('load', function() {
@@ -118,9 +118,10 @@
         }
 
         body {
-            background-image: url(/res/images/sys/desert-sand-dune-sand-waves-africa-sunset.jpg);
+            background-image: url(<?php print include dirname(__DIR__) . '/Views/background.php'; ?>);
             background-repeat: no-repeat;
-            background-size: auto;
+            background-size: cover;
+            background-attachment: fixed;
             background-clip: border-box;
         }
 

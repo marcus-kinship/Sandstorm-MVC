@@ -44,8 +44,8 @@ if (PHP_SAPI === 'cli') {
 
 	$options = ['-d', 'short_open_tag=On'];
 
-	// Load gettext and mysqli if they are installed but not enabled in php.ini
-	foreach (['gettext', 'mysqli'] as $extension) {
+	// Load gettext, mysqli and mbstring if they are installed but not enabled in php.ini
+	foreach (['gettext', 'mysqli', 'mbstring'] as $extension) {
 		if (!extension_loaded($extension)) {
 			$options[] = '-d';
 			$options[] = "extension=$extension";

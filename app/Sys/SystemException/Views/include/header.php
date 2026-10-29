@@ -194,9 +194,10 @@
         }
 
         body {
-            background-image: url(<?php print include __DIR__ . '/background.php'; ?>);
+            background-image: url(<?php print include dirname(__DIR__, 3) . '/Views/background.php'; ?>);
             background-repeat: no-repeat;
             background-size: cover;
+            background-attachment: fixed;
             background-clip: border-box;
         }
 

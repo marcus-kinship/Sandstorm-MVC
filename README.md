@@ -114,7 +114,7 @@ Open the address it prints, normally http://localhost:8000, to see the welcome p
 
 To use a specific PHP version for this project, put the full path to `php.exe` on the first line of a file named `php.local` in the project folder; `start.bat` then uses it. The file is not committed.
 
-`server.php` runs PHP's built-in server with short tags, gettext and mysqli turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
+`server.php` runs PHP's built-in server with short tags, gettext, mysqli and mbstring turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
 
 **Tip**: You can create multiple database pools by copying `default.db.php` and changing the class name.
 

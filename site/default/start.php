@@ -19,7 +19,7 @@ $docs = 'https://github.com/marcus-kinship/Sandstorm-MVC';
         body {
             min-height: 100vh;
             background-color: #1d3f7a;
-            background-image: url(<?php print include $_SERVER['HTTP_path_sys'] . 'SystemException/Views/include/background.php'; ?>);
+            background-image: url(<?php print include $_SERVER['HTTP_path_sys'] . 'Views/background.php'; ?>);
             background-repeat: no-repeat;
             background-size: cover;
             background-attachment: fixed;

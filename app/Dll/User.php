@@ -181,7 +181,8 @@ class User
             ];
         }
     
-        // Login successful
+        // Login successful: new session id first, so an id known before the login is worthless
+        Session::regenerate();
         Session::set('userid', $data['id']);
     
         $userrecord->define('online', 1);

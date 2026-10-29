@@ -104,7 +104,32 @@ A `SystemException` can be caught with `try { } catch (SystemException $e) { }`.
 
 ### Session
 
-The session starts the first time you use `Session::set()`, `get()`, `add()` or `remove()`. Pages that never use it send no session cookie and write no session file. `Session::exists()` tells whether the visitor already has a session.
+The session starts the first time you write to it with `Session::set()` or `add()`. Reading (`get()`) a visitor who has no session returns the default without starting one, so pages that never write to the session send no session cookie and write no session file. `Session::exists()` tells whether the visitor already has a session.
+
+Security: the cookie is HttpOnly, SameSite=Strict and Secure on HTTPS; PHP's strict mode rejects session ids it did not create (session fixation). Call `Session::regenerate()` right after a login, before writing the user's data (`User::login()` does), and `Session::kill()` on logout.
+
+### Cookies
+
+```php
+CookieManager::set('theme', 'dark', 86400 * 30);   // 30 days; HttpOnly, SameSite=Lax, Secure on HTTPS
+$theme = CookieManager::get('theme', 'light');
+CookieManager::delete('theme');
+
+CookieManager::setSigned('plan', 'pro');           // readable, but cannot be changed by the visitor
+$plan = CookieManager::getSigned('plan');          // null when it was changed
+```
+
+Signed cookies need a secret of at least 32 characters: `config::set('cookie.secret', bin2hex(random_bytes(32)))` once. It is stored in `app/config/settings/cookie.ini.php`, which is not committed. The expiry time is signed too, so the server rejects a copied cookie after it (cookies without a lifetime: after one day, or `$maxAge`). Signed cookies cannot be changed but can be read: never put secrets in them.
+
+Name a cookie `__Host-...` for the browser's strongest protection (always Secure, path `/`, no domain). Behind a proxy, `X-Forwarded-Proto: https` also turns Secure on, for cookies and the session.
+
+## 🧪 Tests
+
+```bash
+php tests/run.php
+```
+
+`tests/session.php` tests the session and cookies over real HTTP requests, `tests/record.php` the ORM (SQL and column types without a database). The database tests need a test pool in `app/config/mysql/test.db.php` (not committed; see the top of `tests/database.php`). The database in that pool is created and removed by the tests, so never point it at real data.
 
 Language, development mode, error mode and MySQL logging are set with the `SetEnv` lines at the end of `.htaccess`.
 

@@ -21,25 +21,44 @@ class Core
      * Applies HttpOnly, Secure, and SameSite=Strict cookie flags before
      * session_start(). Safe to call multiple times — no-op if already active.
      *
+     * Strict mode: PHP only accepts session ids it created itself, so an id
+     * an attacker made up (session fixation) starts a new, empty session.
+     * The id only travels in the cookie, never in the URL.
+     *
      * @return void
+     * @throws \RuntimeException If the session cannot be started
      */
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
+            ini_set('session.use_strict_mode', '1');
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.use_trans_sid', '0');
 
-            session_set_cookie_params([
-                'lifetime' => 0,
-                'path' => '/',
-                'domain' => '',
-                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-                'httponly' => true,
-                'samesite' => 'Strict',
-            ]);
+            session_set_cookie_params(self::cookieParams());
 
+            // @: session_start() warns on headers already sent; the exception below reports it
             if (!@session_start()) {
                 throw new \RuntimeException("Failed to start session");
             }
         }
+    }
+
+    /**
+     * Cookie flags for the session cookie.
+     *
+     * @return array{lifetime: int, path: string, domain: string, secure: bool, httponly: bool, samesite: string}
+     */
+    private static function cookieParams(): array
+    {
+        return [
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => \CookieManager::isHttps(),
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ];
     }
 
     /**
@@ -92,19 +111,11 @@ class Core
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
 
-            // delete cookie också (viktigt!)
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-
-                setcookie(
-                    session_name(),
-                    '',
-                    time() - 42000,
-                    $params["path"],
-                    $params["domain"],
-                    $params["secure"],
-                    $params["httponly"]
-                );
+            // Remove the cookie too, with the same flags it was set with
+            if (ini_get('session.use_cookies') && !headers_sent()) {
+                $params = self::cookieParams();
+                unset($params['lifetime']);
+                setcookie(session_name(), '', ['expires' => time() - 42000] + $params);
             }
 
             session_destroy();

@@ -100,12 +100,27 @@ class Session
      */
     public static function kill(): void
     {
-        if (self::$store) {
-            self::$store->close();
+        // Destroy while the session is still active; closing it first left it on disk
+        if (self::exists()) {
+            \Sys\Session\Core::start();
+            \Sys\Session\Core::destroy();
         }
 
-        \Sys\Session\Core::destroy();
         self::$store = null;
+    }
+
+    /**
+     * Give the session a new id and delete the old one.
+     *
+     * Call it right after a login (or any change of rights), before writing
+     * the user's data, so an id someone else knew before cannot be used.
+     *
+     * @return void
+     */
+    public static function regenerate(): void
+    {
+        self::store();
+        \Sys\Session\Core::regenerate(true);
     }
 
     // -------------------------------------------------------------------------
@@ -149,6 +164,11 @@ class Session
      */
     public static function get(string $key, mixed $def = false): mixed
     {
+        // A visitor without a session has nothing stored: do not start one to find out
+        if (!self::exists()) {
+            return $def;
+        }
+
         return self::store()->get($key, $def);
     }
 
@@ -162,6 +182,10 @@ class Session
      */
     public static function remove(string $key): void
     {
+        if (!self::exists()) {
+            return;
+        }
+
         self::store()->remove($key);
     }
 

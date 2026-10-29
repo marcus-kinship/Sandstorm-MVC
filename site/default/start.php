@@ -118,19 +118,10 @@ $docs = 'https://github.com/marcus-kinship/Sandstorm-MVC';
             border-radius: 14px;
             background-color: rgb(0 0 0 / 25%);
             box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
-            border-left: 6px solid #9e9e9e;
         }
 
         .card p {
             margin-top: 6px;
-        }
-
-        .card.ok {
-            border-left-color: #4caf50;
-        }
-
-        .card.fail {
-            border-left-color: #e5533d;
         }
 
         .dot {

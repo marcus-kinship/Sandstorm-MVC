@@ -56,7 +56,7 @@ The framework follows classic MVC architecture and makes it easy to separate log
 
 ## 💻 System Requirements
 
-- **PHP**: 7.0 or higher
+- **PHP**: 7.0 or higher to 8.4
 - **MySQL**: 5.6 or higher (if database is used)
 - **Web Server**: Apache with mod_rewrite enabled
 - **PHP Short Tags**: Must be enabled
@@ -65,72 +65,44 @@ The framework follows classic MVC architecture and makes it easy to separate log
 
 ## 🚀 Installation
 
-### Step 1: Install Prerequisites
+### Step 1: Clone
 
 ```bash
-# Install PHP and MySQL on your development environment
-# For Ubuntu/Debian:
-sudo apt-get update
-sudo apt-get install php mysql-server apache2
-
-# For macOS (with Homebrew):
-brew install php mysql
+git clone https://github.com/marcus-kinship/Sandstorm-MVC.git
+cd Sandstorm-MVC
 ```
 
-### Step 2: Configure PHP
+### Step 2: Configure the database
 
-Open `php.ini` and enable short tags:
-
-```ini
-short_open_tag = On
-```
-
-Restart the web server after the change.
-
-### Step 3: Download Sandstorm
-
-Download or clone Sandstorm to your web server's root directory:
-
-```bash
-cd /var/www/html  # or your web server's root
-git clone https://github.com/yourusername/sandstorm.git
-cd sandstorm
-```
-
-### Step 4: First Run
-
-When you visit your URL for the first time, Sandstorm will automatically:
-- Generate necessary `.htaccess` settings
-- Create basic routing
-- Display a welcome page
-
-### Step 5: Configure Database Connection (Optional)
-
-If you want to use MySQL, configure the pool file:
-
-```bash
-# Navigate to the config folder
-cd app/config/mysql/
-
-# Edit default.db.php
-nano default.db.php
-```
-
-Fill in your database details:
+Open `app/config/mysql/default.db.php` and fill in your database details:
 
 ```php
-<?php
-class DefaultDB {
-    private $host = 'localhost';
-    private $username = 'your_username';
-    private $password = 'your_password';
-    private $database = 'your_database';
-    
-    // ... rest of the configuration
+class default_db
+{
+    public $user = "root";
+    public $name = "database";
+    public $password = "password";
+    public $hostname = "localhost";
+    public $driver = "mysql";
+    public $type = "as:text";
+    public $charset = "utf8mb4";
+    public $logpath = "";
 }
 ```
 
-**Tip**: You can create multiple database pools by copying the file and changing the class name.
+Language, development mode, error mode and MySQL logging are set with the `SetEnv` lines at the end of `.htaccess`.
+
+### Step 3: Start
+
+```bash
+php server.php
+```
+
+Open http://localhost:8000. On the first visit Sandstorm sets itself up and shows the welcome page "Välkommen till Sandstorm-MVC". Use another port with `php server.php 8080`.
+
+`server.php` runs PHP's built-in server with short tags and gettext turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
+
+**Tip**: You can create multiple database pools by copying `default.db.php` and changing the class name.
 
 ---
 

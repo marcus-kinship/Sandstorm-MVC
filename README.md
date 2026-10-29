@@ -87,8 +87,12 @@ class default_db
     public $type = "as:text";
     public $charset = "utf8mb4";
     public $logpath = "";
+    public $lengthmax = 0;
+    public $settingsname = "";
 }
 ```
+
+You do not have to create the database yourself: if the database in `$name` does not exist, Sandstorm creates it (with `$charset`) the first time it connects. The MySQL user needs permission to create databases. Tables are created by your models through `Scheme`/`Record`, and the `ExceptionLog` table is created automatically when the first error is logged.
 
 Language, development mode, error mode and MySQL logging are set with the `SetEnv` lines at the end of `.htaccess`.
 
@@ -98,7 +102,7 @@ Language, development mode, error mode and MySQL logging are set with the `SetEn
 php server.php
 ```
 
-Open http://localhost:8000. On the first visit Sandstorm sets itself up and shows the welcome page "Welcome to Sandstorm-MVC". Use another port with `php server.php 8080`.
+Open http://localhost:8000 to see the welcome page "Welcome to Sandstorm-MVC". Use another port with `php server.php 8080`.
 
 `server.php` runs PHP's built-in server with short tags and gettext turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
 

@@ -48,7 +48,16 @@ class Driver
             throw new SystemException(_('You must install the mysqli extension'));
         }
 
-        $this->mysqli = new \Mysqli($hostname, $username, $password, $database);
+        try {
+            $this->mysqli = new \Mysqli($hostname, $username, $password, $database);
+        } catch (\mysqli_sql_exception $e) {
+            // 1049 = unknown database: create it on the first connection
+            if ($e->getCode() !== 1049) {
+                throw $e;
+            }
+            $this->mysqli = $this->createDatabase($hostname, $username, $password, $database, $charset);
+        }
+
         $this->database = $this->mysqli;
         $this->isClose = false;
         $this->lengthmax = $lengthmax;
@@ -77,6 +86,35 @@ class Driver
                 __LINE__
             );
         }
+    }
+
+    /**
+     * Create the database when it does not exist yet, then connect to it.
+     *
+     * @param string $hostname - Server name or IP address of the MySQL server.
+     * @param string $username - Username for the MySQL user.
+     * @param string $password - Password for the MySQL user.
+     * @param string $database - Database name to create.
+     * @param string $charset - Character set for the new database.
+     *
+     * @return \Mysqli - Connection with the new database selected.
+     */
+    private function createDatabase($hostname, $username, $password, $database, $charset)
+    {
+        $mysqli = new \Mysqli($hostname, $username, $password);
+
+        if (!preg_match('/^\w+$/', $charset)) {
+            $charset = 'utf8mb4';
+        }
+
+        $mysqli->query(sprintf(
+            'CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET %s',
+            str_replace('`', '``', $database),
+            $charset
+        ));
+        $mysqli->select_db($database);
+
+        return $mysqli;
     }
 
     /**

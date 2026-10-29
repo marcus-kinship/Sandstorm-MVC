@@ -15,6 +15,9 @@ class Report
     /** @var array Stores all SQL queries and their details */
     private $allSQL;
 
+    /** @var object|null The driver, for the emulate view */
+    public $sql = null;
+
     /**
      * Constructor for the Report class.
      *

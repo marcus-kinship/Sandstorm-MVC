@@ -1,104 +1,68 @@
 <?php
 
 /**
- * Class MysqlSelect
+ * SELECT for MySQL: one row or all rows.
  *
- * Handles SQL SELECT queries against the database.
- * Provides methods for fetching a single row or multiple rows,
- * with support for parameterized queries via placeholder escaping.
+ * <code>
+ * $user  = $db->get()->row('SELECT * FROM `users` WHERE id = %d', 1);
+ * $users = $db->get('as:obj')->rows('SELECT * FROM `users`');
+ * </code>
  *
- * @package Database
+ * @category _("MySQL Select class")
  */
 class MysqlSelect
 {
     /**
-     * @var object $base The base driver object containing the database connection and configuration.
+     * @var DatabaseConnection
      */
-    private $base;
+    private DatabaseConnection $base;
 
     /**
-     * MysqlSelect constructor.
-     *
-     * Initializes the select handler with a database driver object.
-     * Optionally sets the result data type (e.g. "as:both", "as:assoc", "as:num").
-     *
-     * @param object $db       The database driver object providing connection and query methods.
-     * @param string $dataType Optional. The fetch mode for query results. Defaults to an empty string
-     *                         (uses the driver's existing setting). Accepted values depend on the driver
-     *                         implementation (e.g. "as:assoc", "as:num", "as:both").
+     * @param DatabaseConnection $db       The connection
+     * @param string             $dataType 'as:text', 'as:number', 'as:both', 'as:obj' or '' (the pool's type)
      */
     public function __construct($db, $dataType = "")
     {
         $this->base = $db;
 
-        if ($dataType != "") {
+        if ($dataType !== '') {
             $this->base->db->type = $dataType;
         }
     }
 
     /**
-     * Executes a SQL SELECT query and returns a single row.
+     * Fetch one row.
      *
-     * Accepts a SQL string with optional placeholder arguments (passed as additional
-     * arguments to the method). The query is escaped and prepared before execution.
-     * The driver is set to single-row mode before fetching.
-     *
-     * Example usage:
-     * <code>
-     *   $row = $select->row("SELECT * FROM users WHERE id = %s", $userId);
-     * </code>
-     *
-     * @param string $sql     The SQL SELECT query, optionally containing placeholders.
-     * @param mixed  ...$args Optional. Values to bind to query placeholders.
-     *
-     * @return array|null An associative (or typed, based on $dataType) array representing
-     *                    the matched row, or null if no row was found.
+     * @param string|array $sql Query with placeholders, followed by its arguments
+     *                          (or one array with both)
+     * @return mixed The row, null when nothing matched, DataSet for 'as:obj'
+     * @throws Sys\DatabaseConnection\DatabaseException If the query fails
      */
     public function row($sql)
     {
-        $arg = func_get_args();
+        $args = is_array($sql) ? $sql : func_get_args();
 
-        if (is_array($sql[0])) {
-            $sql = $sql[0];
-        }
-
-        $sql = $this->base->db->escapeString($arg, 'Row');
-
+        $query = $this->base->db->escapeString($args, 'Row');
         $this->base->db->modesingle = true;
 
-        $result = $this->base->db->queryAndFetch($sql);
-
-        return $result;
+        return $this->base->db->queryAndFetch($query);
     }
 
     /**
-     * Executes a SQL SELECT query and returns all matching rows.
+     * Fetch all rows.
      *
-     * Accepts a SQL string with optional placeholder arguments (passed as additional
-     * arguments to the method). The query is escaped and prepared before execution.
-     * The driver is set to multi-row mode before fetching.
-     *
-     * Example usage:
-     * <code>
-     *   $rows = $select->rows("SELECT * FROM users WHERE active = ?", 1);
-     * </code>
-     *
-     * @param string $sql     The SQL SELECT query, optionally containing placeholders.
-     * @param mixed  ...$args Optional. Values to bind to query placeholders.
-     *
-     * @return array An array of associative (or typed) arrays, each representing one
-     *               matched row. Returns an empty array if no rows were found.
+     * @param string|array $sql Query with placeholders, followed by its arguments
+     *                          (or one array with both)
+     * @return mixed The rows ([] when nothing matched), DataSet for 'as:obj'
+     * @throws Sys\DatabaseConnection\DatabaseException If the query fails
      */
     public function rows($sql)
     {
-        $arg = func_get_args();
+        $args = is_array($sql) ? $sql : func_get_args();
 
-        $sql = $this->base->db->escapeString($arg, 'Rows');
-
+        $query = $this->base->db->escapeString($args, 'Rows');
         $this->base->db->modesingle = null;
 
-        $result = $this->base->db->queryAndFetch($sql);
-
-        return $result;
+        return $this->base->db->queryAndFetch($query);
     }
 }

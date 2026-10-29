@@ -35,21 +35,62 @@ Goal: the framework should use as little CPU and memory as possible per request,
 
 The router cache from the plan was left out: PHP forgets static data between requests, and reading one docblock costs about 20 µs.
 
+## Cleanup of app/Dll and app/Sys
+
+Inventory of 2026-10-29. "No users" means no other file in the repository uses the class; site code outside the repository may still use it. Nothing is removed without a decision per row.
+
+**A. Empty, duplicate or broken copies (proposed: remove)**
+
+| File | Why |
+|---|---|
+| `Sys/Session_old.php` | Old copy of `Session` with the same class name |
+| `Sys/CookieManager.php` | Contains a copy of class `Curl`, not a cookie manager; loading it together with `Curl.php` is a fatal error |
+| `Dll/Comments.php` | Empty class `comments` |
+| `Sys/Record/Step/Export.php`, `Import.php`, `Start.php`, `views/` | Empty files and folder |
+
+**B. Replaced by the rewritten database code (proposed: remove)**
+
+| File | Replaced by |
+|---|---|
+| `Sys/Scheme.php` | `Sys/Record/SQL/Scheme.php` |
+| `Sys/Querybuilder.php` | `Sys/Record/QueryBuilder/*` and `Record\From` |
+| `Dll/Table.php`, `Dll/Rtable.php` | `Record` (creates and changes tables itself) |
+| `Dll/Tagging.php` | Uses the old database API (`mysql_escape_mimic`) that no longer exists |
+
+**C. Two versions of the same thing (proposed: merge into one)**
+
+| Files | Group |
+|---|---|
+| `Dll/FileInfoIO.php`, `Dll/FolderInfoIO.php`, `Dll/FilesystemIO.php` and `Sys/FileInfo.php`, `Sys/FolderInfo.php`, `Sys/Filesystem.php` | File system |
+| `Dll/Pagination.php` (namespace `dll`) and `Sys/Record/Pagination.php` | Databases |
+
+**D. Keep and bring up to the standard (in their groups)**
+
+| Group | Files |
+|---|---|
+| Forms and validation | `Sys/Formi.php`, `Dll/Forms/*` (the field classes extend `element`, which does not exist), `Dll/Validation.php`, `Dll/Listview.php` |
+| Users and content | `Dll/User.php`, `Dll/Slug.php`, `Dll/Comment.php`, `Dll/Media.php`, `Dll/UploadedFiles.php`, `Dll/Captcha.php`, `Dll/Mail.php` |
+| Images | `Dll/Resizing.php`, `Dll/Thumbnails.php` |
+| Text and time | `Dll/Encoding.php`, `Dll/Bb.php`, `Dll/Wtime.php`, `Dll/calendar.php` |
+| Data | `Dll/Flatdata.php`, `Dll/Searchf.php`, `Dll/cache.php`, `Sys/Mutator.php` |
+| Router | `Sys/RouterBuilder.php`, `Sys/SiteRouter.php`, `Sys/extendDatabasRouter.php`, `Sys/Install.php` |
+| Debugging and tools | `Sys/c.php`, `Sys/Console/Report.php`, `Dll/Backtraces.php`, `Dll/StopWatch.php`, `Sys/ServerInfo.php`, `Dll/Minifier.php`, `Sys/Curl.php` |
+| Views | `Dll/View/view.php` (uses the old `Querybuilder`) |
+
 ## Next: code quality per group
 
 The rest of `app/` is brought up to `docs/code-standard.md` one group at a time, each committed and tested on its own:
 
 | Group | Files |
 |---|---|
-| Databases | `DatabaseConnection.php`, `DatabaseManager.php`, `DatabaseConnection/*` (Mysql Select/Insert/Update/Delete, ArgumentEscaper, QueryTemplate, ...), `Record.php`, `Record/*`, `Scheme.php`, `Querybuilder.php` |
+| Databases | `DatabaseConnection.php`, `DatabaseManager.php`, `DatabaseConnection/*` (Mysql Select/Insert/Update/Delete, ArgumentEscaper, QueryTemplate, ...), `Record.php`, `Record/*`, `Scheme.php`, `Querybuilder.php`. Record is the ORM, with three entry points on purpose: `Record` (read and write), `Record\From` (read only) and `Record\To` (write only), so code loads only what it needs and can be limited to reading or writing. |
 | Session | `Session.php`, `Session/Core.php`, `Session/Store.php`, `Session_old.php` (remove) |
 | File system | `Filesystem.php`, `FileInfo.php`, `FolderInfo.php`, `Dll/FilesystemIO.php`, `Dll/FileInfoIO.php`, `Dll/FolderInfoIO.php` |
 | Cookie | `CookieManager.php`, `Curl.php` |
 | Config | `config/config.class.php`, `config/settings/*`, `config/mysql/*` |
 | Language | `Language.php`, `app/locales/*` |
-| Controllers | `controller/ApIController.php`, `controller/IController.php`, `controller/Iproperty.php` |
-| Validation | `Dll/Validation.php` (to be developed further), together with `Sys/Request/Validator.php` |
-| Forms | `Sys/Formi.php`, `Dll/Forms/*` (text, textarea, hidden, dropmenu, time, table, tableboxs, getMessage) |
+| Controllers | `controller/ApIController.php` (API responses: JSON, XML, ...), `controller/IController.php` (loads the views), `controller/Iproperty.php` |
+| Forms and validation | `Sys/Formi.php`, `Dll/Forms/*` (text, textarea, hidden, dropmenu, time, table, tableboxs, getMessage), `Dll/Validation.php`, `Sys/Request/Validator.php`. The form system is a set of form classes; the goal is that validation is handed out to the subclasses, so every field type validates its own value. |
 | Listview | `Dll/Listview.php` |
 
 ## 1. What one request costs today

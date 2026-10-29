@@ -2,287 +2,292 @@
 
 namespace Sys\Record\Traits;
 
-use \DatabaseConnection2;
-use \Sys\Record\QueryBuilder\Inserts;
-use \Sys\Record\QueryBuilder\Updates;
-use \Sys\Record\SQL\Analyzer;
-use \Sys\Record\SQL\Scheme;
+use Sys\DatabaseConnection\DatabaseException;
+use Sys\Record\QueryBuilder\Inserts;
+use Sys\Record\QueryBuilder\Updates;
+use Sys\Record\SQL\Analyzer;
+use Sys\Record\SQL\Scheme;
 
 /**
- * Trait för datainsättning/uppdatering
+ * Writing for Record: save, delete and table changes.
  *
- * @category _("Trait för datainsättning/uppdatering Trait")
+ * <code>
+ * $r = new Record('people');
+ * $id = $r->define('name', 'Ada')->define('age', 36)->save();    // INSERT, returns the id
+ * $r->define('age', 37)->save($id);                              // UPDATE row $id (INSERT if it is gone)
+ * $r->define('age', 38)->save(['name', '=', 'Ada']);             // UPDATE where name = 'Ada'
+ * $r->delete($id);                                               // DELETE row $id
+ * $r->delete(['age', '<', 18]);                                  // DELETE where age < 18
+ * </code>
+ *
+ * In devmode a failed write repairs the table (creates it, adds a missing
+ * column, makes a column larger) and tries again. Outside devmode the error
+ * is thrown, so a production database is never changed by a request.
+ *
+ * @category _("Record write trait")
  */
-
 trait ToTrait
 {
-
+    use DefineTrait;
 
     /**
-     * Funktion för att definiera en åtgärd som ska utföras efter att en SQL-fråga har körts.
+     * Called after a repair, with MySQL's error message
      *
-     * @param callable $function Callback-funktionen som ska utföras efter att SQL-frågan har körts.
+     * @var callable|null
      */
-    function repairAfterSQLRun($function)
+    private $repairAfterSQLRun = null;
+
+    /**
+     * Run $function after each automatic repair (for example to log it).
+     *
+     * @param callable $function Gets MySQL's error message
+     * @return $this
+     */
+    public function repairAfterSQLRun($function)
     {
         $this->repairAfterSQLRun = $function;
-    }
-
-    public function save($id = null)
-    {
-        // instans av MySQL-klass
-        $this->db = new \DatabaseConnection();
-        // Bygg upp frågan för att infoga data
-
-        if ($id === null) {
-
-            // Kontrollera om multi är sann flera instätt
-            if ($this->multi) {
-
-                // Om inget ID anges, infoga flera nya rader i tabellen
-                $s = new Inserts($this->table);
-                $sql[0] = $s->rows($this->properties, $this->_data);
-
-                $this->db->getError = true;
-
-                // Utför SQL-frågan och få det autogenererade ID:t för den nyligen infogade raden
-                $id = $this->db->insertRow($sql);
-
-                // Kontrollera om $id är false, vilket indikerar att frågan misslyckades
-                if ($id === false) {
-
-                    // Hämta antalet kolumner
-                    $numColumns = count($this->properties);
-
-                    // Loop för att försöka reparera felet ett begränsat antal gånger (antal kolumner)
-                    for ($i = 0; $i < $numColumns; $i++) {
-                        // Hämta felmeddelandet från databasanslutningen
-                        $errorMessage = $this->db->getErrorMessage();
-                        // Skapa en ny instans av SQL-analysören och skicka in felmeddelandet
-                        $sqlAnalyzer = new Analyzer($errorMessage);
-                        // Om reparationsförsöket lyckas, försök köra SQL-frågan igen
-                        if ($sqlAnalyzer->typeSQL('insert')->table($this->table)->fields($this->properties)->arguments($this->_data)->repair()) {
-                            $id = $this->db->insertRow($sql);
-                            $this->hasRunSQL = true;
-                            // Om SQL-frågan lyckas, returnera det autogenererade ID:et
-                            if ($id !== false) {
-                                $this->db->getError = false;
-                                return $id;
-                            }
-                        }
-                    }
-
-                    $this->db->getError = false;
-                    // Kasta ett undantag om reparationsförsök misslyckades
-                    throw new \SystemException(_("Kunde inte reparera SQL-frågan."));
-                }
-
-                $this->db->getError = false;
-                // Om allt gick bra, returnera det autogenererade ID för den nyligen infogade raden
-                return $id;
-            } else {
-                // Om inget ID anges, infoga en ny rad i tabellen
-                $s = new Inserts($this->table);
-                $sql[0] = $s->row($this->properties);
-
-                $this->db->getError = true;
-
-                $sql = array_merge($sql, $this->data);
-                
-                $this->hasRunSQL = true;
-
-                // Utför SQL-frågan och få det autogenererade ID:t för den nyligen infogade raden
-                $id = $this->db->insertRow($sql);
-
-                // Kontrollera om $id är false, vilket indikerar att frågan misslyckades
-                if ($id === false) {
-
-                    // Hämta antalet kolumner
-                    $numColumns = count($this->properties);
-
-                    // Loop för att försöka reparera felet ett begränsat antal gånger (antal kolumner)
-                    for ($i = 0; $i < $numColumns; $i++) {
-                        // Hämta felmeddelandet från databasanslutningen
-                        $errorMessage = $this->db->getErrorMessage();
-                        // Skapa en ny instans av SQL-analysören och skicka in felmeddelandet
-                        $sqlAnalyzer = new Analyzer($errorMessage);
-                        // Om reparationsförsöket lyckas, försök köra SQL-frågan igen
-                        if ($sqlAnalyzer->typeSQL('insert')->table($this->table)->fields($this->properties)->arguments($this->data)->repair()) {
-                            $id = $this->db->insertRow($sql);
-                            // Om SQL-frågan lyckas, returnera det autogenererade ID:et
-                            if ($id !== false) {
-                                $this->db->getError = false;
-                                return $id;
-                            }
-                        }
-                    }
-
-                    $this->db->getError = false;
-                    // Kasta ett undantag om reparationsförsök misslyckades
-                    throw new \SystemException(sprintf(_("Kunde inte reparera SQL-frågan. %s"), $errorMessage));
-                }
-                $this->db->getError = false;
-                // Om allt gick bra, returnera det autogenererade ID för den nyligen infogade raden
-                return $id;
-            }
-        } elseif (is_numeric($id)) {
-            
-            // Om ett numeriskt ID anges, uppdatera den befintliga raden med det angivna ID:et
-            $s = new Updates($this->table);
-            $this->define('id',$id);
-            $sql = $s->force($this->properties, $this->data);
-            $this->hasRunSQL = true;
-            $this->db->update()->row($sql);
-        } elseif (is_array($id)) {
-            // Om en array med fält och värden anges, använd dem för att uppdatera eller infoga data
-            $s = new Updates($this->table);
-            if (empty($this->where)) {
-                $this->where = $id;
-            }
-            
-            // Kontrollera om multi är sann för flera uppdateringar
-            if ($this->multi) {
-                $sql = $s->where($this->where)->multiForce($this->_data, $this->properties);
-            } else {
-                $sql = $s->force($this->properties, $this->data);
-            }
-            
-            $this->hasRunSQL = true;
-            $this->db->update()->row($sql);
-        }
-    }
-
-    public function createTableIfNotExists()
-    {
-        // Kontrollera om tabellen finns
-
-        $sql = new Scheme($this->table);
-        $sql->properties($this->properties);
-        $sql->createTable();
-        $stmt = $this->db->query($sql->get());
-
-        if ($stmt->errno === 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return $this;
     }
 
     /**
-     * Sätter värdet för en given egenskap.
+     * Save the defined values.
      *
-     * @param string $name Namnet på egenskapen.
-     * @param mixed $value Värdet som ska tilldelas.
-     * @param callable|null $callback (valfritt) Callback-funktionen som ska tillämpas på värdet.
-     * @return Record Aktuell instans av Record-klassen.
+     * - save()              INSERT; returns the new id (the first id with multi())
+     * - save(5)             UPDATE row 5, or INSERT it with id 5 when it does not exist; returns 5
+     * - save([conditions])  UPDATE the rows that match (see buildWhere()); returns true
+     *
+     * Only the values set with define()/set() are written.
+     *
+     * @param int|string|array|null $id
+     * @return int|string|bool
+     * @throws \SystemException When nothing is defined
+     * @throws DatabaseException When the write fails (and cannot be repaired)
+     */
+    public function save($id = null)
+    {
+        if ($this->properties === []) {
+            throw new \SystemException(_('Nothing to save: use define() or set() first.'));
+        }
+
+        $table = $this->table();
+        $this->hasRunSQL = true;
+
+        if ($id === null) {
+            $rows = $this->multi ? $this->rows : [$this->values()];
+            $newId = $this->write(Inserts::rows($table, $this->properties, $rows), 'Insert');
+
+            if (!$this->multi) {
+                $this->data['id'] = $newId;
+            }
+            return $newId;
+        }
+
+        if (is_array($id)) {
+            if ($this->multi) {
+                throw new \SystemException(_('save() with conditions works on one row; save several rows one at a time.'));
+            }
+            [$where, $args] = self::buildWhere($id);
+            $this->write(Updates::row($table, $this->properties, $this->values(), $where, $args), 'Update');
+            return true;
+        }
+
+        if (!is_numeric($id)) {
+            throw new \SystemException(sprintf(_('save() needs an id, conditions or nothing, not %s'), get_debug_type($id)));
+        }
+
+        $values = $this->values();
+        $matched = 0;
+
+        if (count($values) > 0 && array_diff(array_keys($values), ['id']) !== []) {
+            $this->write(Updates::row($table, $this->properties, $values, '`id` = %d', [(int) $id]), 'Update');
+            $matched = $this->matchedRows();
+        }
+
+        if ($matched === 0) {
+            $columns = ['id' => ['sql' => 'BIGINT', 'placeholder' => '%d', 'rank' => 3]] + $this->properties;
+            $this->write(Inserts::rows($table, $columns, [['id' => (int) $id] + $values]), 'Insert');
+        }
+
+        $this->data['id'] = $id;
+        return $id;
+    }
+
+    /**
+     * Create the table for the defined columns, if it does not exist.
+     *
+     * @return bool
+     * @throws DatabaseException If MySQL refuses
+     */
+    public function createTableIfNotExists()
+    {
+        $this->db()->query(Scheme::createTable($this->table(), $this->properties));
+        return true;
+    }
+
+    /**
+     * Set a value, optionally through a callback first.
+     *
+     * @param string        $name
+     * @param mixed         $value
+     * @param callable|null $callback Gets the value, returns the value to store
+     * @return $this
      */
     public function set($name, $value, $callback = null)
     {
-        // Kör callback-funktionen om den är angiven
-        if ($callback !== null && is_callable($callback)) {
-            $value = call_user_func($callback, $value);
+        if (is_callable($callback)) {
+            $value = $callback($value);
         }
 
-        $this->define($name, $value); // Sätt värdet för egenskapen
-        return $this; // Returnera aktuell instans av klassen för metodkedja
+        return $this->define($name, $value);
     }
 
     /**
-     * Funktionen `get` används för att hämta data från en instans baserat på nycklar och/eller ID:n.
+     * Read a defined value, optionally through a callback.
      *
-     * @param string $name Nyckeln som ska hämtas.
-     * @param string|array|callable $ids (valfritt) ID:n eller ID-arrayen för att hämta data för flera poster i muliti läget eller en post eller Callback-funktionen som ska tillämpas på värdet innan det returneras .
-     * @param callable|null $callback (valfritt) Callback-funktionen som ska tillämpas på värdet innan det returneras.
-     * 
-     * @return mixed Värdet för den angivna nyckeln eller nycklarna (med eller utan callback).
-     * 
-     * @throws SystemException Kastas om något av följande inträffar:
-     *                         - Inget ID har angetts när det förväntades.
-     *                         - Nyckeln eller ID:t som angivits finns inte i datan.
+     * - get('name')                  value of the row
+     * - get('name', $callback)       value through the callback (stored back)
+     * - get('name', 1)               multi(): value of row 1
+     * - get('name', [0, 1])          multi(): [0 => ['name' => ...], 1 => [...]]
+     *
+     * @param string                $name
+     * @param int|array|callable|'' $ids
+     * @param callable|null         $callback
+     * @return mixed
+     * @throws \SystemException When the name (or row) is not there
      */
-    function get($name = "", $ids = "", $callback = null)
+    public function get($name = "", $ids = "", $callback = null)
     {
-        // Kontrollera om typen är sann (antagligen inställd någon annanstans)
-        if ($this->_type) {
-            // Kontrollera om $ids är tomt
-            if (!empty($ids)) {
-                // Kontrollera om $ids är en array
-                if (is_array($ids)) {
-                    $tmp = array(); // Skapa en temporär array för att lagra resultaten
-                    foreach ($ids as $id) {
-                        // Kontrollera om $id finns och om $name finns i dess data
-                        if (key_exists($id, $this->_data) && key_exists($name, $this->_data[$id])) {
-                            // Kontrollera om callback-funktionen är definierad och anropbar
-                            if ($callback !== null && is_callable($callback)) {
-                                // Tillämpa callback-funktionen på värdet och lagra det i $tmp
-                                $tmp[$id][$name] = $this->_data[$id][$name] = call_user_func($callback, $this->_data[$id][$name]);
-                            } else {
-                                // Annars lagra värdet direkt i $tmp
-                                $tmp[$id][$name] = $this->_data[$id][$name];
-                            }
-                        }
-                    }
-                    // Returnera resultatet för den sista $id/$name-kombinationen
-                    return $tmp;
-                } else {
-                    // Kontrollera om $ids och $name finns i data
-                    if (key_exists($ids, $this->_data) && key_exists($name, $this->_data[$ids])) {
-                        // Kontrollera om callback-funktionen är definierad och anropbar
-                        if (
-                            $callback !== null && is_callable($callback)
-                        ) {
-                            // Tillämpa callback-funktionen på värdet och lagra det i data
-                            $this->_data[$ids][$name] = call_user_func($callback, $this->_data[$ids][$name]);
-                        }
-                        // Returnera värdet för den angivna nyckeln
-                        return $this->_data[$ids][$name];
-                    } else {
-                        // Kasta ett undantag om nyckeln eller ID inte finns
-                        throw new \SystemException(sprintf(_("Du måste ange rätt id och nyckel, du har angett (%s, %s)"), $ids, $name));
-                    }
-                }
-            } else {
-                // Kasta ett undantag om inget ID har angetts
-                throw new \SystemException(_("Ingen id har angetts"));
+        if (!$this->multi) {
+            if (!array_key_exists($name, $this->data)) {
+                throw new \SystemException(sprintf(_('No value with the name %s'), $name));
             }
-        } else {
-            // Om typen inte är sann
-            if (key_exists($name, $this->data)) {
-                // Kontrollera om $ids är definierad och en anropbar funktion
-                if ($ids !== "" && is_callable($ids)) {
-                    // Tillämpa callback-funktionen på värdet och lagra det i data
-                    $this->data[$name] = call_user_func($ids, $this->data[$name]);
-                }
-                // Returnera värdet för den angivna nyckeln
-                return $this->data[$name];
-            } else {
-                // Kasta ett undantag om nyckeln inte finns
-                throw new \SystemException(sprintf(_("Du måste ange rätt nyckel, du har angett (%s)"), $name));
+            if (is_callable($ids)) {
+                $this->data[$name] = $ids($this->data[$name]);
             }
+            return $this->data[$name];
         }
+
+        if ($ids === '' || $ids === null) {
+            throw new \SystemException(_('multi(): give the row number(s) to get().'));
+        }
+
+        $result = [];
+        foreach ((array) $ids as $row) {
+            if (!isset($this->rows[$row]) || !array_key_exists($name, $this->rows[$row])) {
+                throw new \SystemException(sprintf(_('No value %s in row %s'), $name, $row));
+            }
+            if (is_callable($callback)) {
+                $this->rows[$row][$name] = $callback($this->rows[$row][$name]);
+            }
+            $result[$row][$name] = $this->rows[$row][$name];
+        }
+
+        return is_array($ids) ? $result : $result[$ids][$name];
     }
 
     /**
-     * Tar bort en rad från databastabellen.
+     * Delete rows.
      *
-     * @param string $villkor Villkor för att välja vilken rad som ska tas bort, t.ex. "id = 5".
-     * @return bool Returnerar true om raden togs bort framgångsrikt, annars false.
+     * @param int|array|string $where Id, conditions (see buildWhere()), or an SQL
+     *                                condition you trust (never with user input)
+     * @return bool True when a row was deleted
+     * @throws \SystemException When no condition is given
+     * @throws DatabaseException If the query fails
      */
-    public function delete($villkor)
+    public function delete($where)
     {
-        if ($villkor == "") {
-            throw new \SystemException(_('Du måste ange Villkor för att välja vilken rad som ska tas bort, t.ex. id = 5.'));
+        $table = self::quote($this->table());
+
+        if (is_int($where) || (is_string($where) && ctype_digit($where))) {
+            return $this->db()->delete("DELETE FROM $table WHERE `id` = %d", (int) $where);
         }
-        // Skapar en instans av MySQL-klassen
-        $db = new \DatabaseConnection();
 
-        // Bygger upp SQL-frågan för att ta bort raden baserat på det angivna villkoret
-        $sqlQuery = "DELETE FROM $this->table WHERE $villkor";
+        if (is_array($where) && $where !== []) {
+            [$sql, $args] = self::buildWhere($where);
+            return $this->db()->delete("DELETE FROM $table WHERE $sql", ...$args);
+        }
 
-        // Utför SQL-frågan och få antalet berörda rader
-        $resultat = $db->query($sqlQuery);
+        if (is_string($where) && trim($where) !== '') {
+            return $this->db()->delete("DELETE FROM $table WHERE $where");
+        }
 
-        // Returnerar true om minst en rad togs bort, annars false
-        return $resultat > 0;
+        throw new \SystemException(_('delete() needs an id or conditions, for example delete(5) or delete(["id", "=", 5]).'));
+    }
+
+    /**
+     * Drop the table.
+     *
+     * @return bool
+     */
+    public function removeTable()
+    {
+        $this->db()->query(Scheme::dropTable($this->table()));
+        return true;
+    }
+
+    /**
+     * Drop one or more columns.
+     *
+     * @param string|string[] $columns
+     * @return bool
+     */
+    public function removeColumns($columns)
+    {
+        $this->db()->query(Scheme::dropColumns($this->table(), (array) $columns));
+        return true;
+    }
+
+    /**
+     * The values of the defined columns (one row).
+     *
+     * @return array
+     */
+    private function values(): array
+    {
+        return array_intersect_key($this->data, $this->properties);
+    }
+
+    /**
+     * Rows the last UPDATE matched (also those that did not change).
+     *
+     * @return int
+     */
+    private function matchedRows(): int
+    {
+        $info = $this->db()->db->mysqli->info ?? '';
+
+        return preg_match('/Rows matched: (\d+)/', (string) $info, $m) ? (int) $m[1] : $this->db()->affectedRows();
+    }
+
+    /**
+     * Run a write; in devmode repair the table and try again when it fails.
+     *
+     * @param array  $query [query with placeholders, args...]
+     * @param string $type  'Insert' or 'Update'
+     * @return int|string|bool The new id for Insert, true for Update
+     * @throws DatabaseException When it fails and cannot be repaired
+     */
+    private function write(array $query, string $type)
+    {
+        $db = $this->db();
+        $driver = $db->db;
+        $sql = $driver->escapeString($query, $type);
+        $attempts = count($this->properties) + 2;
+
+        for ($i = 0; ; $i++) {
+            if ($driver->_query($sql, false) !== false) {
+                return $type === 'Insert' ? $driver->mysqli->insert_id : true;
+            }
+
+            $error = $driver->getErrorMessage();
+
+            if (!self::canRepair() || $i >= $attempts || !Analyzer::repair($db, $this->table(), $this->properties, $error)) {
+                throw new DatabaseException(sprintf(_('Could not save to %s: %s'), $this->table(), $error), $driver->debugSQL[0] ?? []);
+            }
+
+            if (is_callable($this->repairAfterSQLRun)) {
+                ($this->repairAfterSQLRun)($error);
+            }
+        }
     }
 }

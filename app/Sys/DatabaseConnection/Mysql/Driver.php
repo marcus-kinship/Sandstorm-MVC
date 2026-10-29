@@ -2,107 +2,127 @@
 
 namespace Sys\DatabaseConnection\Mysql;
 
-use Error;
+use Sys\DatabaseConnection\DatabaseException;
+use Sys\DatabaseConnection\EscapeString;
 
 /**
- * The `Driver` class handles MySQL database connections and SQL queries.
- * 
+ * MySQL connection and queries for DatabaseConnection.
+ *
+ * One MySQL connection per server, user, password, database and charset is
+ * opened per request and shared by every Driver; each Driver keeps its own
+ * settings (type, getError, helper, ...), so they never leak between
+ * DatabaseConnection objects.
+ *
+ * A failed query:
+ * - with a helper (DatabaseConnection::notSetTable()): the helper runs, then
+ *   the query is tried once more
+ * - when the caller asked for soft errors: returns false, and
+ *   getErrorMessage() gives the reason
+ * - otherwise: throws DatabaseException
+ *
  * @category _("MySQL Driver Class")
  */
 class Driver
 {
-    public $mysqli;
-    public $database;
-    public $type;
-    public $check;
-    public $helper = false;
+    /** @var \mysqli The shared connection */
+    public \mysqli $mysqli;
+
+    /** @var \mysqli Same as $mysqli (older name, used by Insert and ArgumentEscaper) */
+    public \mysqli $database;
+
+    /** @var string|int Result type: 'as:text', 'as:number', 'as:both', 'as:obj' or a MYSQLI_* constant */
+    public string|int $type = MYSQLI_BOTH;
+
+    /** @var bool Return results as DataSet ('as:obj') */
+    public bool $dataset = false;
+
+    /** @var bool True: one row (Row), null: all rows (Rows) */
+    public ?bool $modesingle = null;
+
+    /** @var bool Run $func when a query fails, then try again */
+    public bool $helper = false;
+
+    /** @var callable|false Helper for a failed query (creates a missing table, ...) */
     public $func = false;
-    public $dataset = false;
-    public $getMessage = false;
-    public $modesingle = null;
-    public $debugSQL = array();
-    protected $isClose = false;
-    private static array $connections = []; // Open connections in this request, shared by all Drivers
-    protected $lengthmax; // Default 4 MB
-    /**
-     * If you set getError to true and call getErrorMessage(),
-     * it returns the error message when an SQL query fails.
-     */
-    public $getError = false;
+
+    /** @var bool Return false instead of throwing when a query fails */
+    public bool $getError = false;
+
+    /** @var array|false [error, query] of the last failed query */
+    public array|false $getMessage = false;
+
+    /** @var array<int, array> The last query, for the error page and the SQL report */
+    public array $debugSQL = [];
+
+    /** @var int Rows changed by the last INSERT, UPDATE or DELETE */
+    public int $affected_rows = 0;
+
+    /** @var bool Kept for older code; true when the connection works */
+    public bool $check = true;
+
+    /** @var int Largest allowed query in bytes, 0 = no limit */
+    protected int $lengthmax = 0;
+
+    /** @var bool True after close() */
+    protected bool $isClose = false;
+
+    /** @var string Error of the last failed query ('' when it worked) */
+    private string $lastError = '';
+
+    /** @var array<string, \mysqli> Open connections in this request, shared by all Drivers */
+    private static array $connections = [];
 
     /**
-     * Constructor for the MySQL class.
+     * Connect, or reuse the connection that is already open.
      *
-     * @param string $hostname - Server name or IP address of the MySQL server.
-     * @param string $username - Username for the MySQL user.
-     * @param string $password - Password for the MySQL user.
-     * @param string $database - Database name to use.
-     * @param string $type - Data type for the results (default: "").
-     * @param string $charset - Character set for the results (default: utf8mb4).
-     * @param int $lengthmax - Maximum query length (default: 0 for no limit).
-     * 
-     * @throws SystemException - Thrown if the mysqli extension is not installed.
+     * @param string $hostname  MySQL server
+     * @param string $username  MySQL user
+     * @param string $password  MySQL password
+     * @param string $database  Database name; created when it does not exist
+     * @param string $type      Result type ('as:text', 'as:obj', ...), '' for both
+     * @param string $charset   Connection charset
+     * @param int    $lengthmax Largest allowed query in bytes, 0 = no limit
+     *
+     * @throws \SystemException If mysqli is missing or the charset cannot be set
+     * @throws \mysqli_sql_exception If the connection fails
      */
     public function __construct($hostname, $username, $password, $database, $type = "", $charset = "utf8mb4", int $lengthmax = 0)
     {
         if (!class_exists('mysqli')) {
-            throw new SystemException(_('You must install the mysqli extension'));
+            throw new \SystemException(_('You must install the mysqli extension'));
         }
 
         $this->lengthmax = $lengthmax;
 
-        if ($type != "") {
+        if ($type !== '') {
             $this->type = $type;
-            $this->dataset = ($this->type === 'as:obj');
-        } else {
-            $this->type = MYSQLI_BOTH;
         }
 
-        // One MySQL connection per server, user, database and charset for the
-        // whole request; every Driver keeps its own settings (type, getError, ...)
         $key = implode("\0", [$hostname, $username, $password, $database, $charset]);
         if (isset(self::$connections[$key])) {
-            $this->mysqli = self::$connections[$key];
-            $this->database = $this->mysqli;
+            $this->mysqli = $this->database = self::$connections[$key];
             return;
         }
 
         try {
-            $this->mysqli = new \Mysqli($hostname, $username, $password, $database);
+            $mysqli = new \mysqli($hostname, $username, $password, $database);
         } catch (\mysqli_sql_exception $e) {
             // 1049 = unknown database: create it on the first connection
             if ($e->getCode() !== 1049) {
                 throw $e;
             }
-            $this->mysqli = $this->createDatabase($hostname, $username, $password, $database, $charset);
+            $mysqli = $this->createDatabase($hostname, $username, $password, $database, $charset);
         }
 
-        $this->database = $this->mysqli;
-        $this->isClose = false;
-
-        if (!$this->mysqli->set_charset($charset)) {
-            throw new \SystemException(
-                sprintf('Error loading character set %s: %s', $charset, $this->mysqli->error),
-                0,
-                __FILE__,
-                __LINE__
-            );
+        if (!$mysqli->set_charset($charset)) {
+            throw new \SystemException(sprintf(_('Error loading character set %s: %s'), $charset, $mysqli->error));
         }
 
-        if ($this->mysqli->connect_error) {
-            throw new \SystemException(
-                sprintf('Could not connect to MySQL database. Error code: %s, Error: %s', $this->mysqli->connect_errno, $this->mysqli->connect_error),
-                0,
-                __FILE__,
-                __LINE__
-            );
-        }
-
-        self::$connections[$key] = $this->mysqli;
+        $this->mysqli = $this->database = self::$connections[$key] = $mysqli;
     }
 
     /**
-     * Whether a connection is already open in this request
+     * Whether a connection is already open in this request.
      *
      * Lets code that must not open a connection of its own (the error
      * logger) use the database only when the page already does.
@@ -117,17 +137,16 @@ class Driver
     /**
      * Create the database when it does not exist yet, then connect to it.
      *
-     * @param string $hostname - Server name or IP address of the MySQL server.
-     * @param string $username - Username for the MySQL user.
-     * @param string $password - Password for the MySQL user.
-     * @param string $database - Database name to create.
-     * @param string $charset - Character set for the new database.
-     *
-     * @return \Mysqli - Connection with the new database selected.
+     * @param string $hostname MySQL server
+     * @param string $username MySQL user
+     * @param string $password MySQL password
+     * @param string $database Database name to create
+     * @param string $charset  Character set for the new database
+     * @return \mysqli Connection with the new database selected
      */
-    private function createDatabase($hostname, $username, $password, $database, $charset)
+    private function createDatabase(string $hostname, string $username, string $password, string $database, string $charset): \mysqli
     {
-        $mysqli = new \Mysqli($hostname, $username, $password);
+        $mysqli = new \mysqli($hostname, $username, $password);
 
         if (!preg_match('/^\w+$/', $charset)) {
             $charset = 'utf8mb4';
@@ -144,147 +163,158 @@ class Driver
     }
 
     /**
-     * Escape and prepare an SQL string with placeholders.
+     * Build the final SQL from a query with placeholders and its arguments.
      *
-     * @param mixed $query - One or more parameters to send to the database.
-     * @param string $typeQuery - Optional query type for debugging.
-     * @return array - Associative array with prepared SQL string, debug info, types, and arguments.
-     * 
-     * @throws SystemException - Thrown if no query is provided.
+     * The query is kept in $debugSQL for the error page. It is also added to
+     * DatabaseConnection::$allSQL (the SQL report), but only in devmode or with
+     * HTTP_mysql_log true, so a long script does not collect every query.
+     *
+     * @param mixed  $query     'SQL' or ['SQL with %s', arg1, ...]
+     * @param string $typeQuery Kind of query for the error page (Row, Insert, ...)
+     * @return string The SQL to run
+     * @throws DatabaseException If the query is empty, invalid or too large
      */
-    function escapeString($query, $typeQuery = "")
+    public function escapeString($query, $typeQuery = ""): string
     {
         if (empty($query)) {
-            throw new \SystemException(_('The query cannot be executed because no SQL query was provided'));
+            throw new DatabaseException(_('The query cannot be executed because no SQL query was provided'), ['type' => $typeQuery]);
         }
 
-        $string = new \Sys\DatabaseConnection\EscapeString([
-            "db" => $this->database,
-            "query" => $query,
-            "typeQuery" => $typeQuery
+        $string = new EscapeString([
+            'db' => $this->database,
+            'query' => $query,
+            'typeQuery' => $typeQuery,
         ]);
 
-        if ($string->valid()) {
-            $sql = $string->get();
-            $forquery = $string->getForQuery();
+        $rawQuery = is_array($query) ? $query[0] : $query;
+
+        if (!$string->valid()) {
+            throw new DatabaseException(_('The SQL query could not be prepared'), ['sql' => $rawQuery, 'type' => $typeQuery]);
         }
 
-        // Save for debugging
-        $rawQuery = is_array($query) ? $query[0] : $query;
         $this->debugSQL[0] = [
             'sql' => $rawQuery,
-            'forsql' => $forquery,
+            'forsql' => $string->getForQuery(),
             'args' => $string->params ?? [],
-            'type' => $typeQuery
+            'type' => $typeQuery,
         ];
-        \DatabaseConnection::$allSQL[] = $this->debugSQL[0];
 
-        if ($this->lengthmax > 0) {
-            $len = strlen($rawQuery);
-            $max = $this->lengthmax;
-
-            if ($len > $max) {
-                throw new \Sys\DatabaseConnection\DatabaseException(
-                    sprintf(_("Query too large (> %d bytes)"), $max),
-                    $this->debugSQL[0]
-                );
-            }
+        if (($_SERVER['HTTP_devmode'] ?? '') === 'true' || ($_SERVER['HTTP_mysql_log'] ?? '') === 'true') {
+            \DatabaseConnection::$allSQL[] = $this->debugSQL[0];
         }
 
-        return $sql;
+        if ($this->lengthmax > 0 && strlen($rawQuery) > $this->lengthmax) {
+            throw new DatabaseException(sprintf(_('Query too large (> %d bytes)'), $this->lengthmax), $this->lastQuery());
+        }
+
+        return $string->get();
     }
 
     /**
-     * Check if the connection is successful.
+     * Whether the connection works.
      *
-     * @return bool - Returns true if the connection is successful, otherwise false.
+     * @return bool
      */
-    public function check()
+    public function check(): bool
     {
-        return $this->mysqli->connect_error === null;
+        return !$this->isClose && $this->mysqli->connect_error === null;
     }
 
     /**
-     * Set the data type for results.
+     * Turn the 'as:...' type into the MYSQLI_* constant for fetch_array().
      *
-     * Available options:
-     *   - 'as:text'   => (associative array)
-     *   - 'as:number' => (numeric array)
-     *   - 'as:both'   => (both associative and numeric array)
-     *   - 'as:obj'    => (alias, treated as object if supported)
-     * 
-     * @return Select - Returns an instance of the Select class.
+     * @return $this
      */
-    public function type()
+    public function type(): static
     {
         $validTypes = [
             'as:text' => MYSQLI_ASSOC,
             'as:number' => MYSQLI_NUM,
             'as:both' => MYSQLI_BOTH,
-            'as:obj' => MYSQLI_BOTH
+            'as:obj' => MYSQLI_ASSOC,
         ];
 
-        if (array_key_exists($this->type, $validTypes)) {
+        if (is_string($this->type) && isset($validTypes[$this->type])) {
+            $this->dataset = $this->type === 'as:obj';
             $this->type = $validTypes[$this->type];
-            $this->dataset = ($this->type === 'as:obj');
         }
 
         return $this;
     }
 
     /**
-     * Execute an SQL query and return the prepared statement.
+     * Run a query.
      *
-     * @param string $query - SQL string to execute.
-     * @param bool $error - Throw exception on error (default: true).
-     * @return mysqli_stmt|bool - Returns prepared statement on success, otherwise false.
-     * 
-     * @throws DatabaseException - Thrown on error during prepared SQL query execution.
+     * @param string $query The SQL to run
+     * @param bool   $error True: throw DatabaseException on failure; false: return false
+     * @return \mysqli_result|bool The result, true for queries without rows, false on failure
+     * @throws DatabaseException On failure when $error is true
      */
     public function _query(string $query, bool $error = false)
     {
+        $this->lastError = '';
+
         try {
-            $result = $this->database->query($query);
-
-            if ($error && $this->database->errno) {
-                \DatabaseConnection::smakeDataTypes();
-                $lastKey = array_key_last(\DatabaseConnection::$allSQL);
-                throw new \Sys\DatabaseConnection\DatabaseException(
-                    sprintf(_('Syntax error in query. Error message: %s'), $this->mysqli->error),
-                    \DatabaseConnection::$allSQL[$lastKey]
-                );
-            }
-
-            // Save affected rows
-            $this->affected_rows = $this->database->affected_rows;
-
-            return $result;
-
+            $result = $this->mysqli->query($query);
         } catch (\mysqli_sql_exception $e) {
-            \DatabaseConnection::smakeDataTypes();
-            $lastKey = array_key_last(\DatabaseConnection::$allSQL);
-            throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_("Error executing SQL query: %s"), $e->getMessage()),
-                \DatabaseConnection::$allSQL[$lastKey]
-            );
+            $result = false;
+            $this->lastError = $e->getMessage();
         }
+
+        if ($result === false) {
+            if ($this->lastError === '') {
+                $this->lastError = $this->mysqli->error;
+            }
+            if ($error) {
+                throw new DatabaseException(sprintf(_('Error executing SQL query: %s'), $this->lastError), $this->lastQuery());
+            }
+            return false;
+        }
+
+        $this->affected_rows = (int) $this->mysqli->affected_rows;
+        return $result;
     }
 
     /**
-     * Fetch results from a prepared statement.
+     * Run a SELECT and fetch one row (modesingle true) or all rows.
      *
-     * @param mixed $result - mysqli_result object.
-     * @return array - Array of query results.
+     * @param string $query The SQL to run
+     * @return array|null|false The row(s); null when Row finds nothing; false when
+     *                          the query failed and getError is true
+     * @throws DatabaseException If the query fails
      */
-    private function fetchMode($result)
+    public function fetchResults($query)
     {
+        $result = $this->_query($query);
+        $helped = false;
+
+        if ($result === false && $this->helper && is_callable($this->func)) {
+            // Run the helper once (for example: create the missing table), then try again
+            $this->helper = false;
+            $helped = true;
+            ($this->func)();
+            $result = $this->_query($query);
+        }
+
+        if ($result === false) {
+            $this->getMessage = [$this->lastError, $query];
+
+            // Soft errors, but not when even the helper could not fix it
+            if ($this->getError && !$helped) {
+                return false;
+            }
+
+            throw new DatabaseException(sprintf(_('Failed to execute SQL query: %s'), $this->lastError), $this->lastQuery());
+        }
+
+        if (!$result instanceof \mysqli_result) {
+            throw new \SystemException(_('Unexpected return type from database query.'));
+        }
+
         $type = $this->type()->type;
 
         if ($this->modesingle === null) {
-            $rows = [];
-            while ($row = $result->fetch_array($type)) {
-                $rows[] = $row;
-            }
+            $rows = $result->fetch_all($type);
         } else {
             $rows = $result->fetch_array($type);
         }
@@ -294,104 +324,55 @@ class Driver
     }
 
     /**
-     * Fetch results from an SQL query and update debug info.
+     * Wrap a row in a DataSet ('as:obj').
      *
-     * @param string $query - SQL string to execute.
-     * @return array - Array of query results.
-     * @throws SystemException - On SQL or connection error.
-     */
-    public function fetchResults($query)
-    {
-        $stmt = $this->_query($query);
-
-        if ($stmt === false) {
-            $this->getMessage = [$this->mysqli->error, $query];
-
-            if ($this->helper) {
-                $func = $this->func;
-                $func();
-
-                $stmt = $this->_query($query, false);
-                if ($stmt === false) {
-                    throw new \SystemException(_('Failed to execute query even after helper function.'));
-                }
-
-                $this->getError = false;
-                return $this->fetchResults($query);
-            }
-
-            $this->getError = false;
-
-            \DatabaseConnection::smakeDataTypes();
-            $lastKey = array_key_last(\DatabaseConnection::$allSQL);
-            throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_('Failed to execute SQL query: %s'), $this->mysqli->error),
-                \DatabaseConnection::$allSQL[$lastKey]
-            );
-        }
-
-        if ($this->mysqli->error) {
-            \DatabaseConnection::smakeDataTypes();
-            $lastKey = array_key_last(\DatabaseConnection::$allSQL);
-            throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_('Failed to execute SQL query: %s'), $this->mysqli->error),
-                \DatabaseConnection::$allSQL[$lastKey]
-            );
-        }
-
-        if ($stmt instanceof \mysqli_stmt) {
-            $result = $stmt->get_result();
-        } elseif ($stmt instanceof \mysqli_result) {
-            $result = $stmt;
-        } else {
-            throw new \SystemException(_('Unexpected return type from database query.'));
-        }
-
-        $row = $this->fetchMode($result);
-
-        if ($stmt instanceof \mysqli_stmt) {
-            $stmt->close();
-        }
-
-        return $row;
-    }
-
-    /**
-     * Set dataset.
-     *
-     * @param array $row - Result from SQL query.
-     * @return DataSet - DataSet object containing query results.
+     * @param mixed $row
+     * @return \DataSet
      */
     public function setDataset($row)
     {
-        $dat = new DataSet($row);
-        return $dat;
+        return new \DataSet($row);
     }
 
     /**
-     * Execute an SQL query and fetch results.
+     * Run a SELECT and return the rows, as DataSet when the type is 'as:obj'.
      *
-     * @param string $query - SQL query string.
-     * @return array|DataSet - Array or DataSet object depending on data type.
+     * @param string $query The SQL to run
+     * @return mixed
+     * @throws DatabaseException If the query fails
      */
     public function queryAndFetch($query)
     {
         $row = $this->fetchResults($query);
 
-        if ($this->dataset) {
+        if ($this->dataset && $row !== false && $row !== null) {
             return $this->setDataset($row);
         }
+
         return $row;
     }
 
     /**
-     * Get the error message from the last SQL query.
+     * Error of the last failed query, '' when it worked.
      *
-     * @return string - Error message from last SQL query.
+     * @return string
      */
-    function getErrorMessage()
+    public function getErrorMessage(): string
     {
-        return $this->mysqli->error;
+        return $this->lastError !== '' ? $this->lastError : $this->mysqli->error;
+    }
+
+    /**
+     * The last query with the types of its placeholders, for DatabaseException.
+     *
+     * @return array
+     */
+    private function lastQuery(): array
+    {
+        $query = $this->debugSQL[0] ?? [];
+        $query['datatypes'] = \DatabaseConnection::dataTypes($query['forsql'] ?? '');
+
+        return $query;
     }
 
     /**
@@ -400,8 +381,10 @@ class Driver
      * The connection is shared: closing it closes it for every Driver in the
      * request, and the next Driver opens a new one. PHP closes it by itself
      * when the request ends, so this is rarely needed.
+     *
+     * @return void
      */
-    public function close()
+    public function close(): void
     {
         if ($this->isClose) {
             return;

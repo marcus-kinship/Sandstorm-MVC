@@ -128,7 +128,7 @@ class DataSet implements \ArrayAccess, \Iterator, \Countable
      *
      * @return int Number of elements
      */
-    public function count()
+    public function count(): int
     {
         return count($this->keys);
     }

@@ -1,12 +1,21 @@
 # Code standard
 
+## Goal
+
+Sandstorm-MVC is for fast response times, little overhead, dynamic code and getting started quickly. Every change is weighed against that: if it makes a request slower or heavier, or makes it harder to start a new project, it needs a good reason.
+
 The model files are `Sys/DatabaseConnection/EscapeString.php`, `Sys/Session/Store.php`, `Sys/DatabaseConnection/Mysql/Driver.php` and `Sys/Request/*`. New and rewritten code in `app/` follows them.
 
 ## Language and version
 
 - PHP 8.0 or later. No branches for PHP 7.
 - `<?php`, never the short tag `<?` in classes. (Views may use `<?=`.)
-- Code, comments, docblocks and commit messages in English. User-facing text goes through `_()`.
+- Code, comments, docblocks and commit messages in English.
+- User-facing text is written in English inside `_()` and translated with gettext: `app/locales/sv_SE/LC_MESSAGES/sv_SE.po` (Swedish) and `en_US.po`, compiled to `messages.mo`. Never write Swedish (or another language) directly in the code; add the translation to the `.po` file instead.
+
+## Routing
+
+Routes are `SetEnvIfNoCase` lines in `.htaccess`, read by Apache before PHP starts. This is on purpose: it was measured to be faster than routing in PHP, and the framework is built around it. `server.php` reads the same lines for PHP's built-in server. Do not move routing into PHP.
 
 ## Structure
 

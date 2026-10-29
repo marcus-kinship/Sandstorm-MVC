@@ -1,51 +1,80 @@
 <?php
 
 /**
- * Represents a database connection using a driver.
+ * A database connection for one pool, with Select, Insert, Update and Delete.
  *
- * The DatabaseConnection class manages the database connection and provides access to
- * various component classes (Select, Update, Insert, Delete) for performing SQL operations.
+ * <code>
+ * $db = new DatabaseConnection();                       // pool 'default'
+ * $row  = $db->get()->row('SELECT * FROM `users` WHERE id = %d', 1);
+ * $rows = $db->get('as:obj')->rows('SELECT * FROM `users`');
+ * $id   = $db->insertRow('INSERT INTO `users` (`name`) VALUES (%s)', 'Ada');
+ * $db->update()->row('UPDATE `users` SET `name` = %s WHERE id = %d', 'Ada', $id);
+ * $db->delete('DELETE FROM `users` WHERE id = %d', $id);
+ * </code>
+ *
+ * All DatabaseConnection objects for a pool share one MySQL connection per
+ * request (see the Mysql Driver), so creating many of them is cheap.
  *
  * @category _("DatabaseConnection class")
  */
 class DatabaseConnection
 {
-    private $conn = null;
+    /**
+     * The driver for this connection (its own settings, shared MySQL link)
+     *
+     * @var \Sys\DatabaseConnection\Mysql\Driver
+     */
     public $db;
-    private $driver;
+
+    /**
+     * Queries of this request, for the SQL report (devmode or HTTP_mysql_log only)
+     *
+     * @var array<int, array>
+     */
     public static $allSQL = [];
 
     /**
-     * If getError is set to true and getErrorMessage() is called,
-     * it will return the error message when a SQL query fails.
+     * True: a failed insert returns false (read the reason with
+     * getErrorMessage()) instead of throwing DatabaseException.
+     *
+     * @var bool
      */
     public $getError = false;
 
+    /**
+     * True: deleting a row that is already gone is not an error.
+     *
+     * @var bool
+     */
     public $SkipDeleteError = true;
 
     /**
-     * Close the shared database connection for the whole request.
+     * The last Select, Insert, Update or Delete component that was used
      *
-     * Not done automatically: the connection is reused by every
-     * DatabaseConnection in the request and PHP closes it when the request ends.
+     * @var object|null
      */
-    public function close()
-    {
-        $this->db->close();
-    }
+    public $task = null;
 
     /**
-     * Constructor for the DatabaseConnection class.
+     * Driver name, for example 'Mysql'
      *
-     * @param string $connectionstring Name of the database configuration. Default is 'default'.
+     * @var string
+     */
+    private string $driver;
+
+    /**
+     * Open a connection to a pool (or reuse the open one).
+     *
+     * @param string $connectionstring Pool name: app/config/mysql/<name>.db.php
+     * @throws SystemException If the pool settings are missing
+     * @throws mysqli_sql_exception If MySQL refuses the connection
      */
     public function __construct($connectionstring = 'default')
     {
         $config = DatabaseManager::getConnection($connectionstring);
 
-        $this->driver = $uname = ucfirst($config->driver);
-
-        $className = "\\Sys\\DatabaseConnection\\$uname\\Driver";
+        $this->driver = ucfirst($config->driver);
+        $className = "\\Sys\\DatabaseConnection\\{$this->driver}\\Driver";
 
         $this->db = new $className(
             $config->hostname,
@@ -59,9 +88,22 @@ class DatabaseConnection
     }
 
     /**
-     * Get the number of rows affected by the last UPDATE, INSERT, or DELETE query.
+     * Close the shared database connection for the whole request.
      *
-     * @return int Number of affected rows.
+     * Not done automatically: the connection is reused by every
+     * DatabaseConnection in the request and PHP closes it when the request ends.
+     *
+     * @return void
+     */
+    public function close()
+    {
+        $this->db->close();
+    }
+
+    /**
+     * Rows changed by the last INSERT, UPDATE or DELETE.
+     *
+     * @return int
      */
     public function affectedRows()
     {
@@ -69,10 +111,12 @@ class DatabaseConnection
     }
 
     /**
-     * Escape a string for safe use in a SQL query.
+     * Escape a string for a SQL query.
      *
-     * @param string $data The string to escape.
-     * @return string The escaped string.
+     * Prefer placeholders (%s, %d, %i) in the query instead.
+     *
+     * @param string $data
+     * @return string
      */
     public function real_escape_string($data)
     {
@@ -80,16 +124,14 @@ class DatabaseConnection
     }
 
     /**
-     * Emulate a SQL query for debugging purposes.
+     * Show the SQL a query would run, without running it (debugging).
      *
-     * @param string $sql The SQL query with placeholders.
+     * @param string $sql Query with placeholders, followed by its arguments
+     * @return void
      */
     public function emulate($sql)
     {
-        $arg = func_get_args();
-
-        $sql = $this->db->escapeString($arg, _('Query'));
-
+        $this->db->escapeString(func_get_args(), _('Query'));
         $this->makeDataTypes();
 
         $report = new Sys\DatabaseConnection\Report($this->db->debugSQL);
@@ -98,81 +140,48 @@ class DatabaseConnection
     }
 
     /**
-     * Get an instance of the Select class for performing SELECT operations.
+     * SELECT: ->row(...) for one row, ->rows(...) for all rows.
      *
-     * @param string $dataType Optional result datatype:
-     *   - 'as:text'   => associative array
-     *   - 'as:number' => numeric array
-     *   - 'as:both'   => both associative and numeric array
-     *   - 'as:obj'    => object
-     *
-     * @return Select An instance of the Select class.
+     * @param string $dataType 'as:text', 'as:number', 'as:both' or 'as:obj' ('' = the pool's type)
+     * @return MysqlSelect
      */
     public function get($dataType = "")
     {
-        $path = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/$this->driver/Select.php";
-        if (file_exists($path)) {
-            config::registry("Select", sprintf(_('%s Select component class'), $this->driver));
-            include_once($path);
-        }
-
-        $classname = $this->driver . 'Select';
-        if (class_exists($classname, false)) {
-            $this->task = new $classname($this, $dataType);
-            return $this->task;
-        } else {
-            throw new SystemException(_("Could not load the Select class."));
-        }
+        $class = $this->component('Select');
+        return $this->task = new $class($this, $dataType);
     }
 
     /**
-     * Execute a SQL query.
+     * Run any query.
      *
-     * @param string $sql   The SQL query with placeholders.
-     * @param bool   $error Throw exception on error (default: true).
-     *
-     * @return mysqli_stmt|bool Returns the prepared statement if successful, otherwise false.
+     * @param string $sql   Query with placeholders, followed by its arguments
+     * @param bool   $error Kept for older code (errors always throw here)
+     * @return mysqli_result|bool
+     * @throws Sys\DatabaseConnection\DatabaseException If the query fails
      */
     public function query($sql, $error = true)
     {
-        $arg = func_get_args();
-
-        $sql = $this->db->escapeString($arg, _('Query'));
-
-        $result = $this->db->_query($sql, $error);
-
-        return $result;
+        $sql = $this->db->escapeString(func_get_args(), _('Query'));
+        return $this->db->_query($sql, true);
     }
 
     /**
-     * Get an instance of the Update class for performing UPDATE operations.
+     * UPDATE: ->row('UPDATE ...', ...) returns true when a row changed.
      *
-     * @return Update An instance of the Update class.
+     * @return MysqlUpdate
      */
     public function update()
     {
-        $path = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/$this->driver/Update.php";
-        if (file_exists($path)) {
-            config::registry('Update', sprintf(_('%s Update component class'), $this->driver));
-            include_once($path);
-        }
-
-        $classname = $this->driver . 'Update';
-        if (class_exists($classname, false)) {
-            $this->task = new $classname($this);
-            return $this->task;
-        } else {
-            throw new SystemException(_("Could not load the Update class."));
-        }
+        $class = $this->component('Update');
+        return $this->task = new $class($this);
     }
 
     /**
-     * Used when a table is suspected to be missing.
-     * Provides the ability to build the table before executing SQL.
+     * When the next SELECT fails, run $function (for example to create the
+     * missing table) and try once more.
      *
-     * @param Closure $function A closure to build the table.
-     *
-     * @return $this Returns this object for chaining.
+     * @param Closure $function
+     * @return $this
      */
     public function notSetTable(Closure $function)
     {
@@ -183,178 +192,147 @@ class DatabaseConnection
     }
 
     /**
-     * Get an instance of the Insert class for performing INSERT operations.
+     * INSERT a row.
      *
-     * @param string $sql SQL query for insertion.
-     *
-     * @return mixed Result of insertion, usually the auto-generated ID.
+     * @param string $sql Query with placeholders, followed by its arguments
+     * @return int|string|false The new id, or false when it failed and getError is true
+     * @throws Sys\DatabaseConnection\DatabaseException If it fails and getError is false
      */
     public function insertRow($sql)
     {
-        $path = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/$this->driver/Insert.php";
-        if (file_exists($path)) {
-            config::registry('Insert', sprintf(_('%s Insert component class'), $this->driver));
-            include_once($path);
-        }
-
-        $classname = $this->driver . 'Insert';
-        if (class_exists($classname, false)) {
-            $this->task = new $classname($this);
-            $arg = func_get_args();
-            return $this->task->row($arg);
-        } else {
-            throw new SystemException(_("Could not load the Insert class."));
-        }
+        $class = $this->component('Insert');
+        $this->task = new $class($this);
+        return $this->task->row(func_get_args());
     }
 
     /**
-     * Get an instance of the Delete class for performing DELETE operations.
+     * DELETE rows.
      *
-     * @param string $sql SQL query for deletion.
-     *
-     * @return bool True if rows were affected, otherwise false.
+     * @param string $sql Query with placeholders, followed by its arguments
+     * @return bool True when a row was deleted
+     * @throws Sys\DatabaseConnection\DatabaseException If the query fails
+     * @throws SystemException If no row was deleted and SkipDeleteError is false
      */
     public function delete($sql)
     {
-        $path = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/$this->driver/Delete.php";
-        if (file_exists($path)) {
-            config::registry('Delete', sprintf(_('%s Delete component class'), $this->driver));
-            include_once($path);
-        }
-
-        $classname = $this->driver . 'Delete';
-        if (class_exists($classname, false)) {
-            $this->task = new $classname($this);
-            $arg = func_get_args();
-            $this->db->debugSQL = $arg;
-            self::$allSQL[] = $arg;
-            return $this->task->row($arg);
-        } else {
-            throw new SystemException(_("Could not load the Delete class."));
-        }
+        $class = $this->component('Delete');
+        $this->task = new $class($this);
+        return $this->task->row(func_get_args());
     }
 
     /**
-     * Check if a database connection is active.
+     * Whether the pool can connect.
      *
-     * @param string $connectionstring Database configuration name. Default is 'default'.
+     * Reuses the open connection; a refused connection gives false, not an error.
      *
-     * @return bool True if the connection is active, otherwise false.
+     * @param string $connectionstring Pool name
+     * @return bool
      */
     public static function check($connectionstring = 'default')
     {
-        $config = DatabaseManager::getConnection($connectionstring);
-
-        $className = "\\Sys\\DatabaseConnection\\" . ucfirst($config->driver) . "\\Driver";
-
-        // A failed connection means "not active", not an error
         try {
-            $db = new $className(
-                $config->hostname,
-                $config->user,
-                $config->password,
-                $config->name,
-                $config->type,
-                $config->charset,
-                $config->lengthmax
-            );
+            return (new self($connectionstring))->db->check();
         } catch (\Throwable $e) {
             return false;
         }
-
-        return $db->check();
     }
 
     /**
-     * Extract datatypes from a SQL query with placeholders.
-     * Supports %s (string), %d (integer), %i (identifier),
-     * and positional variants %1$s, %2$d, %3$i.
+     * Types of the placeholders in a query: 's' (string), 'd' (integer),
+     * 'i' (identifier), also for positional %1$s, %2$d, %3$i.
      *
-     * @param string $query SQL query with placeholders.
-     *
-     * @return array Array of datatypes in order.
+     * @param string $query
+     * @return string[]
      */
-    private function extractDataTypes($query)
+    public static function dataTypes(string $query): array
     {
-        $datatypes = [];
-        preg_match_all('/%(?:\d+\$)?([sdi])/', $query, $matches);
-
-        if (!empty($matches[1])) {
-            foreach ($matches[1] as $type) {
-                $datatypes[] = $type; // ← rå 's', 'd', 'i' — översättning sker i DatabaseException
-            }
+        if ($query === '' || !str_contains($query, '%')) {
+            return [];
         }
 
-        return $datatypes;
+        preg_match_all('/%(?:\d+\$)?([sdi])/', $query, $matches);
+        return $matches[1];
     }
 
     /**
-     * Process all SQL queries in debugSQL and add their datatypes.
+     * Add the placeholder types to the last query (for the SQL report).
+     *
+     * @return void
      */
     public function makeDataTypes()
     {
-        if (!isset($this->db->debugSQL) || !is_array($this->db->debugSQL)) {
-            return;
-        }
-
         foreach ($this->db->debugSQL as $index => $query) {
-            $this->db->debugSQL[$index]['datatypes'] = isset($query['forsql'])
-                ? $this->extractDataTypes($query['forsql'])
-                : [];
+            $this->db->debugSQL[$index]['datatypes'] = self::dataTypes($query['forsql'] ?? '');
         }
     }
 
     /**
-     * Process all SQL queries in the static allSQL list and add their datatypes.
+     * Add the placeholder types to all queries in $allSQL.
+     *
+     * @return void
      */
     public static function smakeDataTypes()
     {
         foreach (self::$allSQL as $index => $query) {
-            if (isset($query['forsql'])) {
-                $temp = new self();
-                self::$allSQL[$index]['datatypes'] = $temp->extractDataTypes($query['forsql']);
-            } else {
-                self::$allSQL[$index]['datatypes'] = [];
-            }
+            self::$allSQL[$index]['datatypes'] = self::dataTypes($query['forsql'] ?? '');
         }
     }
 
     /**
-     * Display the most recently executed SQL query for debugging purposes.
+     * Show the last query of this connection (debugging).
+     *
+     * @return void
      */
     public function getSQL()
     {
         $this->makeDataTypes();
-
-        $report = new Sys\DatabaseConnection\Report($this->db->debugSQL);
-        $report->showAllSQL();
+        (new Sys\DatabaseConnection\Report($this->db->debugSQL))->showAllSQL();
     }
 
     /**
-     * Display a list of all executed SQL queries.
+     * Show all queries of this request (debugging; collected in devmode or with HTTP_mysql_log).
+     *
+     * @return void
      */
     public static function getAllSQL()
     {
-        foreach (self::$allSQL as $index => $query) {
-            if (isset($query['forsql'])) {
-                $temp = new self();
-                self::$allSQL[$index]['datatypes'] = $temp->extractDataTypes($query['forsql']);
-            } else {
-                self::$allSQL[$index]['datatypes'] = [];
-            }
-        }
-
-        $report = new Sys\DatabaseConnection\Report(self::$allSQL);
-        $report->showAllSQL();
+        self::smakeDataTypes();
+        (new Sys\DatabaseConnection\Report(self::$allSQL))->showAllSQL();
     }
 
     /**
-     * Get the most recent error message from the database.
+     * Error of the last failed query, '' when it worked.
      *
-     * @return string Latest error message.
+     * @return string
      */
     public function getErrorMessage()
     {
         return $this->db->getErrorMessage();
+    }
+
+    /**
+     * Class name of a component (Select, Insert, Update, Delete) for the
+     * driver, loaded once.
+     *
+     * @param string $name Component name
+     * @return string Class name, for example 'MysqlSelect'
+     * @throws SystemException If the component does not exist for the driver
+     */
+    private function component(string $name): string
+    {
+        $class = $this->driver . $name;
+
+        if (!class_exists($class, false)) {
+            $file = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/{$this->driver}/$name.php";
+            if (is_file($file)) {
+                include_once $file;
+                config::registry($class, $file);
+            }
+            if (!class_exists($class, false)) {
+                throw new SystemException(sprintf(_('Could not load the %s class.'), $name));
+            }
+        }
+
+        return $class;
     }
 }

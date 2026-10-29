@@ -1,385 +1,234 @@
-<?
+<?php
+
 namespace Sys\Record;
 
 /**
- * 
- * 	
- * @category _("Kernel class for Record")
+ * Base of the Record ORM: the table, the data and the database connection.
+ *
+ * Kept small, because every entry point loads it:
+ * - \Record       reads and writes (FromTrait + ToTrait)
+ * - Record\From   reads only (FromTrait)
+ * - Record\To     writes only (ToTrait)
+ *
+ * Options (second constructor argument):
+ * - 'pool' => 'default'   database pool (app/config/mysql/<pool>.db.php)
+ *
+ * @category _("Record Kernel class")
  */
-abstract class kernel{
-
-    // Publika egenskaper
-
-    public $multi = false;
-    public $default = "DEFAULT NULL";
-    public $data = array();              // Dataarray för att lagra information
-    public $properties = array();        // Egenskapsarray för att lagra egenskaper
-
-    // Privata egenskaper
- 
-    private $repairAfterSQLRun = false;  // Anger om det behövs reparation efter SQL-körning
-    private $engine = "";                // Variabel för att hålla tabellmotorn
-
-    // Skyddad egenskaper
-
-    // Array med datatyper och deras standardlängder
-    protected $dataTypes = array(
-        "INT" => 11,
-        "SMALLINT" => 6,
-        "MEDIUMINT" => 7,
-        "BIGINT" => 20,
-        "FLOAT" => 8,
-        "DOUBLE" => 8,
-        "DECIMAL" => 8,
-        "VARCHAR" => 255,
-        "TEXT" => 65535,
-        "MEDIUMTEXT" => 16777215,
-        "LONGTEXT" => 4294967295,
-        "DATE" => "YYYY-MM-DD",
-        "TIME" => "HH:MM:SS",
-        "DATETIME" => "YYYY-MM-DD HH:MM:SS",
-        "BOOLEAN" => 1
-    );
-     // Array med datatyper för sekvens
-    protected $sequence = array(
-        0 => 'tinyint',
-        1 => 'int',
-        2 => 'float',
-        3 => 'varchar',
-        'DATE' => 'DATE',
-        'TIME' => 'TIME',
-        'DATETIME' => 'DATETIME',
-        'BOOLEAN' => 'BOOLEAN' // Om du hanterar booleaner
-    );
-    protected $currentLength = 0;        // Nuvarande längd
-    protected $currentMode = "";         // Nuvarande läge
-    protected $currentType = null;       // Nuvarande datatyp
-    protected $table = null;             // Namn på databastabellen
+abstract class Kernel
+{
+    /**
+     * Table name. A model can set it as a default: class User extends \Record { protected $table = 'users'; }
+     *
+     * @var string|null
+     */
+    protected $table = null;
 
     /**
-     * Tilldelar egenskaper baserat på en given array.
+     * Options given to the constructor
      *
-     * @param array $record Associativ array där nycklarna är egenskapsnamn och värdena är de tilldelade datan.
-     * @return void
+     * @var array<string, mixed>
+     */
+    protected array $options = [];
+
+    /**
+     * The values: one row (name => value), or the fetched rows after a read
+     *
+     * @var array
+     */
+    public $data = [];
+
+    /**
+     * True when the data came from (or went to) the database
+     *
+     * @var bool
+     */
+    protected bool $hasRunSQL = false;
+
+    /**
+     * Result type for assign(): 'as:obj' or 'as:text'
+     *
+     * @var string
+     */
+    protected string $outdata = 'as:obj';
+
+    /**
+     * Position for Iterator
+     *
+     * @var int
+     */
+    protected int $position = 0;
+
+    /**
+     * The connection, opened on first use
+     *
+     * @var \DatabaseConnection|null
+     */
+    private ?\DatabaseConnection $connection = null;
+
+    /**
+     * @param string $table   Table name ('' keeps the model's default)
+     * @param array  $options See the class comment
+     */
+    public function __construct(string $table = "", array $options = [])
+    {
+        $this->options = $options;
+
+        if ($table !== '') {
+            $this->table = $table;
+        }
+    }
+
+    /**
+     * Fill the record with a row, for example from a query.
+     *
+     * @param array  $record name => value
+     * @param string $mode   'as:obj' or 'as:text'
+     * @return $this|null Null when the row is empty
      */
     public function assign(array $record, $mode = "as:obj")
     {
-        if (empty($record)) {
-            return null; // Om arrayen är tom, returnera null
+        if ($record === []) {
+            return null;
         }
+
         $this->outdata = $mode;
         $this->hasRunSQL = true;
+        $this->data = $record;
 
-        foreach ($record as $key => $value) {
-            // Tilldela varje egenskap genom define-metoden
-            $this->define($key, $value);
-        }
-
-        return $this; // Returnera objektet för att möjliggöra chaining eller caching
-    }
-    
-    /**
-     * Magisk metod som används för att hämta värden från objektets egenskaper.
-     *
-     * @param string $name - Namnet på den egenskap som ska hämtas.
-     * @return mixed|bool - Värdet för den efterfrågade egenskapen eller falskt om egenskapen inte finns.
-     */
-    function __get($name)
-    {
-  
-        if (key_exists($name, $this->data)) {
-            return $this->data[$name];
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Sätter läge för flera rader.
-     *
-     * @param bool $value (valfritt) Boolean-värde för att aktivera/flera flera rader.
-     * @return $this Nuvarande instans av klassen.
-     */
-    public function multi($value = true)
-    {
-        // flera  rader
-        $this->multi = $value;
         return $this;
     }
 
     /**
-     * Metod för att generera SQL för att ta bort en tabell.
-     * 
-     * @return string SQL-frågan för att ta bort tabellen.
+     * A value of the row: $user->name. False when there is no such value.
+     *
+     * @param string $name
+     * @return mixed
      */
-    public function removeTable()
+    public function __get($name)
     {
-        // Konstruera SQL-frågan för att ta bort tabellen
-        $sql = 'DROP TABLE IF EXISTS `' . $this->table . '`;';
-        $db = new \DatabaseConnection();
-        // Utför SQL-frågan för att lägga till den okända kolumnen
-        $stmt = $db->query($sql);
+        return array_key_exists($name, $this->data) ? $this->data[$name] : false;
+    }
 
-        // Returnerar true om frågan utfördes utan problem, annars false
-        if ($stmt !== null && $stmt->errno === 0) {
-            return true;
-        } else {
-            return false;
+    /**
+     * The table name.
+     *
+     * @return string
+     * @throws \SystemException When no table is set
+     */
+    protected function table(): string
+    {
+        if ($this->table === null || $this->table === '') {
+            throw new \SystemException(_('Record needs a table name: new Record("table") or protected $table in the model.'));
         }
 
+        return $this->table;
     }
 
     /**
-     * Funktion för att definiera en åtgärd som ska utföras efter att en SQL-fråga har körts.
+     * The database connection for this record's pool (shared per request).
      *
-     * @param callable $function Callback-funktionen som ska utföras efter att SQL-frågan har körts.
+     * @return \DatabaseConnection
      */
-    function repairAfterSQLRun($function)
+    protected function db(): \DatabaseConnection
     {
-        $this->repairAfterSQLRun = $function;
+        return $this->connection ??= new \DatabaseConnection($this->options['pool'] ?? 'default');
     }
 
     /**
-     * Funktion för att ta bort en eller flera kolumner från en databastabell.
+     * Quote a column or table name: name -> `name`, t.name -> `t`.`name`.
      *
-     * @param string|array $columns - En sträng med namnet på en kolumn eller en array med namnen på flera kolumner som ska tas bort.
-     * @return bool - Returnerar true om kolumnerna har tagits bort, annars false.
+     * @param string $name
+     * @return string
+     * @throws \InvalidArgumentException For anything but letters, digits, _ and one dot
      */
-    public function removeColumns($columns)
+    protected static function quote(string $name): string
     {
-        // Skapa en ny instans av DatabaseConnection2
-        $db = new DatabaseConnection();
-
-        // Konvertera $columns till en array om det inte redan är det
-        if (!is_array($columns)) {
-            $columns = array($columns);
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$/', $name)) {
+            throw new \InvalidArgumentException(sprintf(_('Invalid column or table name: %s'), $name));
         }
 
-        // Konstruera SQL-frågan för att ta bort kolumnerna
-        $sql = "ALTER TABLE $this->table DROP COLUMN " . implode(", DROP COLUMN ", $columns);
+        return '`' . str_replace('.', '`.`', $name) . '`';
+    }
 
-        // Anropa metoden query från $db-objektet för att utföra SQL-frågan
-        // Funktionen returnerar resultatet från anropet till query-metoden
-        $result = $db->query($sql);
+    /**
+     * Build a WHERE clause with placeholders from a list of conditions.
+     *
+     * <code>
+     * ['name', '=', 'Ada']                              // `name` = 'Ada'
+     * ['age', '>', 30, 'OR', 'name', 'LIKE', 'A%']      // AND between conditions unless 'OR' is given
+     * ['id', 'IN', [1, 2, 3]]                           // `id` IN (1, 2, 3)
+     * ['deleted', 'IS', null]                           // `deleted` IS NULL
+     * ['name' => 'Ada', 'age' => 36]                    // equal, joined with AND
+     * </code>
+     *
+     * @param array $conditions
+     * @return array{0: string, 1: array} [clause without "WHERE", arguments]
+     * @throws \InvalidArgumentException For an unknown operator or an invalid column name
+     */
+    protected static function buildWhere(array $conditions): array
+    {
+        $operators = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS', 'IS NOT'];
 
-        // Kontrollera resultatet av operationen
-        if ($result) {
-            return true; // Kolumnerna har tagits bort från tabellen
-        } else {
-            return false; // Kolumnerna har inte tagits bort från tabellen
+        if ($conditions !== [] && !array_is_list($conditions)) {
+            $list = [];
+            foreach ($conditions as $column => $value) {
+                array_push($list, $column, '=', $value);
+            }
+            $conditions = $list;
         }
-    }
 
-    /**
-     * Sätter läge för maximalt värde.
-     */
-    public function max()
-    {
-        $this->currentMode = "max";
-    }
+        $sql = '';
+        $args = [];
+        $count = count($conditions);
 
-    /**
-     * Sätter läge för minimalt värde.
-     */
-    public function min()
-    {
-        $this->currentMode = "min";
-    }
+        for ($i = 0; $i < $count;) {
+            $column = (string) $conditions[$i];
+            $operator = strtoupper(trim((string) ($conditions[$i + 1] ?? '')));
+            $value = $conditions[$i + 2] ?? null;
+            $i += 3;
 
-    /**
-     * Sätter läge för att klippa värde.
-     */
-    public function cut()
-    {
-        $this->currentMode = "cut";
-    }
+            if (!in_array($operator, $operators, true)) {
+                throw new \InvalidArgumentException(sprintf(_('Unknown operator in WHERE: %s'), $operator));
+            }
 
-    /**
-     * Sätter egenskaper för tabell.
-     *
-     * @param array $properties Egenskaper för tabell.
-     * @return $this Nuvarande instans av klassen.
-     */
-    function properties(array $properties)
-    {
-        $this->properties = $properties;
-        return $this;
-    }
-
-    /**
-     * Sätter datatyp för text.
-     *
-     * @param int $length Längden på text.
-     * @return $this Nuvarande instans av klassen.
-     */
-    public function text($length)
-    {
-        // text
-        $this->currentType = 'text';
-        $this->currentLength = $length;
-        return $this;
-    }
-
-    /**
-     * Sätter datatyp för heltal.
-     *
-     * @param int $length Längden på heltal.
-     * @return $this Nuvarande instans av klassen.
-     */
-    public function int($length)
-    {
-        // number
-        $this->currentType = 'int';
-        $this->currentLength = $length;
-        return $this;
-    }
-
-    /**
-     * Definierar egenskapen och tilldelar dess värde.
-     *
-     * @param string $name Namnet på egenskapen.
-     * @param mixed $data (valfritt) Värdet som ska tilldelas. Standard är null.
-     * @return void
-     *
-     * @throws SystemException Kastas om längden på data överskrider max- eller mingränsen eller om datan inte kan klippas.
-     */
-    function define($name, $data = null)
-    {
-
-    // Standard placeholder för variabler
-        $placeholder = "%s";
-
-        // Hämta standardvärden
-        $default = $this->default;
-        $currentLength = 0; // Säkerställ att $currentLength alltid är definierad
-        $currentType = 3; // Default to text type
-        $d = "";
-        
-        // Kontrollera om det finns data att bearbeta
-        if ($data !== null) {
-            // Använd en temporär variabel för att hantera data
-            $d = $data; // Använd en temporär variabel
-
-            // Identifiera datatypen för $data
-            if (is_array($data) || is_object($data)) {
-                // Om $data är en array eller objekt, konvertera till sträng
-                $currentType = 3; // Anpassad typ för array eller objekt
-                $d = var_export($data, true);
-                $currentLength = strlen($d);
-            } elseif (preg_match('/^\d+\.\d+$/', $data)) {
-                // Om $data är en decimal
-                $currentType = 2; // float
-                $currentLength = strlen($data);
-            } elseif (preg_match('/^\d+$/', $data, $matches, PREG_OFFSET_CAPTURE, 0)) {
-                // Om $data är ett heltal
-                $currentType = 1; // int
-                $placeholder = "%d"; // Updatera platsmarkören för heltal
-                $currentLength = strlen($matches[0][0]);
-            } elseif (is_bool($data)) {
-                // Om $data är en boolesk variabel
-                $currentType = 0; // tinyint
-                $currentLength = 1;
-                $placeholder = "%d"; // Updatera platsmarkören för booleska värden
-            } elseif (is_string($data)) {
-                // Om $data är en sträng
-                if (preg_match('/\b\d{4}-\d{2}-\d{2}\b/', $data)) {
-                    // Om strängen representerar ett datum i formatet YYYY-MM-DD
-                    $data = date('Y-m-d', strtotime($data));
-                    $currentType = "DATE";
-                } elseif (preg_match('/\b\d{2}:\d{2}:\d{2}\b/', $data)) {
-                    // Om strängen representerar en tid i formatet HH:MM:SS
-                    $currentType = "TIME";
-                } elseif (preg_match('/\b\d{2}:\d{2}\b/', $data)) {
-                    // Om strängen representerar en tid i formatet HH:MM (24-timmarsformat)
-                    $data .= ":00"; // Lägg till sekunder
-                    $currentType = "TIME";
-                } elseif (preg_match('/\b(?:\d{2}-\d{2}-\d{4}|\d{2}\/\d{2}\/\d{4})\b/', $data)) {
-                    // Om strängen representerar ett datum i formatet DD-MM-YYYY eller DD/MM/YYYY
-                    $data = date('Y-m-d', strtotime(str_replace('/', '-', $data)));
-                    $currentType = "DATE";
-                } elseif (preg_match('/\b\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\b/', $data)) {
-                    // Om strängen representerar en tidstämpel i formatet YYYY-MM-DD HH:MM:SS
-                    $currentType = "DATETIME";
+            if (is_array($value)) {
+                if ($value === []) {
+                    $part = $operator === 'IN' ? '0 = 1' : '1 = 1';
                 } else {
-                    // Om strängen inte matchar något specifikt format
-                    $currentType = 3; // Anpassad typ för vanlig text
-                    $currentLength = strlen($data); // Beräkna längden av strängen
+                    $part = self::quote($column) . " $operator (" . implode(', ', array_fill(0, count($value), '%s')) . ')';
+                    array_push($args, ...array_values($value));
                 }
-            }
-        }
-
-        // Sätt den aktuella datatypen baserat på ordningen i sekvensen
-        $this->currentType = $this->sequence[$currentType];
-
-        // Om flera värden är aktiverade
-        if ($this->multi == true) {
-            // Jämför längden för att se om den är större än $this->currentLength och uppdatera om så är fallet
-            if ($currentLength > $this->currentLength) {
-                $this->currentLength = $currentLength;
-            }
-            
-            $this->adjustDataType($currentType);
-
-            // Kontrollera om egenskapen $name redan är satt, om inte skapa en tom array
-            if (!isset($this->data[$name])) {
-                $this->data[$name] = [];
-            }
-
-            // Lägg till värdet från den temporära variabeln till egenskapen
-            $this->data[][$name] = $d;
-        } else {
-            // Annars, om flera värden inte är aktiverade
-            $this->currentLength = $currentLength;
-
-            $this->adjustDataType($currentType);
-
-            // Tilldela värdet direkt till egenskapen
-            $this->data[$name] = $d;
-        }
-
-        // Kontrollera om längden av data överstiger gränsvärdet för aktuellt läge
-        if ($this->currentMode === "min" && $currentLength < $this->currentLength) {
-            throw new SystemException(sprintf(_("Data exceeds the min allowed length of %s"), $this->currentLength));
-        } else if ($this->currentMode === "max" && $currentLength > $this->currentLength) {
-            throw new SystemException(sprintf(_("Data exceeds the maximum allowed length of %s"), $this->currentLength));
-        } elseif ($this->currentMode === "cut" && $currentLength > $this->currentLength) {
-            if ($currentType == 3) {
-                throw new SystemException(sprintf(_("Data cannot be cut as it is an array or object")));
+            } elseif ($value === null) {
+                $part = self::quote($column) . ($operator === '=' || $operator === 'IS' ? ' IS NULL' : ' IS NOT NULL');
             } else {
-                $d = substr($d, 0, $this->currentLength);
+                $part = self::quote($column) . " $operator " . (is_int($value) ? '%d' : '%s');
+                $args[] = $value;
+            }
+
+            $sql .= $part;
+
+            if ($i < $count) {
+                $glue = strtoupper((string) $conditions[$i]);
+                if ($glue === 'AND' || $glue === 'OR') {
+                    $i++;
+                } else {
+                    $glue = 'AND';
+                }
+                $sql .= " $glue ";
             }
         }
 
-        // Definiera egenskaperna för den aktuella variabeln
-        $this->properties[$name] = [
-            'type' => $this->currentType,
-            'length' => $this->currentLength,
-            '_length' => $this->currentType . '(' . $this->currentLength . ')',
-            'placeholder' => $placeholder,
-            'default' => $default,
-            'currentMode' => $this->currentMode
-        ];
+        return [$sql, $args];
     }
 
     /**
-     * Anpassar datatypen baserat på nuvarande typ och längd.
+     * Whether automatic table repair is allowed (devmode only).
      *
-     * @param string $currentType Nuvarande datatyp.
-     * @return void
+     * @return bool
      */
-    private function adjustDataType($currentType)
+    protected static function canRepair(): bool
     {
-
-        // Jämför om currentType är större än $this->$currentType, om sant, uppdatera $this->currentType med hjälp av $sequence
-        if (array_search($currentType, $this->sequence) > array_search($this->currentType, $this->sequence)) {
-            $this->currentType = $this->sequence[$currentType];
-        }
-
-        // Jämför längden och typen för att se om ändringar behövs för datatypen
-        if ($this->currentType === "int" && $this->currentLength > 20) {
-            $this->currentType = "varchar";
-        } elseif ($this->currentType === "varchar" && $this->currentLength > 255) {
-            $this->currentType = "text";
-        }
+        return ($_SERVER['HTTP_devmode'] ?? '') === 'true';
     }
 }

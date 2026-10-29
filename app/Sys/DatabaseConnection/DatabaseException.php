@@ -23,14 +23,20 @@ class DatabaseException extends SystemException
      * @param string         $message  The error message.
      * @param array          $query    The database query context.
      * @param int            $code     The error code.
-     * @param Throwable|null $previous Previous exception.
+     * @param \Throwable|null $previous Previous exception.
      */
-    public function __construct($message, $query = array(), $code = 0, Throwable $previous = null)
+    public function __construct($message, $query = array(), $code = 0, ?\Throwable $previous = null)
     {
-        $f = debug_backtrace();
-        $line = $f[2]['line'];
-        $file = $f[2]['file'];
-        unset($f);
+        // Point at the code that ran the query, not at the database classes
+        $file = __FILE__;
+        $line = __LINE__;
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12) as $frame) {
+            if (isset($frame['file']) && !str_contains(str_replace('\\', '/', $frame['file']), '/app/Sys/DatabaseConnection')) {
+                $file = $frame['file'];
+                $line = $frame['line'] ?? 0;
+                break;
+            }
+        }
 
         $this->setTitle("DatabaseException");
 
@@ -58,7 +64,7 @@ class DatabaseException extends SystemException
 
         $this->setMessages($this->SQLBlock($message, $errorComponents, $data));
 
-        parent::__construct($errorComponents, $code = 0, $file, $line, $previous);
+        parent::__construct($errorComponents, $code, $file, $line, $previous);
     }
 
     /**
@@ -175,7 +181,7 @@ class DatabaseException extends SystemException
      *
      * @return array
      */
-    private function SQLBlock(string $message, array $sql = [], string $data): array
+    private function SQLBlock(string $message, array $sql, string $data): array
     {
         $tmp = [];
 

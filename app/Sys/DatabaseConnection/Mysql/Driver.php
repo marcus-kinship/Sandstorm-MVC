@@ -22,6 +22,7 @@ class Driver
     public $modesingle = null;
     public $debugSQL = array();
     protected $isClose = false;
+    private static array $connections = []; // Open connections in this request, shared by all Drivers
     protected $lengthmax; // Default 4 MB
     /**
      * If you set getError to true and call getErrorMessage(),
@@ -48,6 +49,24 @@ class Driver
             throw new SystemException(_('You must install the mysqli extension'));
         }
 
+        $this->lengthmax = $lengthmax;
+
+        if ($type != "") {
+            $this->type = $type;
+            $this->dataset = ($this->type === 'as:obj');
+        } else {
+            $this->type = MYSQLI_BOTH;
+        }
+
+        // One MySQL connection per server, user, database and charset for the
+        // whole request; every Driver keeps its own settings (type, getError, ...)
+        $key = implode("\0", [$hostname, $username, $password, $database, $charset]);
+        if (isset(self::$connections[$key])) {
+            $this->mysqli = self::$connections[$key];
+            $this->database = $this->mysqli;
+            return;
+        }
+
         try {
             $this->mysqli = new \Mysqli($hostname, $username, $password, $database);
         } catch (\mysqli_sql_exception $e) {
@@ -60,14 +79,6 @@ class Driver
 
         $this->database = $this->mysqli;
         $this->isClose = false;
-        $this->lengthmax = $lengthmax;
-
-        if ($type != "") {
-            $this->type = $type;
-            $this->dataset = ($this->type === 'as:obj');
-        } else {
-            $this->type = MYSQLI_BOTH;
-        }
 
         if (!$this->mysqli->set_charset($charset)) {
             throw new \SystemException(
@@ -86,6 +97,21 @@ class Driver
                 __LINE__
             );
         }
+
+        self::$connections[$key] = $this->mysqli;
+    }
+
+    /**
+     * Whether a connection is already open in this request
+     *
+     * Lets code that must not open a connection of its own (the error
+     * logger) use the database only when the page already does.
+     *
+     * @return bool
+     */
+    public static function hasOpenConnection(): bool
+    {
+        return self::$connections !== [];
     }
 
     /**
@@ -370,9 +396,23 @@ class Driver
 
     /**
      * Close the connection to the MySQL database.
+     *
+     * The connection is shared: closing it closes it for every Driver in the
+     * request, and the next Driver opens a new one. PHP closes it by itself
+     * when the request ends, so this is rarely needed.
      */
     public function close()
     {
+        if ($this->isClose) {
+            return;
+        }
+
+        $key = array_search($this->mysqli, self::$connections, true);
+        if ($key !== false) {
+            unset(self::$connections[$key]);
+        }
+
         $this->mysqli->close();
+        $this->isClose = true;
     }
 }

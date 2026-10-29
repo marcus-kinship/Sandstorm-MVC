@@ -343,10 +343,10 @@ class EscapeString
     }
 
     /**
-     * Safe vsprintf wrapper — compatible with PHP 7 and PHP 8.
+     * Safe vsprintf wrapper.
      *
-     * On PHP 8+, catches ValueError thrown by vsprintf on invalid format strings.
-     * On PHP 7, uses a custom error handler to convert warnings to exceptions.
+     * vsprintf throws ValueError on an invalid format or missing arguments;
+     * it becomes a DatabaseException.
      *
      * @param string $format The printf-style format string.
      * @param array  $args   The arguments to substitute into the format string.
@@ -357,29 +357,13 @@ class EscapeString
      */
     public function safe_vsprintf(string $format, array $args): string
     {
-        if (version_compare(PHP_VERSION, '8.0.0') >= 0) {
-            try {
-                return vsprintf($format, $args);
-            } catch (\ValueError $e) {
-                throw new DatabaseException(
-                    sprintf(
-                        _("Error preparing SQL – could not validate printf format. Message: %s"),
-                        $e->getMessage()
-                    ),
-                    [
-                        'sql' => $format,
-                        'args' => $args,
-                        'typequery' => $this->typeQuery
-                    ]
-                );
-            }
-        }
-
-        set_error_handler(function ($errno, $errstr) use ($format, $args) {
+        try {
+            return vsprintf($format, $args);
+        } catch (\ValueError $e) {
             throw new DatabaseException(
                 sprintf(
-                    _("Error preparing SQL – printf could not be used safely. Message: %s"),
-                    $errstr
+                    _("Error preparing SQL – could not validate printf format. Message: %s"),
+                    $e->getMessage()
                 ),
                 [
                     'sql' => $format,
@@ -387,15 +371,7 @@ class EscapeString
                     'typequery' => $this->typeQuery
                 ]
             );
-        });
-
-        try {
-            $result = vsprintf($format, $args);
-        } finally {
-            restore_error_handler();
         }
-
-        return $result;
     }
 
     // ==================== PUBLIC GETTERS ====================

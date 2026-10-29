@@ -94,6 +94,8 @@ class default_db
 
 You do not have to create the database yourself: if the database in `$name` does not exist, Sandstorm creates it (with `$charset`) the first time it connects. The MySQL user needs permission to create databases. Tables are created by your models through `Scheme`/`Record`.
 
+All `DatabaseConnection` objects (and `Record`, `Session`, ...) in one request share one MySQL connection per pool, so creating many of them is cheap. The connection closes when the request ends; call `->close()` only if you need to close it earlier.
+
 ### Errors
 
 With `HTTP_devmode true` an error shows the full error page: message, source code, stack trace, POST data and loaded classes. With `HTTP_devmode false` visitors get a short page with status 500 and an error id, and warnings, notices and deprecations are logged while the page continues. Every error is written as one line to PHP's error log (with `php server.php`: the terminal), for example `[Sandstorm 34426dd6] TypeError: ... in site/default/Default.class.php:9`. Put your own page in `site/errorpages/500.php` to replace the short page; it gets the variable `$errorId`.

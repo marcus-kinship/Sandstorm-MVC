@@ -332,6 +332,20 @@ class SystemException extends Exception
 			$source === $this ? ($this->data['line'] ?? $this->getLine()) : $source->getLine()
 		));
 
+		// Also log to the ExceptionLog table, but only on a connection the page
+		// already opened: error handling never opens a connection of its own
+		if (class_exists('Sys\DatabaseConnection\Mysql\Driver', false)
+			&& \Sys\DatabaseConnection\Mysql\Driver::hasOpenConnection()) {
+			try {
+				$logger = self::getLogger();
+				if ($logger && $logger->isAvailable()) {
+					$logger->log($this->data);
+				}
+			} catch (\Throwable $logError) {
+				error_log('[Sandstorm ' . $errorId . '] Could not log to the database: ' . $logError->getMessage());
+			}
+		}
+
 		// Remove everything the page had written so far (keep gzip)
 		while (ob_get_level() > 0) {
 			$handlers = ob_list_handlers();

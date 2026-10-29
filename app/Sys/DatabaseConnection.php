@@ -24,9 +24,12 @@ class DatabaseConnection
     public $SkipDeleteError = true;
 
     /**
-     * Destructor that closes the database connection when the object is destroyed.
+     * Close the shared database connection for the whole request.
+     *
+     * Not done automatically: the connection is reused by every
+     * DatabaseConnection in the request and PHP closes it when the request ends.
      */
-    public function __destruct()
+    public function close()
     {
         $this->db->close();
     }

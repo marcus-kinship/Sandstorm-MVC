@@ -14,7 +14,7 @@ Goal: the framework should use as little CPU and memory as possible per request,
 | Error page, devmode off | PHP fatal error with server paths, status 200 | 313 B, about 5 ms, status 500 |
 | Warning or deprecation, devmode off | Page stops | Logged, page continues |
 
-DB logging (`ExceptionLogger`) is not called for now; it comes back in step 2 on the shared connection, so error handling never opens a connection of its own.
+**Step 2 (shared DB connection) is done.** The MySQL `Driver` keeps one connection per server, user, database and charset for the whole request; every `DatabaseConnection` still has its own `Driver` object, so settings such as `getError`, `func` and `type` do not leak between them. `DatabaseConnection` no longer closes the connection in its destructor (`->close()` does it on purpose), and `check()` reuses the open connection. Errors are logged to `ExceptionLog` again, but only when the page already has a connection open. Tested against MySQL: 20 × `new DatabaseConnection()` with a query open one connection instead of 20. `EscapeString::safe_vsprintf()` no longer has the PHP 7 branch.
 
 ## 1. What one request costs today
 

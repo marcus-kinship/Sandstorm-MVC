@@ -354,6 +354,18 @@ class User
     }
 
     /**
+     * Media (images, ...) that belong to something of the user, for example a post.
+     *
+     * @param int         $imageid What the media belongs to
+     * @param string|null $type    Media type (default: the first of the setting "media types")
+     * @return \Dll\User\Media
+     */
+    public static function media(int $imageid, ?string $type = null): \Dll\User\Media
+    {
+        return new \Dll\User\Media($imageid, $type);
+    }
+
+    /**
      * Number of users who are online.
      *
      * @return int

@@ -17,7 +17,7 @@ foreach (['gettext', 'mysqli', 'mbstring', 'curl', 'gd'] as $extension) {
     }
 }
 
-$tests = ['session.php', 'record.php', 'curl.php', 'filesystem.php', 'minifier.php', 'pagination.php', 'resizing.php', 'user.php'];
+$tests = ['session.php', 'record.php', 'curl.php', 'filesystem.php', 'minifier.php', 'pagination.php', 'resizing.php', 'user.php', 'validation.php'];
 if (is_file(dirname(__DIR__) . '/app/config/mysql/test.db.php')) {
     $tests[] = 'database.php';
 } else {

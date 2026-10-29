@@ -1,4 +1,21 @@
-<?
+<?php
+
+/**
+ * Slugs: "Hej på dig!" -> "hej-pao-dig", for URLs.
+ *
+ * <code>
+ * $slug = (string) new Slug('Hej på dig!');                       // hej-pao-dig
+ * $slug = (new Slug($title, ['max_length' => 60]))->getSlug();
+ * $slug = Slug::unique($title, fn($s) => User::find('slug', $s) !== null);   // hej, hej-1, hej-2 ...
+ * \Dll\Validation\Slug::isValid($slug);                            // checking: see Dll\Validation\Slug
+ * </code>
+ *
+ * Options: to_lower (true), max_length, prefix, postfix, char_map (your own
+ * character table), replacements (regex => replacement, run first),
+ * seperator_char ('-').
+ *
+ * @category _("Slug class")
+ */
 class Slug implements ArrayAccess{
 
       protected $original = null;
@@ -94,7 +111,8 @@ class Slug implements ArrayAccess{
   
   public function  generateSlug(){
       // Make sure string is in UTF-8 and strip invalid UTF-8 characters
-      $str = mb_convert_encoding((string) $this->original, 'UTF-8', mb_list_encodings());;
+      // Clean UTF-8 first (cheap when it already is); trying every encoding was slow
+      $str = Encoding::toUTF8((string) $this->original);
    
       if ($this['to_lower']){
       $str = mb_strtolower($str, 'UTF-8');
@@ -117,7 +135,7 @@ class Slug implements ArrayAccess{
       $str = preg_replace('/['.preg_quote($this['seperator_char']).']+/', $this['seperator_char'], $str);
   
       if ($this['max_length']){
-        $str = $this->shortenSlug($str, $this['max_length']-mb_strlen($this['prefix'], 'UTF-8')-mb_strlen($this['postfix'], 'UTF-8'));
+        $str = $this->shortenSlug($str, $this['max_length']-mb_strlen((string) $this['prefix'], 'UTF-8')-mb_strlen((string) $this['postfix'], 'UTF-8'));
       }
   
       // Add prefix & postfix
@@ -141,6 +159,11 @@ class Slug implements ArrayAccess{
 
     // cut to $maxLen
     $cutted_slug = trim(substr($slug, 0, $maxLen), $this['seperator_char']);
+
+    // the cut fell exactly between two words: keep the whole last word
+    if (substr($slug, $maxLen, 1) === $this['seperator_char']) {
+      return $cutted_slug;
+    }
 
     // cut to the last position of '-' in cutted string
     $beautified_slug = trim(preg_replace('/[^'.preg_quote($this['seperator_char']).']*$/', '', $cutted_slug), $this['seperator_char']);
@@ -176,7 +199,7 @@ class Slug implements ArrayAccess{
    * @param string $offset The option name
    * @param string $value The option value
    */
-  public function offsetSet($offset, $value){
+  public function offsetSet($offset, $value): void{
     if (is_null($offset)){
       $this->options[] = $value;
     }else{
@@ -190,7 +213,7 @@ class Slug implements ArrayAccess{
    * @param  string $name The name of option
    * @return Boolean true if the option exists, false otherwise
    */
-  public function offsetExists($offset){
+  public function offsetExists($offset): bool{
     return isset($this->options[$offset]);
   }
 
@@ -199,7 +222,7 @@ class Slug implements ArrayAccess{
    *
    * @param string $offset The option name
    */
-  public function offsetUnset($offset){
+  public function offsetUnset($offset): void{
     $this->options[$offset] = null;
   }
 
@@ -209,7 +232,7 @@ class Slug implements ArrayAccess{
    * @param  string $name The offset of the option to get
    * @return mixed The option if exists, null otherwise
    */
-  public function offsetGet($offset){
+  public function offsetGet($offset): mixed{
     return isset($this->options[$offset]) ? $this->options[$offset] : null;
   }
   
@@ -222,7 +245,33 @@ class Slug implements ArrayAccess{
      * @return  string
      */
   public static  function increment($str, $separator = '-', $first = 1){
-    preg_match('/(.+)'.$separator.'([0-9]+)$/', $str, $match);
+    preg_match('/(.+)' . preg_quote((string) $separator, '/') . '([0-9]+)$/', (string) $str, $match);
     return isset($match[2]) ? $match[1].$separator.($match[2] + 1) : $str.$separator.$first;
+  }
+
+  /**
+   * A slug that is not taken yet: "hej", then "hej-1", "hej-2", ...
+   *
+   * @param string   $text    Text to make the slug from
+   * @param callable $exists  Gets a slug, returns true when it is taken
+   * @param array    $options Slug options
+   * @param int      $tries   Give up after this many (then a random suffix is added)
+   * @return string
+   */
+  public static function unique(string $text, callable $exists, array $options = [], int $tries = 100): string
+  {
+    $separator = $options['seperator_char'] ?? '-';
+    $slug = (new self($text, $options))->getSlug();
+    if ($slug === '') {
+      $slug = 'item';
+    }
+
+    for ($i = 0, $candidate = $slug; $i < $tries; $i++, $candidate = self::increment($candidate, $separator)) {
+      if (!$exists($candidate)) {
+        return $candidate;
+      }
+    }
+
+    return $slug . $separator . bin2hex(random_bytes(3));
   }
 }

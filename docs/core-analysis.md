@@ -63,6 +63,8 @@ Done: `Dll/Comments.php` and `Sys/Session_old.php` removed (after `tests/session
 
 Done for Pagination: `Sys\Record\Pagination` has both halves (links and sorting) and more functions (`render()`, `summary()`, `toArray()`, `window()`, `url()`, ...); `Dll/Pagination.php` gives it the global name `Pagination` (`tests/pagination.php`). Also done: `Dll/User.php` (secure login, password upgrade, `create()`, `changePassword()`), passwords in `Dll/Validation/Password.php` (used by User and the Validation rule `password`), `Dll/Resizing.php` (`fit()`, `cover()`, `pad()`, WebP/AVIF, size limit) — `tests/user.php`, `tests/resizing.php`.
 
+Also done: `Dll/Flatdata.php` and `Dll/Comment.php` removed; `Captcha` is `Dll\Validation\Captcha` (random_int, one use, expires), `Encoding` is split into `Dll\Encoding\Utf8`, `Win1252` and `Dll\Validation\Encoding`, `Slug` has `unique()` and `Dll\Validation\Slug`, `Media` is `Dll\User\Media` (placeholders, files only in the user's own folder); Validation rules `captcha`, `utf8` and `slug` (`tests/validation.php`). The short open tag `<?` is replaced by `<?php` in all 37 files that had it: with `short_open_tag=Off` (the production default) PHP printed their source code instead of running it.
+
 Done for the file system: `Filesystem`, `FileInfo` and `FolderInfo` in `Sys` are the real classes, locked to the project folder; `FilesystemIO`, `FileInfoIO` and `FolderInfoIO` are aliases of them (`tests/filesystem.php`).
 
 | Files | Group |

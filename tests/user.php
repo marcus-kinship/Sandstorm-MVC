@@ -135,6 +135,50 @@ if (!is_file("$root/app/config/mysql/test.db.php") || !extension_loaded('mysqli'
     check('getUserBySlug()', User::getUserBySlug('ada')?->id == 1);
     check('getActiveUser() without login throws', throws(fn() => User::getActiveUser(), SystemException::class));
 
+    echo "\nUser\\Media\n";
+    $admin->query("CREATE TABLE $quotedName.`media` (`id` INT AUTO_INCREMENT PRIMARY KEY, `images` VARCHAR(255), `position` INT, `imageid` INT, `type` VARCHAR(20))");
+
+    // Files in a temporary project folder
+    $sandbox = str_replace('\\', '/', sys_get_temp_dir()) . '/sandstorm-media-' . getmypid();
+    mkdir("$sandbox/upload/user/ada/images", 0777, true);
+    mkdir("$sandbox/upload/user/bo/images", 0777, true);
+    foreach (['a.jpg', 'a-300.jpg', 'b.jpg'] as $f) {
+        file_put_contents("$sandbox/upload/user/ada/images/$f", 'x');
+    }
+    file_put_contents("$sandbox/upload/user/bo/images/c.jpg", 'x');
+    $realRoot = $_SERVER['DOCUMENT_ROOT'];
+    $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', realpath($sandbox));
+
+    $media = User::media(7);
+    check('User::media() gives Dll\User\Media, Media is the older name', $media instanceof Dll\User\Media && new Media(7) instanceof Dll\User\Media);
+    $saved = $media->save([
+        ['adress' => 'upload/user/ada/images/a.jpg', 'position' => 2],
+        ['adress' => "upload/user/ada/images/b.jpg', 1, 1, 'x'); DROP TABLE media; --", 'position' => 1],
+    ]);
+    check('save() adds rows, and SQL in a value stays a value', $saved === 2 && (int) $admin->query("SELECT COUNT(*) FROM $quotedName.`media`")->fetch_row()[0] === 2);
+    $list = $media->get();
+    check('get() in position order', count($list) === 2 && (int) $list[0]->position === 1 && $list[1]->image === 'upload/user/ada/images/a.jpg');
+    Dll\User\Media::position([$list[1]->id => 0]);
+    check('position() changes the order', $media->get()[0]->image === 'upload/user/ada/images/a.jpg');
+    check('an invalid type throws', throws(fn() => new Dll\User\Media(7, 'virus'), InvalidArgumentException::class));
+
+    User::login(['identity' => 'ada', 'password' => 'new sand dune']);
+    $aId = $media->get()[0]->id;
+    check('remove() deletes the row and the files made from it', Dll\User\Media::remove(7, $aId)
+        && !is_file("$sandbox/upload/user/ada/images/a.jpg") && !is_file("$sandbox/upload/user/ada/images/a-300.jpg") && is_file("$sandbox/upload/user/ada/images/b.jpg"));
+    $admin->query("INSERT INTO $quotedName.`media` (`images`, `position`, `imageid`, `type`) VALUES ('upload/user/bo/images/c.jpg', 1, 7, 'image')");
+    $boId = (int) $admin->insert_id;
+    Dll\User\Media::remove(7, $boId);
+    check("remove() never deletes another user's files", is_file("$sandbox/upload/user/bo/images/c.jpg"));
+    User::logout();
+
+    $_SERVER['DOCUMENT_ROOT'] = $realRoot;
+    $items = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sandbox, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($items as $item) {
+        $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+    }
+    rmdir($sandbox);
+
     $admin->query("DROP DATABASE IF EXISTS $quotedName");
     echo "  (test database removed)\n";
 }

@@ -456,4 +456,46 @@ class Validation
 	{
 		return Password::isStrong((string) $value, (int) ($minLength ?: Password::MIN_LENGTH));
 	}
+
+	/**
+	 * Check a captcha code (see Dll\Validation\Captcha::check(); the code is used up).
+	 *
+	 * <code>
+	 * $form->set('captcha')->rule(_('Wrong code'), ['captcha' => '']);
+	 * </code>
+	 *
+	 * @param string $value
+	 * @return bool
+	 */
+	function captcha($value)
+	{
+		return \Dll\Validation\Captcha::check($value);
+	}
+
+	/**
+	 * Check that the value is valid UTF-8 (see Dll\Validation\Encoding).
+	 *
+	 * @param string $value
+	 * @return bool
+	 */
+	function utf8($value)
+	{
+		return \Dll\Validation\Encoding::isUtf8((string) $value);
+	}
+
+	/**
+	 * Check that the value is a valid slug (see Dll\Validation\Slug).
+	 *
+	 * <code>
+	 * $form->set('slug')->rule(_('Only a-z, 0-9 and -'), ['slug' => 100]);   // at most 100 characters
+	 * </code>
+	 *
+	 * @param string $value
+	 * @param int    $maxLength 0 = no limit
+	 * @return bool
+	 */
+	function slug($value, $maxLength = 0)
+	{
+		return \Dll\Validation\Slug::isValid((string) $value, '-', (int) $maxLength);
+	}
 }

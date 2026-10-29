@@ -14,7 +14,7 @@
  * @file Start.php
  * @author Marcus Larsson
  * @copyright (c) 2011, Marcus Larsson
- * @category System Startup Class
+ * @category _(System Startup Class)
  */
 class Start
 {
@@ -182,7 +182,7 @@ class Start
 		if (!$defaultLanguage)
 			return;
 
-		$userLanguage = Session::getLanguage();
+		$userLanguage = Language::getFromSession();
 
 		if ($userLanguage !== false) {
 			$defaultLanguage = $userLanguage;

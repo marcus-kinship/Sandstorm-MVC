@@ -56,6 +56,7 @@ class DatabaseManager
 			$c->driver ??= 'mysql';
 			$c->type ??= 'as:text';
 			$c->charset ??= '';
+			$c->lengthmax ??= 0;
 
 			// Set pool and remember configuration name
 			self::$pool = $c;

@@ -1,17 +1,16 @@
-<?
+<?php
 
 namespace Sys\DatabaseConnection\Mysql;
 
 use Error;
 
 /**
- * Klassen `Driver` hanterar MySQL-databasanslutningar och SQL-frågor.
+ * The `Driver` class handles MySQL database connections and SQL queries.
  * 
  * @category _("MySQL Driver Class")
  */
 class Driver
 {
-
     public $mysqli;
     public $database;
     public $type;
@@ -23,35 +22,36 @@ class Driver
     public $modesingle = null;
     public $debugSQL = array();
     protected $isClose = false;
+    protected $lengthmax; // Default 4 MB
     /**
-     * Om man sätter getError till true och anropa getErrorMessage()
-     * då får man tillbaka felmeddelande när SQL-frågan felar.
+     * If you set getError to true and call getErrorMessage(),
+     * it returns the error message when an SQL query fails.
      */
     public $getError = false;
 
     /**
-     * Konstruktör för Mysql-klassen.
+     * Constructor for the MySQL class.
      *
-     * @param string $hostname - Servernamn eller IP-adress för MySQL-servern.
-     * @param string $username - Användarnamn för MySQL-användaren.
-     * @param string $password - Lösenord för MySQL-användaren.
-     * @param string $database - Databasnamn som ska användas.
-     * @param string $type - Datatyp för resultaten (standard: "").
-     * @param string $charset - teckenuppsättning för resultaten (standard: utf8mb4).
+     * @param string $hostname - Server name or IP address of the MySQL server.
+     * @param string $username - Username for the MySQL user.
+     * @param string $password - Password for the MySQL user.
+     * @param string $database - Database name to use.
+     * @param string $type - Data type for the results (default: "").
+     * @param string $charset - Character set for the results (default: utf8mb4).
+     * @param int $lengthmax - Maximum query length (default: 0 for no limit).
      * 
-     * 
-     * @throws SystemException - Kastas om mysqli-tillägget inte är installerat.
+     * @throws SystemException - Thrown if the mysqli extension is not installed.
      */
-    public function __construct($hostname, $username, $password, $database, $type = "",$charset = "utf8mb4")
+    public function __construct($hostname, $username, $password, $database, $type = "", $charset = "utf8mb4", int $lengthmax = 0)
     {
-
         if (!class_exists('mysqli')) {
-            throw new SystemException(_('Du måste installera mysqli-tillägget'));
+            throw new SystemException(_('You must install the mysqli extension'));
         }
 
         $this->mysqli = new \Mysqli($hostname, $username, $password, $database);
         $this->database = $this->mysqli;
         $this->isClose = false;
+        $this->lengthmax = $lengthmax;
 
         if ($type != "") {
             $this->type = $type;
@@ -60,93 +60,105 @@ class Driver
             $this->type = MYSQLI_BOTH;
         }
 
-         if (!$this->mysqli->set_charset($charset)) {
+        if (!$this->mysqli->set_charset($charset)) {
             throw new \SystemException(
-                sprintf('Fel vid inläsning av teckenuppsättning %s: %s', $charset, $this->mysqli->error),
-                0,
-                __FILE__,
-                __LINE__
-            );
-        }
-        
-        if ($this->mysqli->connect_error) {
-            throw new \SystemException(
-                sprintf('Kunde inte ansluta till MySQL-databasen. Felkod: %s, Fel: %s', $this->mysqli->connect_errno, $this->mysqli->connect_error),
+                sprintf('Error loading character set %s: %s', $charset, $this->mysqli->error),
                 0,
                 __FILE__,
                 __LINE__
             );
         }
 
+        if ($this->mysqli->connect_error) {
+            throw new \SystemException(
+                sprintf('Could not connect to MySQL database. Error code: %s, Error: %s', $this->mysqli->connect_errno, $this->mysqli->connect_error),
+                0,
+                __FILE__,
+                __LINE__
+            );
+        }
     }
 
     /**
-     * Escape:a och förbereda SQL-strängen med placeholders.
+     * Escape and prepare an SQL string with placeholders.
      *
-     * @param mixed $query - En eller flera parametrar som ska skickas till databasen.
-     * @return array - Associativ array med färdig SQL-sträng, debug-info, typer och argument.
+     * @param mixed $query - One or more parameters to send to the database.
+     * @param string $typeQuery - Optional query type for debugging.
+     * @return array - Associative array with prepared SQL string, debug info, types, and arguments.
      * 
-     * @throws SystemException - Kastas om inga frågor skickas in.
+     * @throws SystemException - Thrown if no query is provided.
      */
     function escapeString($query, $typeQuery = "")
     {
         if (empty($query)) {
-            throw new \SystemException(_('Frågan kan inte köras eftersom du har inte skickat med någon SQL-fråga'));
+            throw new \SystemException(_('The query cannot be executed because no SQL query was provided'));
         }
 
-        $string = new \Sys\DatabaseConnection\EscapeString(([
+        $string = new \Sys\DatabaseConnection\EscapeString([
             "db" => $this->database,
             "query" => $query,
             "typeQuery" => $typeQuery
-        ]));
+        ]);
 
         if ($string->valid()) {
             $sql = $string->get();
             $forquery = $string->getForQuery();
         }
-  
-        // Spara för felsökning
+
+        // Save for debugging
+        $rawQuery = is_array($query) ? $query[0] : $query;
         $this->debugSQL[0] = [
-            'sql' => $query[0],
+            'sql' => $rawQuery,
             'forsql' => $forquery,
-            'args' => $string->params,
+            'args' => $string->params ?? [],
             'type' => $typeQuery
         ];
         \DatabaseConnection::$allSQL[] = $this->debugSQL[0];
+
+        if ($this->lengthmax > 0) {
+            $len = strlen($rawQuery);
+            $max = $this->lengthmax;
+
+            if ($len > $max) {
+                throw new \Sys\DatabaseConnection\DatabaseException(
+                    sprintf(_("Query too large (> %d bytes)"), $max),
+                    $this->debugSQL[0]
+                );
+            }
+        }
 
         return $sql;
     }
 
     /**
-     * Kontrollera om anslutningen är framgångsrik.
+     * Check if the connection is successful.
      *
-     * @return bool - Returnera true om anslutningen är framgångsrik, annars false.
+     * @return bool - Returns true if the connection is successful, otherwise false.
      */
     public function check()
     {
-
-        if ($this->mysqli->connect_error === null) {
-            return true;
-        } else {
-            return false;
-        }
+        return $this->mysqli->connect_error === null;
     }
 
     /**
-     * Sätt datatyp för resultaten.
+     * Set the data type for results.
      *
-     * Resultatdatatypen (valfri). Tillgängliga alternativ:
-     *   - 'as:text'   => (associerad array)
-     *   - 'as:number' => (numerisk array)
-     *   - 'as:both'   => (både associerad och numerisk array)
-     *   - 'as:obj'    => (alias, används som objekt om det stöds)
+     * Available options:
+     *   - 'as:text'   => (associative array)
+     *   - 'as:number' => (numeric array)
+     *   - 'as:both'   => (both associative and numeric array)
+     *   - 'as:obj'    => (alias, treated as object if supported)
      * 
-     * @return Select En instans av Select-klassen.
+     * @return Select - Returns an instance of the Select class.
      */
     public function type()
     {
-
-        $validTypes = ['as:text' => MYSQLI_ASSOC, 'as:number' => MYSQLI_NUM, 'as:both' => MYSQLI_BOTH, 'as:obj' => MYSQLI_BOTH];
+        $validTypes = [
+            'as:text' => MYSQLI_ASSOC,
+            'as:number' => MYSQLI_NUM,
+            'as:both' => MYSQLI_BOTH,
+            'as:obj' => MYSQLI_BOTH
+        ];
 
         if (array_key_exists($this->type, $validTypes)) {
             $this->type = $validTypes[$this->type];
@@ -157,30 +169,29 @@ class Driver
     }
 
     /**
-     * Kör en SQL-fråga och returnera det förberedda uttalandet.
+     * Execute an SQL query and return the prepared statement.
      *
-     * @param array $query - Associativ array med SQL-sträng, debug-info, typer och argument.
-     * @param bool $error - Kasta undantag om det finns ett fel (standard: true).
-     * @return mysqli_stmt|bool - Returnera det förberedda uttalandet om det är framgångsrikt, annars false.
+     * @param string $query - SQL string to execute.
+     * @param bool $error - Throw exception on error (default: true).
+     * @return mysqli_stmt|bool - Returns prepared statement on success, otherwise false.
      * 
-     * @throws DatabaseException - Kastas om det finns ett fel vid användning av förberedda SQL-frågor.
+     * @throws DatabaseException - Thrown on error during prepared SQL query execution.
      */
     public function _query(string $query, bool $error = false)
     {
         try {
-        
-            $result = $this->database->query( $query);
-            
+            $result = $this->database->query($query);
+
             if ($error && $this->database->errno) {
                 \DatabaseConnection::smakeDataTypes();
                 $lastKey = array_key_last(\DatabaseConnection::$allSQL);
                 throw new \Sys\DatabaseConnection\DatabaseException(
-                    sprintf(_('Ett Syntaxfel i frågan. Felmeddelande: %s'), $this->mysqli->error),
+                    sprintf(_('Syntax error in query. Error message: %s'), $this->mysqli->error),
                     \DatabaseConnection::$allSQL[$lastKey]
                 );
             }
 
-            // Spara antal påverkade rader
+            // Save affected rows
             $this->affected_rows = $this->database->affected_rows;
 
             return $result;
@@ -189,24 +200,20 @@ class Driver
             \DatabaseConnection::smakeDataTypes();
             $lastKey = array_key_last(\DatabaseConnection::$allSQL);
             throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_("Ett fel uppstod vid körning av SQL-fråga: %s"), $e->getMessage()),
+                sprintf(_("Error executing SQL query: %s"), $e->getMessage()),
                 \DatabaseConnection::$allSQL[$lastKey]
             );
         }
     }
 
     /**
-     * Hämta resultatet från det förberedda uttalandet.
+     * Fetch results from a prepared statement.
      *
-     * 
-     * @param array $query - Associativ array med SQL-sträng, debug-info, typer och argument.
-     * @return array - Array med resultatet från SQL-frågan.
-     * 
-     * 
+     * @param mixed $result - mysqli_result object.
+     * @return array - Array of query results.
      */
     private function fetchMode($result)
     {
-        // Hämta flera rader om inget specifikt läge är satt, annars en enskild rad
         $type = $this->type()->type;
 
         if ($this->modesingle === null) {
@@ -223,15 +230,14 @@ class Driver
     }
 
     /**
-     * Hämta resultaten från SQL-frågan och uppdatera debug-info.
+     * Fetch results from an SQL query and update debug info.
      *
-     * @param array $query - Associativ array med SQL-sträng, debug-info, typer och argument.
-     * @return array - Array med resultatet från SQL-frågan.
-     * @throws SystemException - Vid SQL- eller anslutningsfel.
+     * @param string $query - SQL string to execute.
+     * @return array - Array of query results.
+     * @throws SystemException - On SQL or connection error.
      */
     public function fetchResults($query)
     {
-        // Försök köra frågan med prepared statement eller direkt
         $stmt = $this->_query($query);
 
         if ($stmt === false) {
@@ -243,47 +249,42 @@ class Driver
 
                 $stmt = $this->_query($query, false);
                 if ($stmt === false) {
-                    throw new \SystemException(_('Misslyckades att köra frågan även efter hjälpfunktion.'));
+                    throw new \SystemException(_('Failed to execute query even after helper function.'));
                 }
 
                 $this->getError = false;
-                return $this->fetchResults($query); // kör igen med samma query
+                return $this->fetchResults($query);
             }
 
             $this->getError = false;
-            
+
             \DatabaseConnection::smakeDataTypes();
             $lastKey = array_key_last(\DatabaseConnection::$allSQL);
             throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_('Misslyckades att köra SQL-frågan: %s'), $this->mysqli->error),
-                \DatabaseConnection::$allSQL[$lastKey]
-            );
-           
-        }
-       
-        // Kontrollera SQL-syntaxfel
-        if ($this->mysqli->error) {
-        
-            \DatabaseConnection::smakeDataTypes();
-            $lastKey = array_key_last(\DatabaseConnection::$allSQL);
-            throw new \Sys\DatabaseConnection\DatabaseException(
-                sprintf(_('Misslyckades att köra SQL-frågan: %s'), $this->mysqli->error),
+                sprintf(_('Failed to execute SQL query: %s'), $this->mysqli->error),
                 \DatabaseConnection::$allSQL[$lastKey]
             );
         }
 
-        // Hämta resultat beroende på objektets typ
+        if ($this->mysqli->error) {
+            \DatabaseConnection::smakeDataTypes();
+            $lastKey = array_key_last(\DatabaseConnection::$allSQL);
+            throw new \Sys\DatabaseConnection\DatabaseException(
+                sprintf(_('Failed to execute SQL query: %s'), $this->mysqli->error),
+                \DatabaseConnection::$allSQL[$lastKey]
+            );
+        }
+
         if ($stmt instanceof \mysqli_stmt) {
             $result = $stmt->get_result();
         } elseif ($stmt instanceof \mysqli_result) {
             $result = $stmt;
         } else {
-            throw new \SystemException(_('Oväntad returtyp från databasfrågan.'));
+            throw new \SystemException(_('Unexpected return type from database query.'));
         }
 
         $row = $this->fetchMode($result);
 
-        // Stäng statement om det är ett mysqli_stmt
         if ($stmt instanceof \mysqli_stmt) {
             $stmt->close();
         }
@@ -291,12 +292,11 @@ class Driver
         return $row;
     }
 
-
     /**
-     * Sätta dataset.
+     * Set dataset.
      *
-     * @param array $row - Resultatet från SQL-frågan.
-     * @return DataSet - Ett DataSet-objekt med resultatet från SQL-frågan.
+     * @param array $row - Result from SQL query.
+     * @return DataSet - DataSet object containing query results.
      */
     public function setDataset($row)
     {
@@ -305,14 +305,13 @@ class Driver
     }
 
     /**
-     * Kör en SQL-fråga och hämta resultaten.
+     * Execute an SQL query and fetch results.
      *
-     * @param array $query - Associativ array med SQL-sträng, debug-info, typer och argument.
-     * @return array|DataSet - Array eller DataSet-objekt beroende på datatypen.
+     * @param string $query - SQL query string.
+     * @return array|DataSet - Array or DataSet object depending on data type.
      */
     public function queryAndFetch($query)
     {
-
         $row = $this->fetchResults($query);
 
         if ($this->dataset) {
@@ -322,9 +321,9 @@ class Driver
     }
 
     /**
-     * Hämta felmeddelandet från senaste SQL-frågan.
+     * Get the error message from the last SQL query.
      *
-     * @return string - Felmeddelandet från senaste SQL-frågan.
+     * @return string - Error message from last SQL query.
      */
     function getErrorMessage()
     {
@@ -332,7 +331,7 @@ class Driver
     }
 
     /**
-     * Stäng anslutningen till MySQL-databasen.
+     * Close the connection to the MySQL database.
      */
     public function close()
     {

@@ -1,0 +1,3341 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2024-01-14 23:17+0100\n"
+"PO-Revision-Date: 2024-01-14 23:29+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: nb_NO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-Basepath: ../../../..\n"
+"X-Poedit-SearchPath-0: app\n"
+"X-Poedit-SearchPath-1: site\n"
+"X-Poedit-SearchPathExcluded-0: app/config/mysql\n"
+"X-Poedit-SearchPathExcluded-1: app/locales\n"
+
+#: app/config/config.class.php:38
+#, php-format
+msgid "Kunde inte ladda %s klassen."
+msgstr "Kunne ikke laste %s klasse."
+
+#: app/config/config.class.php:50
+#, php-format
+msgid "Kunde inte ladda system klassen %s."
+msgstr "Kunne ikke laste systemklassen %s."
+
+#: app/config/config.class.php:157
+#, php-format
+msgid "Kunde inte hämta värdet %s"
+msgstr "Kunne ikke hente verdien %s"
+
+#: app/config/config.class.php:175
+#, php-format
+msgid "Kunde inte hitta den här filen %s.ini.php."
+msgstr "Kunne ikke finne filen %s.ini.php."
+
+#: app/config/config.class.php:193
+#, php-format
+msgid "Kunde inte hämta värdet %s."
+msgstr "Kunne ikke hente verdien %s."
+
+#: app/config/settings/admin.ini.php:16 app/dll/Myusers.php:27
+#: site/app/admin/user/edit.php:824 site/app/admin/user/list.php:602
+#: site/app/admin/user/list.php:749 site/app/admin/user/list.php:779
+#: site/app/admin/user/list.php:817 site/app/admin/user/list.php:872
+#: site/app/admin/user/list.php:1026 site/app/admin/user/list.php:1210
+#: site/app/admin/user/list.php:1250 site/app/admin/user/list.php:1512
+#: site/app/admin/user/list.php:1956 site/app/admin/user/list.php:2677
+#: site/app/admin/user/list.php:2969 site/app/admin/user/new.php:816
+#: site/app/archive/index.php:2707 site/app/index.php:1916
+#: site/app/profile/index.php:734 site/app/show/image.php:1997
+msgid "Användare"
+msgstr "Bruker"
+
+#: app/config/settings/admin.ini.php:17
+msgid "Användare med prenumeration"
+msgstr "Brukere med abonnement"
+
+#: app/config/settings/admin.ini.php:18
+msgid "Användare för organisation"
+msgstr "Bruker for organisasjon"
+
+#: app/config/settings/admin.ini.php:19
+msgid "Administratör för organisation"
+msgstr "Administrator for organisasjon"
+
+#: app/config/settings/admin.ini.php:20
+msgid "Arkivanvändare"
+msgstr "Arkivbruker"
+
+#: app/config/settings/admin.ini.php:21
+msgid "Administratör"
+msgstr "Administrator"
+
+#: app/config/settings/admin.ini.php:22
+msgid "Utvecklare av system"
+msgstr "Utvikler av systemer"
+
+#: app/config/settings/default.ini.php:25
+msgid "Svenska"
+msgstr "Svensk"
+
+#: app/config/settings/default.ini.php:26
+msgid "Engelska"
+msgstr "Engelsk"
+
+#: app/config/settings/default.ini.php:27
+msgid "Finska"
+msgstr "Finsk"
+
+#: app/config/settings/default.ini.php:28
+msgid "Norska"
+msgstr "Norsk"
+
+#: app/config/settings/default.ini.php:29
+msgid "Danska"
+msgstr "Dansk"
+
+#: app/config/systemexception/default.php:7
+#: app/config/systemexception/default.php:664
+msgid "SystemException"
+msgstr "SystemUntak"
+
+#: app/config/systemexception/default.php:564
+msgid "Aktivitetshanteraren"
+msgstr "Oppgavebehandleren"
+
+#: app/config/systemexception/default.php:567
+msgid "SystemException Säger"
+msgstr "SystemException sier"
+
+#: app/config/systemexception/default.php:603
+msgid "Stack"
+msgstr "Stable spor"
+
+#: app/config/systemexception/default.php:604
+msgid "Rad"
+msgstr "Rad"
+
+#: app/config/systemexception/default.php:621
+msgid "Klasser som har laddats"
+msgstr "Klasser som er lastet inn"
+
+#: app/config/systemexception/default.php:626
+#: app/config/systemexception/default.php:668
+msgid "Klasser"
+msgstr "Klasser"
+
+#: app/config/systemexception/default.php:627 app/dll/Brevsamlingarmm.php:23
+#: app/dll/Brevsamlingarmm.php:64 app/dll/Brodernalarsson.php:33
+#: app/dll/Brodernalarsson.php:104
+msgid "Typ"
+msgstr "Type"
+
+#: app/config/systemexception/default.php:642
+msgid "Post data"
+msgstr "Be om data"
+
+#: app/config/systemexception/default.php:647
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:90
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:98
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:107
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:118
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:218
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:357
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:364
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:649
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:662
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:781
+#: app/dll/Brevsamlingarmm.php:246 app/dll/Brevsamlingarmm.php:256
+#: app/dll/Brevsamlingarmm.php:260 app/dll/Brodernalarsson.php:62
+#: app/dll/Brodernalarsson.php:90 app/dll/Brodernalarsson.php:256
+#: app/dll/Brodernalarsson.php:290 app/dll/Brodernalarsson.php:295
+#: app/dll/Brodernalarsson.php:399 app/dll/Brodernalarsson.php:409
+#: app/dll/Brodernalarsson.php:413 app/dll/Brodernalarssonmedresenar.php:55
+#: app/dll/Brodernalarssonmedresenar.php:228
+#: app/dll/Brodernalarssonmedresenar.php:232
+#: app/dll/Brodernalarssonmedresenar.php:300
+#: app/dll/Brodernalarssonmedresenar.php:310
+#: app/dll/Brodernalarssonmedresenar.php:316 ⁨app/dll/Fotodatabas 1.php⁩:204
+#: ⁨app/dll/Fotodatabas 1.php⁩:247 app/dll/Fotodatabas.php:201
+#: app/dll/Fotodatabas.php:244 app/dll/Husforhorslangdermm.php:146
+#: app/dll/Husforhorslangdermm.php:236 app/dll/Husforhorslangdermm.php:247
+#: app/dll/Husforhorslangdermm.php:251 app/dll/Inskannadeuppsatasere3.php:232
+#: app/dll/Johnericsson.php:69 app/dll/Johnericsson.php:200
+#: app/dll/Johnericsson.php:217 app/dll/Johnericsson.php:221
+#: app/dll/Johnericsson.php:256 app/dll/Johnericsson.php:270
+#: app/dll/Johnericsson.php:274 app/dll/Myusers.php:469 app/dll/Myusers.php:473
+#: app/dll/Myusers.php:501 app/dll/Myusers.php:510 app/dll/Myusers.php:514
+#: app/dll/Riksforeningensarkiv.php:17 app/dll/Riksforeningensarkiv.php:31
+#: app/dll/Riksforeningensarkiv.php:40 app/dll/Riksforeningensarkiv.php:49
+#: app/dll/Riksforeningensarkiv.php:57 app/dll/Riksforeningensarkiv.php:68
+#: app/dll/Riksforeningensarkiv.php:77 app/dll/Riksforeningensarkiv.php:191
+#: app/dll/Riksforeningensarkiv.php:209 app/dll/Riksforeningensarkiv.php:244
+#: app/dll/Riksforeningensarkiv.php:258 app/dll/Riksforeningensarkiv.php:262
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:186
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:204
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:208
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:246
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:260
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:264
+#: site/app/admin/user/edit.php:1348 site/app/admin/user/new.php:1285
+msgid "Namn"
+msgstr "Navn"
+
+#: app/config/systemexception/default.php:648
+msgid "Data"
+msgstr "Data"
+
+#: app/config/systemexception/default.php:672
+msgid "Post Data"
+msgstr "Legg inn data"
+
+#: app/controller/ApIController.php:62
+msgid " eller "
+msgstr " eller "
+
+#: app/controller/ApIController.php:63
+#, php-format
+msgid ""
+"Du måste ange klassnanmet ...%sapicontroller i din klass och filnamn ..."
+"%sapi.class"
+msgstr ""
+"Du må spesifisere klassenavnet ...%sapicontroller i klassen og filnavnet ..."
+"%sapi.class"
+
+#: app/controller/ApIController.php:280
+msgid "Okänd http status kod, du måste ange annan status kod"
+msgstr "Ukjent http-statuskode, du må angi en annen statuskode"
+
+#: app/controller/IController.php:53 app/controller/IController.php:188
+#: app/sys/SystemException.php:215
+#, php-format
+msgid "Kunde inte ladda den här vyn. %s"
+msgstr "Kunne ikke laste denne visningen. %s"
+
+#: app/controller/IController.php:78 app/sys/SystemException.php:83
+#, php-format
+msgid "Kunde inte ladda vyn eftersom ingen adress har angetts. %s"
+msgstr "Kunne ikke laste visningen fordi ingen adresse er angitt. %s"
+
+#: app/controller/IController.php:96 app/dll/FileInfoIO.php:179
+#: app/sys/FileInfo.php:288 app/sys/Filesystem.php:89
+#, php-format
+msgid "Det gick inte att skapa mappen %s"
+msgstr "Kunne ikke opprette mappen %s"
+
+#: app/controller/IController.php:145 app/sys/SystemException.php:50
+msgid "Ojämnt antal argument. Förväntar mig nyckel-värde-par."
+msgstr "Ujevnt antall argumenter. Forvent nøkkel-verdi-par."
+
+#: app/controller/IController.php:216
+#, php-format
+msgid "Kunde inte hitta widget med det här namnet"
+msgstr "Kunne ikke finne widget med dette navnet"
+
+#: app/dll/Archive.php:351
+#, php-format
+msgid "Fel det gick inte skapa av mappen: %s"
+msgstr "Feil, kunne ikke opprette mappen: %s"
+
+#: app/dll/Archive.php:432 app/dll/Archive.php:484 app/dll/Archive.php:730
+#: app/dll/Archive.php:835 app/dll/Archive.php:979
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:435
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:506
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:847
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:926
+msgid "eller"
+msgstr "eller"
+
+#: app/dll/Archive.php:432 app/dll/Archive.php:484 app/dll/Archive.php:730
+#: app/dll/Archive.php:835 app/dll/Archive.php:974
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:435
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:506
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:847
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:926
+msgid "och"
+msgstr "og"
+
+#: app/dll/Archive.php:464 app/dll/Bevaringenslevnadsbeskrivningar.php:26
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:76
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:113
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:117
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:144
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:162
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:566
+#: app/dll/Brevsamlingarmm.php:19 app/dll/Brevsamlingarmm.php:50
+#: app/dll/Brevsamlingarmm.php:60 app/dll/Brevsamlingarmm.php:109
+#: app/dll/Brodernalarsson.php:19 app/dll/Brodernalarsson.php:48
+#: app/dll/Brodernalarsson.php:85 app/dll/Brodernalarsson.php:89
+#: app/dll/Brodernalarssonmedresenar.php:19
+#: app/dll/Brodernalarssonmedresenar.php:39
+#: app/dll/Brodernalarssonmedresenar.php:54
+#: app/dll/Brodernalarssonmedresenar.php:95
+#: app/dll/Brodernalarssonmedresenar.php:99 ⁨app/dll/Fotodatabas 1.php⁩:15
+#: ⁨app/dll/Fotodatabas 1.php⁩:31 ⁨app/dll/Fotodatabas 1.php⁩:42
+#: ⁨app/dll/Fotodatabas 1.php⁩:53 ⁨app/dll/Fotodatabas 1.php⁩:68
+#: ⁨app/dll/Fotodatabas 1.php⁩:72 ⁨app/dll/Fotodatabas 1.php⁩:83
+#: app/dll/Fotodatabas.php:15 app/dll/Fotodatabas.php:31
+#: app/dll/Fotodatabas.php:42 app/dll/Fotodatabas.php:53
+#: app/dll/Fotodatabas.php:68 app/dll/Fotodatabas.php:72
+#: app/dll/Fotodatabas.php:83 app/dll/Husforhorslangdermm.php:20
+#: app/dll/Husforhorslangdermm.php:37 app/dll/Husforhorslangdermm.php:72
+#: app/dll/Husforhorslangdermm.php:76 app/dll/Inskannadeuppsatasere3.php:20
+#: app/dll/Inskannadeuppsatasere3.php:34 app/dll/Inskannadeuppsatasere3.php:65
+#: app/dll/Inskannadeuppsatasere3.php:69 app/dll/Johnericsson.php:15
+#: app/dll/Johnericsson.php:30 app/dll/Johnericsson.php:40
+#: app/dll/Johnericsson.php:49 app/dll/Johnericsson.php:64
+#: app/dll/Johnericsson.php:68 app/dll/Johnericsson.php:78
+#: app/dll/Myusers.php:31 app/dll/Myusers.php:66 app/dll/Myusers.php:86
+#: app/dll/Myusers.php:132 app/dll/Myusers.php:136
+#: app/dll/Riksforeningensarkiv.php:15 app/dll/Riksforeningensarkiv.php:29
+#: app/dll/Riksforeningensarkiv.php:38 app/dll/Riksforeningensarkiv.php:47
+#: app/dll/Riksforeningensarkiv.php:62 app/dll/Riksforeningensarkiv.php:66
+#: app/dll/Riksforeningensarkiv.php:75
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:19
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:37
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:47
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:56
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:71
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:75
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:85
+#: site/app/archive/index.php:1187
+msgid "Id"
+msgstr "Id"
+
+#: app/dll/Archive.php:1116
+msgid "intervall"
+msgstr "intervall"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:23
+#: site/app/addition/menu.json.php:6
+msgid "Beväringens levnadsbeskrivningar"
+msgstr "Livsbeskrivelser av de vernepliktige"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:27
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:145
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:163 site/app/show/image.php:2855
+msgid "Sidor"
+msgstr "Sider"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:28
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:164
+msgid "Företag"
+msgstr "Virksomhet"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:29
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:79
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:126
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:147
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:165
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:167
+msgid "Nummer i inskrivningslängd"
+msgstr "Antall i påmeldingslengde"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:30
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:80
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:123
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:148
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:166
+msgid "Årsklass"
+msgstr "Årsklasse"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:31
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:127
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:150
+msgid "Nummer för rullföringsområde"
+msgstr "Nummer for rullende område"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:32
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:71
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:78
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:120
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:151
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:169
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:362
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:365
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:596
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:779
+#: app/dll/Brodernalarsson.php:21 app/dll/Brodernalarsson.php:51
+#: app/dll/Brodernalarsson.php:92 app/dll/Brodernalarssonmedresenar.php:21
+#: app/dll/Brodernalarssonmedresenar.php:41
+#: app/dll/Brodernalarssonmedresenar.php:57
+#: app/dll/Brodernalarssonmedresenar.php:71
+#: app/dll/Brodernalarssonmedresenar.php:81
+#: app/dll/Brodernalarssonmedresenar.php:101 app/dll/Johnericsson.php:17
+#: app/dll/Johnericsson.php:32 app/dll/Johnericsson.php:42
+#: app/dll/Johnericsson.php:51 app/dll/Johnericsson.php:71
+#: app/dll/Johnericsson.php:80 app/dll/Myusers.php:34 app/dll/Myusers.php:69
+#: app/dll/Myusers.php:89 app/dll/Myusers.php:111 app/dll/Myusers.php:120
+#: app/dll/Myusers.php:139 site/app/admin/user/edit.php:1064
+#: site/app/admin/user/new.php:1056
+msgid "Efternamn"
+msgstr "Etternavn"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:33
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:71
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:77
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:119
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:152
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:168
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:355
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:358
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:590
+#: app/dll/Brodernalarsson.php:20 app/dll/Brodernalarsson.php:50
+#: app/dll/Brodernalarsson.php:91 app/dll/Brodernalarssonmedresenar.php:20
+#: app/dll/Brodernalarssonmedresenar.php:40
+#: app/dll/Brodernalarssonmedresenar.php:56
+#: app/dll/Brodernalarssonmedresenar.php:70
+#: app/dll/Brodernalarssonmedresenar.php:80
+#: app/dll/Brodernalarssonmedresenar.php:100 app/dll/Johnericsson.php:16
+#: app/dll/Johnericsson.php:31 app/dll/Johnericsson.php:41
+#: app/dll/Johnericsson.php:50 app/dll/Johnericsson.php:59
+#: app/dll/Johnericsson.php:70 app/dll/Johnericsson.php:79
+#: app/dll/Myusers.php:33 app/dll/Myusers.php:68 app/dll/Myusers.php:88
+#: app/dll/Myusers.php:110 app/dll/Myusers.php:119 app/dll/Myusers.php:138
+#: site/app/admin/user/edit.php:1064 site/app/admin/user/new.php:1056
+msgid "Förnamn"
+msgstr "Fornavn"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:34
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:81
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:91
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:94
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:99
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:102
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:121
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:153
+#: app/dll/Brodernalarsson.php:22 app/dll/Brodernalarsson.php:93
+#: app/dll/Brodernalarsson.php:115
+msgid "Brevdatum"
+msgstr "Brevdato"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:35
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:82
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:93
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:101
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:108
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:124
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:154
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:172
+#: site/app/admin/user/edit.php:1076 site/app/admin/user/new.php:1068
+#: site/app/profile/index.php:989
+msgid "Födelsedatum"
+msgstr "Fødselsdato"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:36
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:84
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:92
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:100
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:125
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:155
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:173
+msgid "Födelseplats"
+msgstr "Fødselssted"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:37
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:83
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:128
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:156
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:174
+msgid "Boendeort vid inskrivning"
+msgstr "Bosted ved innmelding"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:38
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:86
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:132
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:157
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:176
+#: app/dll/Brodernalarsson.php:31 app/dll/Brodernalarsson.php:102
+#: app/dll/Brodernalarssonmedresenar.php:30
+#: app/dll/Brodernalarssonmedresenar.php:50
+#: app/dll/Brodernalarssonmedresenar.php:66
+#: app/dll/Brodernalarssonmedresenar.php:110 site/app/show/image.php:2826
+msgid "Kommentarer"
+msgstr "Kommentar"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:39
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:129
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:149
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:170
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:572
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:648
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:661
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:780
+#: app/dll/Brodernalarsson.php:35 app/dll/Brodernalarsson.php:106
+#: app/dll/Brodernalarsson.php:123 app/dll/Brodernalarsson.php:255
+#: app/dll/Brodernalarsson.php:289 app/dll/Brodernalarsson.php:294
+#: app/dll/Brodernalarssonmedresenar.php:227
+#: app/dll/Brodernalarssonmedresenar.php:231 ⁨app/dll/Fotodatabas 1.php⁩:22
+#: ⁨app/dll/Fotodatabas 1.php⁩:38 ⁨app/dll/Fotodatabas 1.php⁩:49
+#: ⁨app/dll/Fotodatabas 1.php⁩:79 ⁨app/dll/Fotodatabas 1.php⁩:90
+#: ⁨app/dll/Fotodatabas 1.php⁩:169 ⁨app/dll/Fotodatabas 1.php⁩:203
+#: ⁨app/dll/Fotodatabas 1.php⁩:217 ⁨app/dll/Fotodatabas 1.php⁩:218
+#: ⁨app/dll/Fotodatabas 1.php⁩:255 app/dll/Fotodatabas.php:22
+#: app/dll/Fotodatabas.php:38 app/dll/Fotodatabas.php:49
+#: app/dll/Fotodatabas.php:79 app/dll/Fotodatabas.php:90
+#: app/dll/Fotodatabas.php:169 app/dll/Fotodatabas.php:200
+#: app/dll/Fotodatabas.php:214 app/dll/Fotodatabas.php:215
+#: app/dll/Fotodatabas.php:252 app/dll/Johnericsson.php:21
+#: app/dll/Johnericsson.php:36 app/dll/Johnericsson.php:85
+#: app/dll/Johnericsson.php:199 app/dll/Johnericsson.php:216
+#: app/dll/Johnericsson.php:220 app/dll/Myusers.php:468 app/dll/Myusers.php:472
+#: app/dll/Riksforeningensarkiv.php:20 app/dll/Riksforeningensarkiv.php:34
+#: app/dll/Riksforeningensarkiv.php:43 app/dll/Riksforeningensarkiv.php:71
+#: app/dll/Riksforeningensarkiv.php:80 app/dll/Riksforeningensarkiv.php:190
+#: app/dll/Riksforeningensarkiv.php:208
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:26
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:185
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:203
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:207
+#: site/app/show/image.php:5 site/app/show/image.php:2819
+msgid "Filnamn"
+msgstr "Filnavn"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:40
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:130
+msgid "Källreferens"
+msgstr "Kildereferanse"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:41
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:171
+msgid "BildNr"
+msgstr "Bilde nr"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:42
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:179
+msgid "Utbildningsnivå"
+msgstr "Utdanningsnivå"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:43
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:180
+msgid "Antal orter som omnämns"
+msgstr "Antall datamaskiner som skal brukes"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:44
+msgid "Beskrivning med fylligare text (minst ett A4)"
+msgstr "Beskrivelse med fyldigere tekst (minst A4)"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:45
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:133
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:181
+msgid "Född utanför Värmland"
+msgstr "Född utanför Värmland"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:46
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:85
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:134
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:182
+msgid "Familj omnämns"
+msgstr "Familie er nevnt"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:47
+msgid "Industri"
+msgstr "Industri"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:48
+msgid "Bransch"
+msgstr "Bransje"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:49
+#: app/dll/Brodernalarsson.php:24 app/dll/Brodernalarsson.php:53
+#: app/dll/Brodernalarsson.php:63 app/dll/Brodernalarsson.php:71
+#: app/dll/Brodernalarsson.php:95 app/dll/Brodernalarsson.php:117
+#: app/dll/Brodernalarssonmedresenar.php:22
+#: app/dll/Brodernalarssonmedresenar.php:42
+#: app/dll/Brodernalarssonmedresenar.php:58
+#: app/dll/Brodernalarssonmedresenar.php:102
+#: app/dll/Riksforeningensarkiv.php:18 app/dll/Riksforeningensarkiv.php:32
+#: app/dll/Riksforeningensarkiv.php:41 app/dll/Riksforeningensarkiv.php:50
+#: app/dll/Riksforeningensarkiv.php:69 app/dll/Riksforeningensarkiv.php:78
+msgid "Yrke"
+msgstr "Yrke"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:50
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:178
+msgid "ÖvrigtYrke"
+msgstr "Annet yrke"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:51
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:140
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:195
+msgid "Ägarens ID"
+msgstr "Eiers ID"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:59
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:136
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:227
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:254
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:421
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:489
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:624
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:666
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:688
+msgid "1 Har jobbat som"
+msgstr "1 Har jobbet som"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:60
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:137
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:258
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:284
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:422
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:490
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:625
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:692
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:714
+msgid "2 Har jobbat som"
+msgstr "2 Har jobbet som"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:61
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:138
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:289
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:313
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:423
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:491
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:626
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:719
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:743
+msgid "3 Har jobbat som"
+msgstr "3 Har jobbet som"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:62
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:139
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:318
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:348
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:424
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:492
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:627
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:748
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:774
+msgid "4 Har jobbat som"
+msgstr "4 Har jobbat som"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:67
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:111
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:219
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:650
+#: app/dll/Brevsamlingarmm.php:46 app/dll/Brevsamlingarmm.php:107
+#: app/dll/Brevsamlingarmm.php:217 app/dll/Brevsamlingarmm.php:247
+#: app/dll/Brodernalarsson.php:44 app/dll/Brodernalarsson.php:83
+#: app/dll/Brodernalarsson.php:257 app/dll/Brodernalarsson.php:400
+#: app/dll/Brodernalarssonmedresenar.php:35
+#: app/dll/Brodernalarssonmedresenar.php:93
+#: app/dll/Brodernalarssonmedresenar.php:217
+#: app/dll/Brodernalarssonmedresenar.php:301 ⁨app/dll/Fotodatabas 1.php⁩:27
+#: ⁨app/dll/Fotodatabas 1.php⁩:66 ⁨app/dll/Fotodatabas 1.php⁩:205
+#: ⁨app/dll/Fotodatabas 1.php⁩:248 app/dll/Fotodatabas.php:27
+#: app/dll/Fotodatabas.php:66 app/dll/Fotodatabas.php:202
+#: app/dll/Fotodatabas.php:245 app/dll/Husforhorslangdermm.php:33
+#: app/dll/Husforhorslangdermm.php:70 app/dll/Husforhorslangdermm.php:203
+#: app/dll/Husforhorslangdermm.php:237 app/dll/Inskannadeuppsatasere3.php:30
+#: app/dll/Inskannadeuppsatasere3.php:62 app/dll/Inskannadeuppsatasere3.php:233
+#: app/dll/Johnericsson.php:26 app/dll/Johnericsson.php:62
+#: app/dll/Johnericsson.php:201 app/dll/Johnericsson.php:257
+#: app/dll/Myusers.php:130 app/dll/Riksforeningensarkiv.php:25
+#: app/dll/Riksforeningensarkiv.php:60 app/dll/Riksforeningensarkiv.php:192
+#: app/dll/Riksforeningensarkiv.php:245
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:33
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:69
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:187
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:247
+msgid "DB"
+msgstr "DB"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:68
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:106
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:217
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:356
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:363
+#: app/dll/Brevsamlingarmm.php:47 app/dll/Brevsamlingarmm.php:103
+#: app/dll/Brevsamlingarmm.php:104 app/dll/Brevsamlingarmm.php:245
+#: app/dll/Brevsamlingarmm.php:255 app/dll/Brevsamlingarmm.php:259
+#: app/dll/Brodernalarsson.php:45 app/dll/Brodernalarsson.php:78
+#: app/dll/Brodernalarsson.php:79 app/dll/Brodernalarsson.php:398
+#: app/dll/Brodernalarsson.php:408 app/dll/Brodernalarsson.php:412
+#: app/dll/Brodernalarssonmedresenar.php:36
+#: app/dll/Brodernalarssonmedresenar.php:89
+#: app/dll/Brodernalarssonmedresenar.php:90
+#: app/dll/Brodernalarssonmedresenar.php:299
+#: app/dll/Brodernalarssonmedresenar.php:309
+#: app/dll/Brodernalarssonmedresenar.php:315 ⁨app/dll/Fotodatabas 1.php⁩:28
+#: ⁨app/dll/Fotodatabas 1.php⁩:61 ⁨app/dll/Fotodatabas 1.php⁩:62
+#: ⁨app/dll/Fotodatabas 1.php⁩:246 ⁨app/dll/Fotodatabas 1.php⁩:256
+#: app/dll/Fotodatabas.php:28 app/dll/Fotodatabas.php:61
+#: app/dll/Fotodatabas.php:62 app/dll/Fotodatabas.php:243
+#: app/dll/Fotodatabas.php:253 app/dll/Husforhorslangdermm.php:34
+#: app/dll/Husforhorslangdermm.php:66 app/dll/Husforhorslangdermm.php:67
+#: app/dll/Husforhorslangdermm.php:235 app/dll/Husforhorslangdermm.php:246
+#: app/dll/Husforhorslangdermm.php:250 app/dll/Inskannadeuppsatasere3.php:31
+#: app/dll/Inskannadeuppsatasere3.php:58 app/dll/Inskannadeuppsatasere3.php:59
+#: app/dll/Inskannadeuppsatasere3.php:231 app/dll/Johnericsson.php:27
+#: app/dll/Johnericsson.php:57 app/dll/Johnericsson.php:58
+#: app/dll/Johnericsson.php:255 app/dll/Johnericsson.php:269
+#: app/dll/Johnericsson.php:273 app/dll/Myusers.php:63 app/dll/Myusers.php:126
+#: app/dll/Myusers.php:127 app/dll/Myusers.php:500 app/dll/Myusers.php:509
+#: app/dll/Myusers.php:513 app/dll/Riksforeningensarkiv.php:26
+#: app/dll/Riksforeningensarkiv.php:55 app/dll/Riksforeningensarkiv.php:56
+#: app/dll/Riksforeningensarkiv.php:243 app/dll/Riksforeningensarkiv.php:257
+#: app/dll/Riksforeningensarkiv.php:261
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:34
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:64
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:65
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:245
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:259
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:263
+msgid "filnamn"
+msgstr "filnavn"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:110
+#: app/dll/Brevsamlingarmm.php:106 app/dll/Brodernalarsson.php:82
+#: app/dll/Brodernalarssonmedresenar.php:92 ⁨app/dll/Fotodatabas 1.php⁩:65
+#: app/dll/Fotodatabas.php:65 app/dll/Husforhorslangdermm.php:69
+#: app/dll/Inskannadeuppsatasere3.php:61 app/dll/Johnericsson.php:61
+#: app/dll/Myusers.php:129 app/dll/Riksforeningensarkiv.php:59
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:68
+msgid ""
+"Visa mer information genom om du klickar på den.\\n Om du dubbelklickar för "
+"öppna filen"
+msgstr ""
+"Vis mer informasjon gjennom hvis du klikker på den.\\nHvis du dobbeltklikker "
+"da åpner filen"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:112
+#: app/dll/Brevsamlingarmm.php:108 app/dll/Brodernalarsson.php:84
+#: app/dll/Brodernalarssonmedresenar.php:94 ⁨app/dll/Fotodatabas 1.php⁩:67
+#: app/dll/Fotodatabas.php:67 app/dll/Husforhorslangdermm.php:71
+#: app/dll/Inskannadeuppsatasere3.php:63 app/dll/Inskannadeuppsatasere3.php:255
+#: app/dll/Johnericsson.php:63 app/dll/Myusers.php:131
+#: app/dll/Riksforeningensarkiv.php:61
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:70
+msgid "Nummer"
+msgstr "Antall"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:122
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:146
+msgid "Kompani"
+msgstr "Selskap"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:131
+msgid "Bildnummer"
+msgstr "Bildenummer"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:135
+#: app/dll/Brodernalarsson.php:34 app/dll/Brodernalarsson.php:105
+msgid "Antal sidor"
+msgstr "Antall økter"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:175
+msgid "Källhänvisning"
+msgstr "Kildereferanse"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:177
+msgid "UtförligBeskrivning"
+msgstr "Detaljertbeskrivelse"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:183
+msgid "Industri1"
+msgstr "Industri1"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:184
+msgid "Bransch1"
+msgstr "Bransje1"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:185
+msgid "Yrke1"
+msgstr "Yrke1"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:186
+msgid "Industri2"
+msgstr "Industri2"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:187
+msgid "Bransch2"
+msgstr "Bransje2"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:188
+msgid "Yrke2"
+msgstr "Yrke2"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:189
+msgid "Industri3"
+msgstr "Industri3"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:190
+msgid "Bransch3"
+msgstr "Bransje3"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:191
+msgid "Yrke3"
+msgstr "Yrke3"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:192
+msgid "Industri4"
+msgstr "Industri4"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:193
+msgid "Bransch4"
+msgstr "Bransje4"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:194
+msgid "Yrke4"
+msgstr "Yrke4"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:421
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:422
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:423
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:424
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:489
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:490
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:491
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:492
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:624
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:625
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:626
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:627
+msgid "Industri:"
+msgstr "Industri:"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:421
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:422
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:423
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:424
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:489
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:490
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:491
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:492
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:624
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:625
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:626
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:627
+msgid "Bransch:"
+msgstr "Bransje:"
+
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:421
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:422
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:423
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:424
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:489
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:490
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:491
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:492
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:624
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:625
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:626
+#: app/dll/Bevaringenslevnadsbeskrivningar.php:627
+msgid "Yrke:"
+msgstr "Yrke:"
+
+#: app/dll/Brevsamlingarmm.php:16 site/app/addition/menu.json.php:2
+msgid "Brevsamlingar m.m."
+msgstr "Samlinger av brev mv."
+
+#: app/dll/Brevsamlingarmm.php:20 app/dll/Brevsamlingarmm.php:61
+#: app/dll/Inskannadeuppsatasere3.php:39 app/dll/Inskannadeuppsatasere3.php:74
+msgid "Sökväg"
+msgstr "Sti"
+
+#: app/dll/Brevsamlingarmm.php:21 app/dll/Brevsamlingarmm.php:51
+#: app/dll/Brevsamlingarmm.php:62 app/dll/Brevsamlingarmm.php:86
+#: app/dll/Brevsamlingarmm.php:95 app/dll/Brevsamlingarmm.php:113
+msgid "Arkivbildare"
+msgstr "Arkivbruker"
+
+#: app/dll/Brevsamlingarmm.php:22 app/dll/Brevsamlingarmm.php:63
+#: app/dll/Brevsamlingarmm.php:114
+msgid "Arkivbildarnr"
+msgstr "Filbilde nr"
+
+#: app/dll/Brevsamlingarmm.php:24 app/dll/Brevsamlingarmm.php:52
+#: app/dll/Brevsamlingarmm.php:65 app/dll/Brevsamlingarmm.php:87
+#: app/dll/Brevsamlingarmm.php:96 app/dll/Brevsamlingarmm.php:115
+msgid "Emigrantnamn"
+msgstr "Emigrantnavn"
+
+#: app/dll/Brevsamlingarmm.php:25 app/dll/Brevsamlingarmm.php:53
+#: app/dll/Brevsamlingarmm.php:66 app/dll/Brevsamlingarmm.php:88
+#: app/dll/Brevsamlingarmm.php:116
+msgid "Emigrant reg nr"
+msgstr "Emigrant reg.nr"
+
+#: app/dll/Brevsamlingarmm.php:26 app/dll/Brevsamlingarmm.php:67
+msgid "Emigrant f datum"
+msgstr "Emigrant f date"
+
+#: app/dll/Brevsamlingarmm.php:27 app/dll/Brevsamlingarmm.php:68
+msgid "Emigrant f församling"
+msgstr "Emigrant f sogn"
+
+#: app/dll/Brevsamlingarmm.php:28 app/dll/Brevsamlingarmm.php:69
+#: app/dll/Brevsamlingarmm.php:89 app/dll/Brevsamlingarmm.php:97
+#: app/dll/Brevsamlingarmm.php:105 app/dll/Brevsamlingarmm.php:117
+#: app/dll/Myusers.php:128
+msgid "Emigrations datum"
+msgstr "Dato for emigrasjon"
+
+#: app/dll/Brevsamlingarmm.php:29 app/dll/Brevsamlingarmm.php:55
+#: app/dll/Brevsamlingarmm.php:70 app/dll/Brevsamlingarmm.php:90
+#: app/dll/Brevsamlingarmm.php:98 app/dll/Brevsamlingarmm.php:118
+msgid "Emigrations församling"
+msgstr "Emigrasjonsmenighet"
+
+#: app/dll/Brevsamlingarmm.php:30 app/dll/Brevsamlingarmm.php:54
+#: app/dll/Brevsamlingarmm.php:71 app/dll/Brevsamlingarmm.php:119
+msgid "Personer"
+msgstr "Mennesker"
+
+#: app/dll/Brevsamlingarmm.php:31 app/dll/Brevsamlingarmm.php:56
+#: app/dll/Brevsamlingarmm.php:72 app/dll/Brevsamlingarmm.php:91
+#: app/dll/Brevsamlingarmm.php:99 app/dll/Brevsamlingarmm.php:120
+msgid "Brev avs"
+msgstr "Brev av"
+
+#: app/dll/Brevsamlingarmm.php:32 app/dll/Brevsamlingarmm.php:73
+#: app/dll/Brevsamlingarmm.php:121
+msgid "Brev mott"
+msgstr "Brev mottatt"
+
+#: app/dll/Brevsamlingarmm.php:33 app/dll/Brevsamlingarmm.php:74
+#: app/dll/Brevsamlingarmm.php:122
+msgid "Släktutred person 1"
+msgstr "Slektsperson 1"
+
+#: app/dll/Brevsamlingarmm.php:34 app/dll/Brevsamlingarmm.php:75
+msgid "Släktutred person 2"
+msgstr "Slektsperson 2"
+
+#: app/dll/Brevsamlingarmm.php:35 app/dll/Brevsamlingarmm.php:76
+msgid "Händelser"
+msgstr "Arrangementer"
+
+#: app/dll/Brevsamlingarmm.php:36 app/dll/Brevsamlingarmm.php:77
+#: app/dll/Brevsamlingarmm.php:123
+msgid "Platser"
+msgstr "Plass"
+
+#: app/dll/Brevsamlingarmm.php:37 app/dll/Brevsamlingarmm.php:78
+msgid "Adresser förfrågan mm"
+msgstr "Adresser, henvendelser osv"
+
+#: app/dll/Brevsamlingarmm.php:38 app/dll/Brevsamlingarmm.php:79
+msgid "CD"
+msgstr "CD"
+
+#: app/dll/Brevsamlingarmm.php:39 app/dll/Brevsamlingarmm.php:80
+msgid "Övrigt 1"
+msgstr "Diverse 1"
+
+#: app/dll/Brevsamlingarmm.php:40 app/dll/Brevsamlingarmm.php:81
+msgid "Övrigt 2"
+msgstr "Diverse 2"
+
+#: app/dll/Brevsamlingarmm.php:41 app/dll/Brevsamlingarmm.php:82
+msgid "Övrigt 3"
+msgstr "Diverse 3"
+
+#: app/dll/Brevsamlingarmm.php:124 app/dll/Husforhorslangdermm.php:96
+msgid "path"
+msgstr "path"
+
+#: app/dll/Brodernalarsson.php:16 site/app/addition/menu.json.php:4
+msgid "Bröderna Larsson"
+msgstr "Larsson-brødrene"
+
+#: app/dll/Brodernalarsson.php:23 app/dll/Brodernalarsson.php:49
+#: app/dll/Brodernalarsson.php:70 app/dll/Brodernalarsson.php:94
+#: app/dll/Brodernalarsson.php:116 app/dll/Brodernalarsson.php:232
+#: app/dll/Brodernalarsson.php:235 app/dll/Brodernalarsson.php:333
+#: app/dll/Brodernalarsson.php:336 app/dll/Brodernalarsson.php:339
+#: app/dll/Brodernalarssonmedresenar.php:23
+#: app/dll/Brodernalarssonmedresenar.php:43
+#: app/dll/Brodernalarssonmedresenar.php:59
+#: app/dll/Brodernalarssonmedresenar.php:103
+#: app/dll/Brodernalarssonmedresenar.php:194
+#: app/dll/Brodernalarssonmedresenar.php:197
+#: app/dll/Brodernalarssonmedresenar.php:250
+#: app/dll/Brodernalarssonmedresenar.php:253
+#: app/dll/Brodernalarssonmedresenar.php:256 app/dll/Myusers.php:42
+#: app/dll/Myusers.php:73 app/dll/Myusers.php:93 app/dll/Myusers.php:143
+#: app/dll/Myusers.php:432 app/dll/Myusers.php:435 app/dll/Myusers.php:478
+#: app/dll/Myusers.php:481 app/dll/Myusers.php:484
+msgid "Kön"
+msgstr "Kjønn"
+
+#: app/dll/Brodernalarsson.php:25 app/dll/Brodernalarsson.php:54
+#: app/dll/Brodernalarsson.php:64 app/dll/Brodernalarsson.php:72
+#: app/dll/Brodernalarsson.php:96 app/dll/Brodernalarsson.php:118
+#: app/dll/Brodernalarssonmedresenar.php:47
+#: app/dll/Brodernalarssonmedresenar.php:63
+#: app/dll/Brodernalarssonmedresenar.php:75
+#: app/dll/Brodernalarssonmedresenar.php:85
+msgid "HemPlats"
+msgstr "Hjemmested"
+
+#: app/dll/Brodernalarsson.php:26 app/dll/Brodernalarsson.php:55
+#: app/dll/Brodernalarsson.php:65 app/dll/Brodernalarsson.php:73
+#: app/dll/Brodernalarsson.php:97 app/dll/Brodernalarsson.php:119
+#: app/dll/Brodernalarssonmedresenar.php:25
+#: app/dll/Brodernalarssonmedresenar.php:44
+#: app/dll/Brodernalarssonmedresenar.php:60
+#: app/dll/Brodernalarssonmedresenar.php:72
+#: app/dll/Brodernalarssonmedresenar.php:82
+#: app/dll/Brodernalarssonmedresenar.php:91
+#: app/dll/Brodernalarssonmedresenar.php:105 app/dll/Johnericsson.php:81
+msgid "Hemförsamling"
+msgstr "Hjemmenighet"
+
+#: app/dll/Brodernalarsson.php:27 app/dll/Brodernalarsson.php:56
+#: app/dll/Brodernalarsson.php:66 app/dll/Brodernalarsson.php:74
+#: app/dll/Brodernalarsson.php:98 app/dll/Brodernalarsson.php:120
+#: app/dll/Brodernalarssonmedresenar.php:46
+#: app/dll/Brodernalarssonmedresenar.php:62
+#: app/dll/Brodernalarssonmedresenar.php:74
+#: app/dll/Brodernalarssonmedresenar.php:84 app/dll/Husforhorslangdermm.php:21
+#: app/dll/Husforhorslangdermm.php:38 app/dll/Husforhorslangdermm.php:48
+#: app/dll/Husforhorslangdermm.php:57 app/dll/Husforhorslangdermm.php:77
+#: app/dll/Husforhorslangdermm.php:87
+msgid "Län"
+msgstr "Fylke"
+
+#: app/dll/Brodernalarsson.php:28 app/dll/Brodernalarsson.php:99
+#: app/dll/Brodernalarsson.php:121 app/dll/Brodernalarssonmedresenar.php:27
+#: app/dll/Brodernalarssonmedresenar.php:107
+msgid "Hemland"
+msgstr "Hjemland"
+
+#: app/dll/Brodernalarsson.php:29 app/dll/Brodernalarsson.php:100
+#: app/dll/Brodernalarsson.php:122
+msgid "Geografisk omfattning"
+msgstr "Geografisk omfang"
+
+#: app/dll/Brodernalarsson.php:30 app/dll/Brodernalarsson.php:101
+msgid "Språk"
+msgstr "Språk"
+
+#: app/dll/Brodernalarsson.php:32 app/dll/Brodernalarsson.php:103
+msgid "Nyckelord"
+msgstr "Nøkkelord"
+
+#: app/dll/Brodernalarsson.php:36 app/dll/Brodernalarsson.php:107
+msgid "Arkivnamn"
+msgstr "Arkivnavn"
+
+#: app/dll/Brodernalarsson.php:37 app/dll/Brodernalarsson.php:108
+msgid "Skapad av"
+msgstr "Laget av"
+
+#: app/dll/Brodernalarsson.php:38 app/dll/Brodernalarsson.php:109
+msgid "Arkivreferens"
+msgstr "Arkivreferanse"
+
+#: app/dll/Brodernalarsson.php:39 app/dll/Brodernalarsson.php:110
+msgid "Källkod"
+msgstr "Kildekode"
+
+#: app/dll/Brodernalarsson.php:52 app/dll/Brodernalarsson.php:111
+#: app/dll/Brodernalarsson.php:347 app/dll/Brodernalarsson.php:418
+msgid "Medresenär"
+msgstr "Medreisende"
+
+#: app/dll/Brodernalarsson.php:61 app/dll/Brodernalarsson.php:80
+#: app/dll/Brodernalarsson.php:428 app/dll/Brodernalarsson.php:431
+#: app/dll/Brodernalarsson.php:434 app/dll/Brodernalarssonmedresenar.php:333
+#: app/dll/Brodernalarssonmedresenar.php:336
+#: app/dll/Brodernalarssonmedresenar.php:339
+msgid "Kön ikon"
+msgstr "Kjønnsikon"
+
+#: app/dll/Brodernalarsson.php:232 app/dll/Brodernalarsson.php:333
+#: app/dll/Brodernalarsson.php:428 app/dll/Brodernalarsson.php:429
+#: app/dll/Brodernalarssonmedresenar.php:194
+#: app/dll/Brodernalarssonmedresenar.php:250
+#: app/dll/Brodernalarssonmedresenar.php:333
+#: app/dll/Brodernalarssonmedresenar.php:334 app/dll/Myusers.php:432
+#: app/dll/Myusers.php:478
+msgid "Man"
+msgstr "Mann"
+
+#: app/dll/Brodernalarsson.php:235 app/dll/Brodernalarsson.php:336
+#: app/dll/Brodernalarsson.php:431 app/dll/Brodernalarsson.php:432
+#: app/dll/Brodernalarssonmedresenar.php:197
+#: app/dll/Brodernalarssonmedresenar.php:253
+#: app/dll/Brodernalarssonmedresenar.php:336
+#: app/dll/Brodernalarssonmedresenar.php:337 app/dll/Myusers.php:435
+#: app/dll/Myusers.php:481
+msgid "Kvinna"
+msgstr "Kvinne"
+
+#: app/dll/Brodernalarsson.php:429 app/dll/Brodernalarsson.php:432
+#: app/dll/Brodernalarsson.php:435 app/dll/Brodernalarssonmedresenar.php:334
+#: app/dll/Brodernalarssonmedresenar.php:337
+#: app/dll/Brodernalarssonmedresenar.php:340
+msgid "Kön "
+msgstr "Kjønn "
+
+#: app/dll/Brodernalarssonmedresenar.php:16 site/app/addition/menu.json.php:8
+msgid "Bröderna Larssons  medresenär"
+msgstr "Brødrene Larssons medreisende"
+
+#: app/dll/Brodernalarssonmedresenar.php:24
+#: app/dll/Brodernalarssonmedresenar.php:45
+#: app/dll/Brodernalarssonmedresenar.php:61
+#: app/dll/Brodernalarssonmedresenar.php:73
+#: app/dll/Brodernalarssonmedresenar.php:83
+#: app/dll/Brodernalarssonmedresenar.php:104
+msgid "Hemort"
+msgstr "Bosted"
+
+#: app/dll/Brodernalarssonmedresenar.php:26
+#: app/dll/Brodernalarssonmedresenar.php:106
+msgid "Hemlän"
+msgstr "Hjemfylke"
+
+#: app/dll/Brodernalarssonmedresenar.php:28
+#: app/dll/Brodernalarssonmedresenar.php:48
+#: app/dll/Brodernalarssonmedresenar.php:64
+#: app/dll/Brodernalarssonmedresenar.php:76
+#: app/dll/Brodernalarssonmedresenar.php:108
+msgid "Relation till brevskrivare"
+msgstr "Forhold til brevskrivere"
+
+#: app/dll/Brodernalarssonmedresenar.php:29
+#: app/dll/Brodernalarssonmedresenar.php:49
+#: app/dll/Brodernalarssonmedresenar.php:65
+#: app/dll/Brodernalarssonmedresenar.php:109
+#: app/dll/Brodernalarssonmedresenar.php:242
+#: app/dll/Brodernalarssonmedresenar.php:327
+msgid "Brev-ID"
+msgstr "Brev-ID"
+
+#: app/dll/Comment.php:90
+msgid "Ingen tagetid"
+msgstr "Nei tagetid"
+
+#: app/dll/Comment.php:94
+msgid "Ingen makeid som tillhör tagetid"
+msgstr "Ingen makeid som tilhører tagetid"
+
+#: app/dll/Comment.php:98
+msgid "Ingen userid"
+msgstr "Ingen bruker-ID"
+
+#: app/dll/Comment.php:102
+msgid "Ingen posts data"
+msgstr "Ingen postdata"
+
+#: app/dll/FileInfoIO.php:25 app/dll/FolderInfoIO.php:22
+#: app/sys/FileInfo.php:51 app/sys/FolderInfo.php:22
+msgid "Du måste ange en adress."
+msgstr "Du må oppgi en adresse."
+
+#: app/dll/FileInfoIO.php:33 app/sys/FileInfo.php:59
+#, php-format
+msgid "Det är inte någon fil. %s"
+msgstr "Det er ikke en fil. %s"
+
+#: app/dll/FileInfoIO.php:64 app/dll/FolderInfoIO.php:59
+#: app/sys/FileInfo.php:108 app/sys/FolderInfo.php:59
+#, php-format
+msgid "Det gick inte sätt behörigheterna som du angett du %s"
+msgstr "Kunne ikke angi tillatelsene du spesifiserte til %s"
+
+#: app/dll/FileInfoIO.php:67 app/dll/FolderInfoIO.php:62
+#: app/sys/FileInfo.php:111 app/sys/FolderInfo.php:62
+#, php-format
+msgid "Du ange fel,Du måste ange fyra nummer. %s"
+msgstr "Du skriver feil, du må skrive inn fire tall. %s"
+
+#: app/dll/FileInfoIO.php:74 app/sys/FileInfo.php:123
+msgid "Det gick inte ta bort filen."
+msgstr "Kunne ikke slette filen."
+
+#: app/dll/FileInfoIO.php:121 app/dll/FileInfoIO.php:191
+#: app/sys/FileInfo.php:209 app/sys/FileInfo.php:307
+#, php-format
+msgid "Det gick inte att läsa filen %s"
+msgstr "Kunne ikke lese filen %s"
+
+#: app/dll/FileInfoIO.php:141 app/sys/FileInfo.php:236
+msgid "Det gick inte ta kopiera filen."
+msgstr "Kunne ikke kopiere filen."
+
+#: app/dll/FileInfoIO.php:195 app/sys/FileInfo.php:311
+msgid "Det gick inte att skriva till disken"
+msgstr "Kunne ikke skrive til harddisken"
+
+#: app/dll/Flatdata.php:281 app/dll/Searchf.php:259
+msgid ""
+"Du måste göra en sökning genom att du anropar search funktionen innan du kan "
+"få totala värdet av sökning"
+msgstr ""
+"Du må utføre et søk ved å ringe søkefunksjonen før du kan få den totale "
+"verdien av søket"
+
+#: app/dll/Flatdata.php:609
+msgid ""
+"Du måste skicka in en array med nycklar som id och data som nummer på "
+"status, Du har anget en tom array"
+msgstr ""
+"Du må sende inn en matrise med nøkler som id og data som nummer på status, "
+"Du har lagt inn en tom matrise"
+
+#: app/dll/FolderInfoIO.php:30 app/sys/FolderInfo.php:30
+#, php-format
+msgid "Det är inte någon mapp. %s"
+msgstr "Det er ikke en mappe. %s"
+
+#: app/dll/FolderInfoIO.php:69 app/sys/FolderInfo.php:69
+msgid "Det gick inte ta bort mapp filen."
+msgstr "Kunne ikke opprette mappe."
+
+#: app/dll/FolderInfoIO.php:208 app/sys/FolderInfo.php:192
+msgid "Det gick inte skapa mapp."
+msgstr "Kunne ikke opprette mappe."
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:12 app/dll/Fotodatabas.php:12
+#: site/app/addition/menu.json.php:11
+msgid "Fotodatabas"
+msgstr "Fotodatabase"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:16 ⁨app/dll/Fotodatabas 1.php⁩:32
+#: ⁨app/dll/Fotodatabas 1.php⁩:43 ⁨app/dll/Fotodatabas 1.php⁩:54
+#: ⁨app/dll/Fotodatabas 1.php⁩:73 ⁨app/dll/Fotodatabas 1.php⁩:84
+#: app/dll/Fotodatabas.php:16 app/dll/Fotodatabas.php:32
+#: app/dll/Fotodatabas.php:43 app/dll/Fotodatabas.php:54
+#: app/dll/Fotodatabas.php:73 app/dll/Fotodatabas.php:84
+msgid "Filmnr"
+msgstr "Filmnr"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:17 ⁨app/dll/Fotodatabas 1.php⁩:33
+#: ⁨app/dll/Fotodatabas 1.php⁩:44 ⁨app/dll/Fotodatabas 1.php⁩:55
+#: ⁨app/dll/Fotodatabas 1.php⁩:74 ⁨app/dll/Fotodatabas 1.php⁩:85
+#: app/dll/Fotodatabas.php:17 app/dll/Fotodatabas.php:33
+#: app/dll/Fotodatabas.php:44 app/dll/Fotodatabas.php:55
+#: app/dll/Fotodatabas.php:74 app/dll/Fotodatabas.php:85
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:21
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:39
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:49
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:58
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:77
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:87
+msgid "Negativ"
+msgstr "Negativ"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:18 ⁨app/dll/Fotodatabas 1.php⁩:34
+#: ⁨app/dll/Fotodatabas 1.php⁩:45 ⁨app/dll/Fotodatabas 1.php⁩:75
+#: ⁨app/dll/Fotodatabas 1.php⁩:86 app/dll/Fotodatabas.php:18
+#: app/dll/Fotodatabas.php:34 app/dll/Fotodatabas.php:45
+#: app/dll/Fotodatabas.php:75 app/dll/Fotodatabas.php:86
+#: app/dll/Johnericsson.php:19 app/dll/Johnericsson.php:34
+#: app/dll/Johnericsson.php:44 app/dll/Johnericsson.php:53
+#: app/dll/Johnericsson.php:73 app/dll/Johnericsson.php:83
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:22
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:41
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:51
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:60
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:79
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:89
+#: site/app/admin/user/edit.php:1459 site/app/admin/user/list.php:3136
+#: site/app/admin/user/new.php:1380 site/app/archive/index.php:3311
+#: site/app/index.php:252 site/app/index.php:2129
+#: site/app/profile/index.php:1263 site/app/show/image.php:2813
+msgid "Beskrivning"
+msgstr "Beskrivelse"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:19 ⁨app/dll/Fotodatabas 1.php⁩:35
+#: ⁨app/dll/Fotodatabas 1.php⁩:46 ⁨app/dll/Fotodatabas 1.php⁩:56
+#: ⁨app/dll/Fotodatabas 1.php⁩:76 ⁨app/dll/Fotodatabas 1.php⁩:87
+#: app/dll/Fotodatabas.php:19 app/dll/Fotodatabas.php:35
+#: app/dll/Fotodatabas.php:46 app/dll/Fotodatabas.php:56
+#: app/dll/Fotodatabas.php:76 app/dll/Fotodatabas.php:87
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:23
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:40
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:50
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:59
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:78
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:88
+msgid "Tidsperiod"
+msgstr "Periode"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:20 ⁨app/dll/Fotodatabas 1.php⁩:36
+#: ⁨app/dll/Fotodatabas 1.php⁩:47 ⁨app/dll/Fotodatabas 1.php⁩:57
+#: ⁨app/dll/Fotodatabas 1.php⁩:77 ⁨app/dll/Fotodatabas 1.php⁩:88
+#: app/dll/Fotodatabas.php:20 app/dll/Fotodatabas.php:36
+#: app/dll/Fotodatabas.php:47 app/dll/Fotodatabas.php:57
+#: app/dll/Fotodatabas.php:77 app/dll/Fotodatabas.php:88 app/dll/Myusers.php:52
+#: app/dll/Myusers.php:80 app/dll/Myusers.php:100 app/dll/Myusers.php:145
+#: app/dll/Riksforeningensarkiv.php:19 app/dll/Riksforeningensarkiv.php:33
+#: app/dll/Riksforeningensarkiv.php:42 app/dll/Riksforeningensarkiv.php:51
+#: app/dll/Riksforeningensarkiv.php:70 app/dll/Riksforeningensarkiv.php:79
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:24
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:42
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:80
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:90
+#: site/app/admin/user/edit.php:1296 site/app/admin/user/new.php:1237
+#: site/app/profile/index.php:1155
+msgid "Land"
+msgstr "Land"
+
+#: ⁨app/dll/Fotodatabas 1.php⁩:21 ⁨app/dll/Fotodatabas 1.php⁩:37
+#: ⁨app/dll/Fotodatabas 1.php⁩:48 ⁨app/dll/Fotodatabas 1.php⁩:63
+#: ⁨app/dll/Fotodatabas 1.php⁩:78 ⁨app/dll/Fotodatabas 1.php⁩:89
+#: app/dll/Fotodatabas.php:21 app/dll/Fotodatabas.php:37
+#: app/dll/Fotodatabas.php:48 app/dll/Fotodatabas.php:63
+#: app/dll/Fotodatabas.php:78 app/dll/Fotodatabas.php:89
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:25
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:43
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:52
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:81
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:91
+msgid "Originalet ägs av"
+msgstr "Originalen eies av"
+
+#: app/dll/Husforhorslangdermm.php:17 site/app/addition/menu.json.php:3
+msgid "Husförhörslängder m.m."
+msgstr "Husavhørslengder mv."
+
+#: app/dll/Husforhorslangdermm.php:22 app/dll/Husforhorslangdermm.php:39
+#: app/dll/Husforhorslangdermm.php:49 app/dll/Husforhorslangdermm.php:58
+#: app/dll/Husforhorslangdermm.php:78 app/dll/Husforhorslangdermm.php:88
+msgid "Ort"
+msgstr "Plass"
+
+#: app/dll/Husforhorslangdermm.php:23 app/dll/Husforhorslangdermm.php:40
+#: app/dll/Husforhorslangdermm.php:50 app/dll/Husforhorslangdermm.php:59
+#: app/dll/Husforhorslangdermm.php:68 app/dll/Husforhorslangdermm.php:79
+#: app/dll/Husforhorslangdermm.php:89
+msgid "Typ av"
+msgstr "Type av"
+
+#: app/dll/Husforhorslangdermm.php:24 app/dll/Husforhorslangdermm.php:41
+#: app/dll/Husforhorslangdermm.php:51 app/dll/Husforhorslangdermm.php:60
+#: app/dll/Husforhorslangdermm.php:80 app/dll/Husforhorslangdermm.php:90
+msgid "År"
+msgstr "År"
+
+#: app/dll/Husforhorslangdermm.php:25 app/dll/Husforhorslangdermm.php:42
+#: app/dll/Husforhorslangdermm.php:52 app/dll/Husforhorslangdermm.php:61
+#: app/dll/Husforhorslangdermm.php:81 app/dll/Husforhorslangdermm.php:91
+msgid "Slutår"
+msgstr "Siste år"
+
+#: app/dll/Husforhorslangdermm.php:26 app/dll/Husforhorslangdermm.php:43
+#: app/dll/Husforhorslangdermm.php:82 app/dll/Husforhorslangdermm.php:92
+msgid "Årsintervall"
+msgstr "Intervall"
+
+#: app/dll/Husforhorslangdermm.php:27 app/dll/Husforhorslangdermm.php:94
+msgid "Kod"
+msgstr "Kode"
+
+#: app/dll/Husforhorslangdermm.php:28 app/dll/Husforhorslangdermm.php:44
+#: app/dll/Husforhorslangdermm.php:53 app/dll/Husforhorslangdermm.php:62
+#: app/dll/Husforhorslangdermm.php:83 app/dll/Husforhorslangdermm.php:95
+#: app/dll/Inskannadeuppsatasere3.php:64
+msgid "Id nummer"
+msgstr "Id snummer"
+
+#: app/dll/Husforhorslangdermm.php:93
+msgid "Kod typ"
+msgstr "Kodetype"
+
+#: app/dll/Husforhorslangdermm.php:164 app/dll/Husforhorslangdermm.php:204
+#: site/app/addition/menu.json.php:3
+msgid "husforhorslangder-mm"
+msgstr "husforhorslangder-mm"
+
+#: app/dll/Inskannadeuppsatasere3.php:17 site/app/addition/menu.json.php:5
+msgid "Inskannade uppsataser E 3"
+msgstr "Skannede essays E 3"
+
+#: app/dll/Inskannadeuppsatasere3.php:21 app/dll/Inskannadeuppsatasere3.php:35
+#: app/dll/Inskannadeuppsatasere3.php:44 app/dll/Inskannadeuppsatasere3.php:51
+#: app/dll/Inskannadeuppsatasere3.php:70 app/dll/Inskannadeuppsatasere3.php:79
+msgid "Dokumentnamn"
+msgstr "Dokumentnavn"
+
+#: app/dll/Inskannadeuppsatasere3.php:22 app/dll/Inskannadeuppsatasere3.php:36
+#: app/dll/Inskannadeuppsatasere3.php:45 app/dll/Inskannadeuppsatasere3.php:52
+#: app/dll/Inskannadeuppsatasere3.php:60 app/dll/Inskannadeuppsatasere3.php:71
+#: app/dll/Inskannadeuppsatasere3.php:80
+msgid "Dokumentägare"
+msgstr "Dokumenteier"
+
+#: app/dll/Inskannadeuppsatasere3.php:23 app/dll/Inskannadeuppsatasere3.php:37
+#: app/dll/Inskannadeuppsatasere3.php:46 app/dll/Inskannadeuppsatasere3.php:53
+#: app/dll/Inskannadeuppsatasere3.php:72 app/dll/Inskannadeuppsatasere3.php:81
+msgid "Rubrik"
+msgstr "Overskrift"
+
+#: app/dll/Inskannadeuppsatasere3.php:24 app/dll/Inskannadeuppsatasere3.php:38
+#: app/dll/Inskannadeuppsatasere3.php:73 app/dll/Inskannadeuppsatasere3.php:82
+msgid "Text"
+msgstr "Tekst"
+
+#: app/dll/Inskannadeuppsatasere3.php:25 app/dll/Inskannadeuppsatasere3.php:40
+#: app/dll/Inskannadeuppsatasere3.php:47 app/dll/Inskannadeuppsatasere3.php:54
+#: app/dll/Inskannadeuppsatasere3.php:75 app/dll/Inskannadeuppsatasere3.php:83
+msgid "Sidnummer"
+msgstr "Side nummer"
+
+#: app/dll/Inskannadeuppsatasere3.php:199 site/app/addition/menu.json.php:5
+msgid "inskannade-uppsataser-e-3"
+msgstr "inskannade-uppsataser-e-3"
+
+#: app/dll/Johnericsson.php:12
+msgid "John Ericssons korrespondent under sina resor och arbete"
+msgstr "John Ericssons korrespondanse under hans reiser og arbeid"
+
+#: app/dll/Johnericsson.php:18 app/dll/Johnericsson.php:33
+#: app/dll/Johnericsson.php:43 app/dll/Johnericsson.php:52
+#: app/dll/Johnericsson.php:72 app/dll/Johnericsson.php:82
+msgid "Alternativt namn"
+msgstr "Alternativt navn"
+
+#: app/dll/Johnericsson.php:20 app/dll/Johnericsson.php:35
+#: app/dll/Johnericsson.php:45 app/dll/Johnericsson.php:74
+#: app/dll/Johnericsson.php:84 app/sys/SystemException.php:143
+msgid "Datum"
+msgstr "Dato"
+
+#: app/dll/Myusers.php:32 app/dll/Myusers.php:67 app/dll/Myusers.php:87
+#: app/dll/Myusers.php:109 app/dll/Myusers.php:118 app/dll/Myusers.php:137
+msgid "Användarnamn"
+msgstr "Bruker"
+
+#: app/dll/Myusers.php:35
+msgid "Bild"
+msgstr "Bilde"
+
+#: app/dll/Myusers.php:36
+msgid "Slug"
+msgstr "Leery"
+
+#: app/dll/Myusers.php:37
+msgid "Bildnamn"
+msgstr "Bildenavn"
+
+#: app/dll/Myusers.php:38 site/app/admin/user/edit.php:1072
+#: site/app/admin/user/edit.php:1355 site/app/admin/user/new.php:1064
+#: site/app/admin/user/new.php:1292
+msgid "Lösenord"
+msgstr "Passord"
+
+#: app/dll/Myusers.php:39 app/dll/Myusers.php:70 app/dll/Myusers.php:90
+msgid "Misslyckanden"
+msgstr "Feil"
+
+#: app/dll/Myusers.php:40 app/dll/Myusers.php:71 app/dll/Myusers.php:91
+msgid "Misslyckandeanledning"
+msgstr "Årsak til feil"
+
+#: app/dll/Myusers.php:41 app/dll/Myusers.php:72 app/dll/Myusers.php:92
+#: app/dll/Myusers.php:113 app/dll/Myusers.php:121 app/dll/Myusers.php:140
+msgid "E-post"
+msgstr "E-post"
+
+#: app/dll/Myusers.php:43 app/dll/Myusers.php:74 app/dll/Myusers.php:94
+#: app/dll/Myusers.php:112 app/dll/Myusers.php:141
+msgid "Födelsedag"
+msgstr "Fødselsdag"
+
+#: app/dll/Myusers.php:44 app/dll/Myusers.php:75 app/dll/Myusers.php:95
+#: app/dll/Myusers.php:142
+msgid "Telefon"
+msgstr "Telefon"
+
+#: app/dll/Myusers.php:45 app/dll/Myusers.php:102
+#: site/app/admin/user/edit.php:1324 site/app/admin/user/edit.php:1325
+#: site/app/admin/user/new.php:1261 site/app/admin/user/new.php:1262
+msgid "Adress"
+msgstr "Adresse"
+
+#: app/dll/Myusers.php:46 app/dll/Myusers.php:103
+msgid "Postnummer"
+msgstr "Post kode"
+
+#: app/dll/Myusers.php:47 app/dll/Myusers.php:76 app/dll/Myusers.php:96
+msgid "Status"
+msgstr "Status"
+
+#: app/dll/Myusers.php:48 app/dll/Myusers.php:78 app/dll/Myusers.php:98
+msgid "Online"
+msgstr "På nett"
+
+#: app/dll/Myusers.php:49 app/dll/Myusers.php:77 app/dll/Myusers.php:97
+#: site/app/admin/user/edit.php:1266 site/app/admin/user/new.php:1215
+msgid "Roll"
+msgstr "Rolle"
+
+#: app/dll/Myusers.php:50 app/dll/Myusers.php:79 app/dll/Myusers.php:99
+#: app/dll/Myusers.php:144
+msgid "IP-adress"
+msgstr "IP adresse"
+
+#: app/dll/Myusers.php:51
+msgid "ISO-kod"
+msgstr "ISO-kode"
+
+#: app/dll/Myusers.php:53 app/dll/Myusers.php:81 app/dll/Myusers.php:101
+#: app/dll/Myusers.php:146 site/app/admin/user/edit.php:1301
+#: site/app/admin/user/new.php:1242 site/app/profile/index.php:1161
+msgid "Stad"
+msgstr "By"
+
+#: app/dll/Myusers.php:54
+msgid "Värdnamn"
+msgstr "Vertsnavn"
+
+#: app/dll/Myusers.php:55 app/dll/Myusers.php:104
+msgid "Gick med"
+msgstr "Gikk med"
+
+#: app/dll/Myusers.php:56 app/dll/Myusers.php:82 app/dll/Myusers.php:105
+#: app/dll/Myusers.php:114 app/dll/Myusers.php:122 app/dll/Myusers.php:147
+msgid "Senaste inloggning"
+msgstr "Siste innlogging"
+
+#: app/dll/Myusers.php:62
+msgid "Anv"
+msgstr "Bruk"
+
+#: app/dll/Myusers.php:200 app/dll/Myusers.php:292
+msgid "Fält finns inte i tabell"
+msgstr "Finner ikke feltet i tabellen"
+
+#: app/dll/Myusers.php:213 app/dll/Myusers.php:304
+msgid "Felaktig språk"
+msgstr "Feil språk"
+
+#: app/dll/Myusers.php:220 site/app/admin/user/edit.php:482
+#: site/app/admin/user/new.php:478
+msgid "Felaktig e-postadress"
+msgstr "Feil e-postadresse"
+
+#: app/dll/Myusers.php:227 site/app/admin/user/edit.php:489
+#: site/app/admin/user/new.php:485
+msgid ""
+"Lösenordet måste innehålla minst 8 tecken, minst en stor bokstav och minst "
+"en siffra"
+msgstr ""
+"Passordet må inneholde minst 8 tegn, minst én stor bokstav og minst ett tall"
+
+#: app/dll/Myusers.php:233 app/dll/Myusers.php:310
+#: site/app/admin/user/edit.php:495 site/app/admin/user/new.php:491
+msgid "Förnamn måste fyllas i"
+msgstr "Fornavn må fylles ut"
+
+#: app/dll/Myusers.php:256
+msgid "Gick inte skapa ny Användare"
+msgstr "Kunne ikke opprette ny bruker"
+
+#: app/dll/Myusers.php:269
+msgid "Användarenamn finns redan"
+msgstr "Brukernavn finnes allerede"
+
+#: app/dll/Myusers.php:328
+msgid "Gick inte att uppdatera användaren"
+msgstr "Kunne ikke oppdatere brukeren"
+
+#: app/dll/Myusers.php:356
+#, php-format
+msgid ""
+"Hej %s! <br><br>\n"
+"\t\tDitt användarenamn %s<br>\n"
+"\t\tDitt lösenord %s<br>\n"
+"\t\t<br>\n"
+"\t\tLogga in och Läs vår akiv eller kolla in bilder eller Hitta  gamla "
+"minnen. <br>\n"
+"\t\t<br>\n"
+"\t\tKom in i värmen!"
+msgstr ""
+"Hei %s! <br><br>\n"
+"\t\tDitt brukernavn %s<br>\n"
+"\t\tPassordet ditt er %s<br>\n"
+"\t\t<br>\n"
+"\t\tLogg inn og les arkivet vårt eller sjekk ut bilder eller finn "
+"gamleminner. <br>\n"
+"\t\t<br>\n"
+"\t\tKom inn i varmen!"
+
+#: app/dll/Myusers.php:367
+msgid "Kinship Center Utforskaren - du har skapat konto"
+msgstr "Kinship Center Explorer - du har opprettet en konto"
+
+#: app/dll/Myusers.php:455 app/dll/Myusers.php:502
+msgid "ANV"
+msgstr "BRUK"
+
+#: app/dll/Record.php:719
+msgid "Du måste ange en tabellnamn innan du använder record klassen"
+msgstr "Du må spesifisere et tabellnavn før du bruker postklassen"
+
+#: app/dll/Record.php:793
+#, php-format
+msgid ""
+"Du har angett fel datatyp i ditt anrop när det vara en DOUBLE (%s) var så "
+"god ta bort värdet i record.int.php -> \"record.%s%skuser\""
+msgstr ""
+"Du har spesifisert feil datatype i samtalen når det skal være en DOBBELT "
+"(%s), vennligst fjern verdien i record.int.php -> \"record.%s%skuser\""
+
+#: app/dll/Record.php:1012
+msgid "Okänd hashalgoritm"
+msgstr "Ukjent hash-algoritme"
+
+#: app/dll/Riksforeningensarkiv.php:12 site/app/addition/menu.json.php:10
+msgid "Riksföreningens arkiv"
+msgstr "Landsforeningens arkiv"
+
+#: app/dll/Riksforeningensarkiv.php:16 app/dll/Riksforeningensarkiv.php:30
+#: app/dll/Riksforeningensarkiv.php:39 app/dll/Riksforeningensarkiv.php:48
+#: app/dll/Riksforeningensarkiv.php:67 app/dll/Riksforeningensarkiv.php:76
+msgid "Källa"
+msgstr "Kilde"
+
+#: app/dll/Rtable.php:177 app/dll/Rtable.php:179 app/dll/Rtable.php:183
+#: app/dll/Rtable.php:231 app/dll/Rtable.php:233 app/dll/Rtable.php:237
+#: site/app/admin/user/list.php:1811 site/app/admin/user/list.php:1897
+#: site/app/archive/index.php:1783 site/app/archive/index.php:1869
+#: site/app/index.php:700 site/app/index.php:805
+msgid "Föregående"
+msgstr "Tidligere"
+
+#: app/dll/Rtable.php:195 app/dll/Rtable.php:197 app/dll/Rtable.php:201
+#: app/dll/Rtable.php:257 app/dll/Rtable.php:259 app/dll/Rtable.php:263
+#: site/app/admin/user/list.php:1829 site/app/admin/user/list.php:1861
+#: site/app/admin/user/list.php:1878 site/app/archive/index.php:1801
+#: site/app/archive/index.php:1833 site/app/archive/index.php:1850
+#: site/app/index.php:723 site/app/index.php:761 site/app/index.php:782
+msgid "Nästa"
+msgstr "Neste"
+
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:16
+#: site/app/addition/menu.json.php:9
+msgid "Sverige Amerika Centrets emigrantfotosamling"
+msgstr "Svergeige Amerika Centers emigrantfotosamling"
+
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:20
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:38
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:48
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:57
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:66
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:76
+#: app/dll/Sverigeamerikacentretsemigrantfotosamling.php:86
+msgid "Filmnummer"
+msgstr "Filmnummer"
+
+#: app/dll/UploadedFiles.php:18
+msgid "välj en submit knapp"
+msgstr "velg en send-knapp"
+
+#: app/dll/UploadedFiles.php:28 app/dll/UploadedFiles.php:117
+msgid "Du få inte överstiger 2 mb per bild"
+msgstr "Du kan ikke overstige 2 mb per bilde"
+
+#: app/dll/UploadedFiles.php:31
+msgid ""
+"Den här filen har överstiger MAX_FILE_SIZE värdet som anges i HTML-formuläret"
+msgstr ""
+"Denne filen overskrider MAX_FILE_SIZE-verdien som er angitt i HTML-skjemaet"
+
+#: app/dll/UploadedFiles.php:34
+msgid "Den här filen har endast delvis laddas upp"
+msgstr "Denne filen er bare delvis lastet opp"
+
+#: app/dll/UploadedFiles.php:37
+msgid "Ingen fil laddades upp"
+msgstr "Ingen fil ble lastet opp"
+
+#: app/dll/UploadedFiles.php:40
+msgid "En temporär katalog saknas"
+msgstr "En midlertidig katalog mangler"
+
+#: app/dll/UploadedFiles.php:43
+msgid "Det gick inte att skriva till hårddisken"
+msgstr "Kunne ikke skrive til harddisken"
+
+#: app/dll/UploadedFiles.php:46
+msgid "Den här filen har stoppas för att det har inträffat anslutningfel"
+msgstr ""
+"Denne filen har blitt stoppet fordi det har oppstått en tilkoblingsfeil"
+
+#: app/dll/UploadedFiles.php:49
+msgid "Okänt uppladdning fel"
+msgstr "Ukjent opplastingsfeil"
+
+#: app/dll/UploadedFiles.php:113
+msgid "Filen få ha de här filtyperna "
+msgstr "Filen må ha disse filtypene "
+
+#: app/dll/User.php:37
+msgid "Hoppsan! Du misslyckades med att logga in."
+msgstr "Oops! Du klarte ikke å logge på."
+
+#: app/dll/User.php:38
+msgid ""
+"Vi har upptäckt ovanlig aktivitet i ditt konto. För din säkerhets skull har "
+"vi därför inaktiverat all åtkomst. Vi vill skydda din integritet och se till "
+"att bara du har tillgång till ditt konto. läs mer din mail"
+msgstr ""
+"Vi har oppdaget uvanlig aktivitet på kontoen din. For din sikkerhet harVi "
+"har derfor deaktivert all tilgang. Vi ønsker å beskytte personvernet ditt og "
+"sørge forat bare du har tilgang til kontoen din. les mer e-posten din"
+
+#: app/dll/User.php:39
+msgid ""
+"Innan du kan logga in måste du aktivera ditt konto. \"<a href=\"/help/"
+"enable\">aktiveringsmail<a>\" "
+msgstr ""
+"Før du kan logge inn, må du aktivere kontoen din. \"<a href=\"/help/"
+"enable\">aktiverings-e-post<a>\" "
+
+#: app/dll/Validation.php:86
+#, php-format
+msgid "Du måste ange ett namn först innan du kan anropa en regeln"
+msgstr "Du må skrive inn et navn først før du kan kalle en regel"
+
+#: app/dll/Validation.php:102 app/dll/Validation.php:117
+#, php-format
+msgid "Du måste ange ett meddelande först innan du kan ställa in regel"
+msgstr "Du må skrive inn en melding før du kan angi en regel"
+
+#: app/dll/Wtime.php:39
+#, php-format
+msgid "Idag %s"
+msgstr "Idag %s"
+
+#: app/dll/Wtime.php:44
+#, php-format
+msgid "Igår %s"
+msgstr "Igår %s"
+
+#: app/dll/calendar.php:81 site/default/default.class.php:168
+msgid "Januari"
+msgstr "Januar"
+
+#: app/dll/calendar.php:82 site/default/default.class.php:169
+msgid "Februari"
+msgstr "Februar"
+
+#: app/dll/calendar.php:83 site/default/default.class.php:170
+msgid "Mars"
+msgstr "Mars"
+
+#: app/dll/calendar.php:84 site/default/default.class.php:171
+msgid "April"
+msgstr "April"
+
+#: app/dll/calendar.php:85 site/default/default.class.php:172
+msgid "Maj"
+msgstr "Kan"
+
+#: app/dll/calendar.php:86 site/default/default.class.php:173
+msgid "Juni"
+msgstr "Juni"
+
+#: app/dll/calendar.php:87 site/default/default.class.php:174
+msgid "Juli"
+msgstr "Juli"
+
+#: app/dll/calendar.php:88 site/default/default.class.php:175
+msgid "Augusti"
+msgstr "August"
+
+#: app/dll/calendar.php:89 site/default/default.class.php:176
+msgid "September"
+msgstr "September"
+
+#: app/dll/calendar.php:90 site/default/default.class.php:177
+msgid "Oktober"
+msgstr "Oktober"
+
+#: app/dll/calendar.php:91 site/default/default.class.php:178
+msgid "November"
+msgstr "November"
+
+#: app/dll/calendar.php:92 site/default/default.class.php:179
+msgid "December"
+msgstr "Desember"
+
+#: app/sys/DatabaseConnection.php:54
+#, php-format
+msgid "Fel vid inläsning av teckenuppsättning utf8: %s"
+msgstr "Feil ved lasting av tegnsett utf8: %s"
+
+#: app/sys/DatabaseConnection.php:58
+#, php-format
+msgid "%s Kunde inte ansluta till Mysql databasen beror på %s"
+msgstr "%s Kunne ikke koble til Mysql-databasen skyldes %s"
+
+#: app/sys/DatabaseConnection.php:115
+msgid "Frågan kan inte köras eftersom du har inte skicka med någon sql fråga"
+msgstr ""
+"Spørringen kan ikke utføres fordi du ikke har sendt inn noen sql-spørring"
+
+#: app/sys/DatabaseConnection.php:166 app/sys/DatabaseConnection.php:206
+#: app/sys/DatabaseConnection.php:228
+msgid "Frågan kan inte köras: Hel frågan\n"
+msgstr "Spørringen kan ikke kjøres: Hele spørringen\n"
+
+#: app/sys/DatabaseConnection.php:271
+#, php-format
+msgid "Frågan kan inte köras: Hel frågan: %s\n"
+msgstr "Kan ikke kjøre spørringen: Full spørring: %s\n"
+
+#: app/sys/DatabaseConnection.php:295
+#, php-format
+msgid "Ogiltig typ given (%s)"
+msgstr "Ugyldig type oppgitt (%s)"
+
+#: app/sys/DatabaseConnection.php:354
+#, php-format
+msgid "Ogiltig fråga: %s Hel frågan: %s"
+msgstr "Ugyldig spørring: %s Hele spørringen: %s"
+
+#: app/sys/Filesystem.php:154
+#, php-format
+msgid ""
+"Det gick inte att läsa till filen på grund av att adressen är fel eller "
+"filen är skrivskyddat %s"
+msgstr ""
+"Filen kunne ikke leses fordi adressen er feil eller filen er skrivebeskyttet "
+"%s"
+
+#: app/sys/Language.php:44
+msgid "Språkfil med ."
+msgstr "Språkfil med ."
+
+#: app/sys/Language.php:53
+msgid "Ogiltig sökväg angiven."
+msgstr "Ugyldig bane er angitt."
+
+#: app/sys/Language.php:73 app/sys/Language.php:79
+msgid "Putenv failed"
+msgstr "Putenv mislyktes"
+
+#: app/sys/Language.php:85
+msgid ""
+"Setlocale failed: the locale function is not available on this platform, or "
+"the given locale does not exist in this environment. "
+msgstr ""
+"Setlocale mislyktes: locale-funksjonen er ikke tilgjengelig på denne "
+"plattformen, eller den gitte lokaliteten eksisterer ikke i dette miljøet. "
+
+#: app/sys/Language.php:98
+msgid ""
+"Setlocale failed: the locale function is not available on this platform, or "
+"the given locale does not exist in this environment."
+msgstr ""
+"Setlocale mislyktes: locale-funksjonen er ikke tilgjengelig på denne "
+"plattformen, eller den gitte lokaliteten eksisterer ikke i dette miljøet."
+
+#: app/sys/Start.php:54 app/sys/Start.php:230 app/sys/Start_old.php:33
+#: app/sys/Start_old.php:55 app/sys/Start_old.php:73
+msgid "Controller"
+msgstr "Kontroller"
+
+#: app/sys/Start.php:116
+msgid "Ogiltig funktion eller exekvering av koden."
+msgstr "Ugyldig funksjon eller kodeutførelse."
+
+#: app/sys/Start.php:141
+#, php-format
+msgid "Installation misslyckat (%s)"
+msgstr "Installasjonen mislyktes (%s)"
+
+#: app/sys/Start.php:185
+#, php-format
+msgid "Felaktigt regex-mönster för %s  på %s."
+msgstr "Ugyldig regulært uttrykk for %s på %s."
+
+#: app/sys/Start.php:206 app/sys/Start.php:216
+msgid "Kunde inte laddas 404 sidan. eftersom filen saknas."
+msgstr "Kunne ikke laste 404-siden. fordi filen mangler."
+
+#: app/sys/Start.php:226 app/sys/Start_old.php:85
+#, php-format
+msgid "Kunde inte hitta kontrollen med det här namnet \"%s\" i %s"
+msgstr "Kunne ikke finne kontrollen med dette navnet \\%s\\ i %s"
+
+#: app/sys/Start.php:263
+msgid "Kunde inte hitta installationsfilen index.php."
+msgstr "Kunne ikke finne filen %s.ini.php."
+
+#: app/sys/Start_old.php:69
+#, php-format
+msgid ""
+"Kunde inte hitta funktionen med det här namnet %s eller index i classen %s"
+msgstr ""
+"Kunne ikke finne funksjon med dette navnet %s eller indeks i klassen %s"
+
+#: app/sys/Start_old.php:81
+#, php-format
+msgid "Kunde inte hitta %s i classen"
+msgstr "Kunne ikke finne %s i klassen"
+
+#: app/sys/SystemException.php:142
+msgid "Domännamnet"
+msgstr "Domenenavnet"
+
+#: app/sys/SystemException.php:144
+msgid "Tid"
+msgstr "Tid"
+
+#: app/sys/SystemException.php:145
+msgid "System tar på minnet"
+msgstr "Systemet husker"
+
+#: app/sys/SystemException.php:146
+msgid "PHP ta på minne"
+msgstr "PHP tar minne"
+
+#: app/sys/SystemException.php:149
+msgid "Detta är adressen till föregående webbsida"
+msgstr "Dette er adressen til forrige nettside"
+
+#: app/sys/SystemException.php:152
+msgid "Änvändaragenten"
+msgstr "Brukeragenten"
+
+#: app/sys/SystemException.php:153
+msgid "Acceptabla"
+msgstr "Akseptabel"
+
+#: app/sys/SystemException.php:154
+msgid "Godtagbara kodningar"
+msgstr "Akseptable kodinger"
+
+#: app/sys/SystemException.php:155
+msgid "Anslutningen"
+msgstr "Tilkoblingen"
+
+#: site/api/js/comment/comment_jsapi.class.php:21
+#: site/api/js/ocr/ocr_jsapi.class.php:23
+#: site/api/js/search/search_jsapi.class.php:16
+#: site/api/js/user/user_jsapi.class.php:16
+msgid "Välkommen till jsapi"
+msgstr "Velkommen til jsapi"
+
+#: site/api/js/user/user_jsapi.class.php:327
+msgid "Ogiltig ordning eller värde i din ordning."
+msgstr "Ugyldig bestilling eller verdi i bestillingen din."
+
+#: site/app/addition/menu.json.php:2
+msgid "brevsamlingar-mm"
+msgstr "brevsamlinger-osv"
+
+#: site/app/addition/menu.json.php:2
+msgid "Här hittar du Brev från olika aktörer"
+msgstr "Her finner du brev fra ulike aktører"
+
+#: site/app/addition/menu.json.php:3
+msgid ""
+"Här hittar du Husförhörslängder, Inflyttningsattester, Kommunionlängd  "
+"bildformat det betyder att du kan du inte söka på det men vi kommer erbjuda "
+"ett verktyg som tillåter lägga till egna  Anteckningar och de kommer vara "
+"sökbara.   "
+msgstr ""
+"Her finner du husettersynsprotokoller, innflyttingsattester, "
+"nattverdprotokoller bildeformat som betyr at du ikke kan søke på det, men vi "
+"vil tilby  et verktøy som lar deg legge til dine egne notater, og de blir "
+"det søkbar. "
+
+#: site/app/addition/menu.json.php:4
+msgid "broderna-larsson"
+msgstr "broderna-larsson"
+
+#: site/app/addition/menu.json.php:4 site/app/addition/menu.json.php:8
+msgid ""
+"BRÖDERNA LARSSON & CO var en betydande emigrantagentfirma under den tid då "
+"emigrationen från Sverige till Förenta staterna nådde sin höjdpunkt. "
+"Delägarna utgingo från en syskonskara på fem bröder, alla födda i Berghems "
+"församling, Älvsborgs län, som söner av torparen Lars Thomasson och hans "
+"hustru Britta M. Andersson i Slätten.Källa: Riksarkivet"
+msgstr ""
+"BRØDRENE LARSSON &amp; CO var et betydelig emigrantbyrå i løpet av den tiden "
+"emigrasjonen fra Sverige til USA nådde sitt høydepunkt. Medeierne kom fra en "
+"søskenflokk på fem brødre, alle født i Berghems prestegjeld, Älvsborg amt, "
+"som sønner av husmann Lars Thomasson og hans hustru Britta M. Andersson i "
+"Slätten.Kilde: Riksarkivet"
+
+#: site/app/addition/menu.json.php:5
+msgid ""
+"Här hittar du uppsatser från Karlstads Universitet, obs vi har försökt att "
+"göra sökbart men processen av OCR har blivit avbrutit när var 46% gjort på "
+"grund av vi upplevde skulle ta längre tid än tänkt oss med att försöka gör "
+"data sökbart med den här metod att scanna bilder och räkna sidor och "
+"dokumentera grundläggande information om uppsatser. vi kommer göra om "
+"inskanning med mycket effektivare sätt när gäller tid och sökbarhet. i "
+"dagsläget är data inskannat som bilder med mycket begränsa information som "
+"är sökbart    "
+msgstr ""
+"Her finner du essays fra Karlstad Universitet, merk vi har forsøkt å gjør "
+"søkbar, men prosessen med OCR har blitt avbrutt når 46 % er ferdig fordi vi "
+"opplevde ville ta lengre tid enn vi trodde med å prøve å gjøre data søkbare "
+"med denne metoden for å skanne bilder og telle sider og dokumentere "
+"grunnleggende informasjon om essays. vi vil gjøre om skanning på en mye mer "
+"effektiv måte med tanke på tid og søkbarhet. i for øyeblikket skannes "
+"dataene som bilder med svært begrenset informasjon som f.eks er søkbar "
+
+#: site/app/addition/menu.json.php:6
+msgid "bevaringens-levnadsbeskrivningar"
+msgstr "bevaringslivsbeskrivelser"
+
+#: site/app/addition/menu.json.php:6
+msgid ""
+"I perioden 1902-1913 inkrävdes en levnadsbeskrivning av alla inryckande "
+"värnpliktiga på Värmlands regemente. Platsen var Trossnäs fält där "
+"värnpliktiga beskrev sin tidigare liv. Beskrivningarna innehåller bland "
+"annat information om födelse, familj samt olika arbetsuppgifter. Ofta har "
+"rekryterna varit utomlands, år 1902 anger cirka 1/6 att de har varit i Norge "
+"på arbete. I första omgången publiceras 1902-1909 som omfattar cirka 4 000 "
+"personer. Materialet är sökbart och digitala dokument finns publicerat till "
+"varje post. Arbetets är utfört i Interreg-projektet Gränsvandring i ett "
+"samarbete mellan Sverige Amerika Centret, Norsk Utvandrermuseum och "
+"Karlstads universitet.  Originalkälla: Krigsarkivet,<br><br>Stockholm"
+msgstr ""
+"I perioden 1902-1913 ble det krevd en livsbeskrivelse av alle nybyggere "
+"vernepliktige i Värmlands regiment. Stedet var Trossnäs felt der "
+"vernepliktige beskrev sine tidligere liv. Beskrivelsene inneholder blant "
+"annen informasjon om fødsel, familie og ulike arbeidsoppgaver. Har ofte "
+"rekruttene har vært i utlandet, i 1902 oppgir ca 1/6 at de har vært i "
+"Norgepå jobb. I første runde publiseres 1902-1909, som omfatter ca. 4000 "
+"mennesker. Materialet er søkbart og digitale dokumenter publiseres til hver "
+"ting. Arbeidet utføres i Interreg-prosjektet Gränsvandring i ett samarbeid "
+"mellom Sweden America Centre, Norsk Immigrantmuseum og Karlstad universitet. "
+"Originalkilde: Krigsarkivet,<br><br>Stockholm\\Here finner du essays fra "
+"Karlstad Universitet, merk vi har prøvd å lage det søkbar, men prosessen med "
+"OCR har blitt avbrutt da 46 % var ferdig fordi vi følte det ville ta I "
+"perioden 1902-1913 ble en biografi kreves av alle vernepliktige som går inn "
+"i Värmlands regiment. Stedet var Trossnäs-feltet hvor vernepliktige beskrev "
+"sine tidligere liv. Beskrivelsene inneholde blant annet opplysninger om "
+"fødsel, familie og div arbeidsoppgaver. Ofte har rekruttene vært i utlandet, "
+"i 1902 ca 1/6 stat at de har vært i Norge på jobb. I første runde, 1902-1909 "
+"er publisert, som omfatter omtrent 4000 personer. Materialet er søkbare og "
+"digitale dokumenter publiseres for hver oppføring. Arbeidet er gjennomført i "
+"Interreg-prosjektet Border Migration i et samarbeid mellom Sweden America "
+"Centre, Norsk Emigrantmuseum og Karlstad universitet. Originalkilde: "
+"Krigsarkivet,<br><br>Stockholm"
+
+#: site/app/addition/menu.json.php:7
+msgid "John Ericssons korrespondens under sina resor och arbete"
+msgstr "John Ericssons korrespondanse under hans reiser og arbeid"
+
+#: site/app/addition/menu.json.php:7
+msgid "john-ericsson"
+msgstr "john-ericsson"
+
+#: site/app/addition/menu.json.php:7
+msgid ""
+"John Ericsson föddes den 31 juli 1803 i Långbanshyttan nära Filipstad, Redan "
+"från ung ålder visade han en stor talang och passion för mekanik och "
+"maskiner. Trots att han saknade formell utbildning inom ingenjörsvetenskap "
+"lyckades han genom sin egen nyfikenhet och ihärdighet lära sig om mekanik "
+"och utveckla sina färdigheter som uppfinnare.Ericssons första stora "
+"genombrott kom år 1829 när han konstruerade och byggde en ångmaskin med hög "
+"effektivitet och tillförlitlighet. Denna uppfinning väckte stor "
+"uppmärksamhet inom sjöfartsindustrin och banade vägen för hans framtida "
+"framgångar.Men det var hans uppfinning av ångdrivna propellern som verkligen "
+"etablerade John Ericsson som en pionjär inom sitt område. År 1836 "
+"presenterade han sin propellerdesign för den amerikanska flottan, och den "
+"visade sig vara överlägsen de traditionella paddelhjulen som då användes. "
+"Ericssons propeller var mer effektiv, lättare att manövrera och mindre "
+"sårbar för skador. Detta gjorde den idealisk för både handelsfartyg och "
+"krigsfartyg.John Ericsson var inte bara en framstående uppfinnare, utan han "
+"var också en flitig korrespondent under sina resor och arbete. Han förde "
+"noggrant dagbok och skrev brev för att dokumentera sina upptäckter och "
+"erfarenheter.Genom att samla hans brev har vi fått en unik inblick i "
+"Ericssons tankar, idéer och resor. Hans brev ger oss en inblick i den resa "
+"som han gjorde från Sverige till andra delar av världen i jakten på kunskap "
+"och framsteg.I breven kan vi följa Ericssons arbete med att främja sin "
+"propellerdesign och andra innovationer. Han korresponderade med kollegor, "
+"sjöfartsmyndigheter och intressenter för att dela sina framsteg och övertyga "
+"dem om fördelarna med hans uppfinningar. Genom att analysera breven kan vi "
+"följa hans framgångar och utmaningar på vägen.Utöver tekniska ämnen "
+"behandlar breven också personliga betraktelser och reflektioner. Ericsson "
+"delade sina intryck av olika platser, människor och kulturer han mötte under "
+"sina resor. Hans skrivna ord ger oss en inblick i hans personlighet och "
+"intellekt, och visar på hans intresse för både vetenskap och humaniora.Genom "
+"att studera och analysera Ericssons brev får vi inte bara en djupare "
+"förståelse för hans uppfinningar och arbete, utan också en känsla för den "
+"tid han levde i. Breven ger oss en tidstrogen skildring av tekniska framsteg "
+"och samhälleliga förändringar under 1800-talet.Genom att samla och bevara "
+"Ericssons brev har vi kunnat bevara hans arv och dela med oss av hans "
+"erfarenheter till kommande generationer. Dessa brev är inte bara historiska "
+"dokument utan också värdefulla källor till kunskap och inspiration för "
+"framtida uppfinnare och forskare."
+msgstr ""
+"John Ericsson ble født 31. juli 1803 i Långbanshyttan ved Filipstad, Redan "
+"fra en ung alder viste han et stort talent og lidenskap for mekanikk og "
+"Maskiner. Selv om han manglet formell opplæring i ingeniørfag gjennom sin "
+"egen nysgjerrighet og utholdenhet klarte han å lære om mekanikk og utvikle "
+"sine ferdigheter som oppfinnere.Ericssons første hovedfag gjennombruddet kom "
+"i 1829 da han tegnet og bygde en dampmaskin med pel effektivitet og "
+"pålitelighet. Denne oppfinnelsen vakte stor oppmerksomhet i shippingbransjen "
+"og banet vei for hans fremtid suksesser. Men det var hans oppfinnelse av den "
+"dampdrevne propellen som virkelig etablerte John Ericsson som en pioner "
+"innen sitt felt. År 1836 han presenterte propelldesignet sitt for den "
+"amerikanske marinen, og det viste seg å være overlegen de tradisjonelle "
+"skovlhjulene som var i bruk. Ericssons propell var mer effektiv, lettere å "
+"manøvrere og mindre sårbar for skade. Dette gjorde den ideell for både "
+"handelsskip og krigsskip John Ericsson var ikke bare en fremtredende "
+"oppfinner, men han var også en flittig korrespondent under sine reiser og "
+"arbeid. Han tok med omhyggelig journalført og skrev brev for å dokumentere "
+"sine oppdagelser og Ved å samle brevene hans har vi fått et unikt innblikk i "
+"Ericssons tanker, ideer og reiser. Brevet hans gir oss et innblikk i den "
+"reisen slik han gjorde fra Sverige til andre deler av verden på jakt etter "
+"kunnskap I brevene kan vi følge Ericssons arbeid med å fremme sin "
+"propelldesign og andre innovasjoner. Han korresponderte med kolleger, "
+"maritime myndigheter og interessenter for å dele deres fremgang og "
+"overbevise dem om fordelene med oppfinnelsene hans. Ved å analysere "
+"bokstavene kan vi følg hans suksesser og utfordringer underveis. I tillegg "
+"til tekniske emner brevene omhandler også personlige betraktninger og "
+"refleksjoner. Ericsson delte sine inntrykk av forskjellige steder, mennesker "
+"og kulturer han møtte under sine reiser. Hans skrevne ord gir oss et "
+"innblikk i hans personlighet og intellekt, og viser sin interesse for både "
+"naturvitenskap og humaniora.Gjennom for å studere og analysere Ericssons "
+"brev får vi ikke bare en dypere forståelse for hans oppfinnelser og arbeid, "
+"men også en følelse for det tid han levde i. Brevene gir oss en tidstro "
+"skildring av teknologisk fremgang ogsamfunnsendringer i løpet av 1800-tallet "
+"Ved å samle og bevare Ericssons brev, vi har vært i stand til å bevare hans "
+"arv og dele hans opplevelser til fremtidige generasjoner. Disse brevene er "
+"ikke bare historiske dokumenter men også verdifulle kilder til kunnskap og "
+"inspirasjon for fremtidig oppfinner og vitenskapsmann.\\John Ericsson ble "
+"født 31. juli 1803 i Långbanshyttan ved Filipstad, fra han var ung viste han "
+"et stort talent og lidenskap for mekanikk og maskiner. Selv om han manglet "
+"formell opplæring i ingeniørfag, gjennom sin egen nysgjerrighet og "
+"utholdenhet klarte han det lære om mekanikk og utvikle sine ferdigheter som "
+"oppfinner. Ericsson sin Det første store gjennombruddet kom i 1829 da han "
+"designet og bygde en steam motor med høy effektivitet og pålitelighet. Denne "
+"oppfinnelsen tiltrakk seg stort oppmerksomhet i shippingindustrien og banet "
+"vei for hans fremtidige suksess. Men det var hans oppfinnelse av den "
+"dampdrevne propellen som egentlig etablerte John Ericsson som en pioner "
+"innen sitt felt. I 1836 presenterte han hans propelldesign til den "
+"amerikanske marinen, og den viste seg å være overlegen tradisjonelle "
+"skovlhjul som er i bruk. Ericssons propell var mer effektiv, lettere å "
+"manøvrere og mindre sårbar for skader. Dette klarte det ideell for både "
+"handelsskip og krigsskip. John Ericsson var ikke bare en fremtredende "
+"oppfinner, men han var også en flittig korrespondent under sin reise og "
+"jobb. Han førte grundige dagbøker og skrev brev for å dokumentere hans "
+"oppdagelser og opplevelser. Ved å samle brevene hans har vi fått en unik "
+"innsikt i Ericssons tanker, ideer og reiser. Brevene hans gir oss et "
+"innblikk i reisen han gjorde fra Sverige til andre deler av verden på jakt "
+"etter kunnskap og fremgang. I brevene kan vi følge med Ericssons arbeid med "
+"å promotere propelldesignet og andre innovasjoner. Hei korresponderte med "
+"kolleger, sjøfartsmyndigheter og interessenter for å dele hans fremgang og "
+"overbevise dem om fordelene ved hans oppfinnelser. Ved å analysere brevene "
+"kan vi følge hans suksesser og utfordringer underveis. I i tillegg til "
+"tekniske emner, omhandler brevene også personell betraktninger og "
+"refleksjoner. Ericsson delte sine inntrykk av forskjellige steder, mennesker "
+"og kulturer han møtte på sine reiser. Hans skrevne ord gir oss et innblikk i "
+"hans personlighet og intellekt, og viser hans interesse for både "
+"naturvitenskap og humaniora. Ved å studere og analysere Ericssons brev, får "
+"vi ikke bare en dypere forståelse av hans oppfinnelser og arbeid, men også "
+"en følelse for tiden han levde i. De bokstaver gir oss en tidsriktig "
+"skildring av teknologiske fremskritt og sosiale endringer i løpet av 1800-"
+"tallet. Ved å samle og bevare Ericssons brev, har vi vært i stand til å "
+"bevare hans arv og dele hans erfaringer med fremtidige generasjoner. Disse "
+"brevene er ikke bare historiske dokumenter, men også verdifulle kilder til "
+"kunnskap og inspirasjon for fremtiden oppfinnere og forskere."
+
+#: site/app/addition/menu.json.php:8
+msgid "broderna-larssons-medresenar"
+msgstr "brødrene-larssons-medreisende"
+
+#: site/app/addition/menu.json.php:9
+msgid "sverige-amerika-centrets-emigrantfotosamling"
+msgstr "swedish-america-centerets-emigrant fotosamling"
+
+#: site/app/addition/menu.json.php:9
+msgid ""
+"Samlingen består av emigrantfotografier insamlade vid Sverige Amerika "
+"Centret i Karlstad. De flesta av emigranterna är relaterade till Värmland. "
+"Fotografierna är till största del tagna på 1900-talets första hälft men även "
+"några tidigare och senare. Totalt består samlingen av cirka 1700 fotografier "
+"med tillhörande index. Fotografierna har som regel länk till databasen "
+"\"Emigranter registrerade i svenska kyrkböcker\". Uppgifter om "
+"originalfotonas ägare finns men kan ej publiceras pga gällande lagstiftning. "
+"Kontakta Sverige Amerika Centret för mer information.Databasen är skapad av "
+"Sverige Amerika Centret i Karlstad."
+msgstr ""
+"Samlingen består av emigrantfotografier samlet på Sweden America Senteret i "
+"Karlstad. De fleste av utvandrerne er i slekt med Värmland. Fotografiene er "
+"stort sett tatt i første halvdel av 1900-tallet, men også noen tidligere og "
+"senere. Samlet består samlingen av cirka 1700 fotografier med tilhørende "
+"indeks. Bildene har vanligvis en lenke til databasen \\Emigranter registrert "
+"i svenske kirkebøker\\. Informasjon om eierne av originalbildene eksisterer, "
+"men kan ikke publiseres på grunn av gjeldende lovgivning. Kontakt Sweden "
+"America Center for mer informasjon Databasen er laget av Sweden America "
+"Center i Karlstad.\\Samlingen består av emigrant fotografier samlet på "
+"Sweden Americet senter i Karlstad. Mesteparten av utvandrere er i slekt med "
+"Värmland. Bildene er stort sett tatt i første halvdel av 1900-tallet, men "
+"også noe tidligere og senere. Totalt, samlingen består av ca 1700 "
+"fotografier med tilhørende indeksert. Fotografiene har vanligvis en lenke "
+"til databasen \\Emigrants registrert i svensk kirkebok\\. Informasjon om "
+"eierne av originalbilder er tilgjengelige, men kan ikke publiseres på grunn "
+"av gjeldende lovgivning. Kontakt Sweden America Center for mer informasjon. "
+"De databasen ble opprettet av Sweden America Center i Karlstad."
+
+#: site/app/addition/menu.json.php:10
+msgid "riksforeningens-arkiv"
+msgstr "riksforeningens arkiv"
+
+#: site/app/addition/menu.json.php:10
+msgid ""
+"Riksföreningen Sverigekontakt, organisation som bistår svenskar och "
+"svenskättlingar utomlands, söker bevara svenska språket bland dem, sprider "
+"kännedom i utlandet om svensk kultur och vårdar svenskminnen utomlands. R. "
+"har sitt säte i Göteborg. Den hette 1908-79 Riksföreningen för svenskhetens "
+"bevarande i utlandet."
+msgstr ""
+"Riksföreningen Sverigekontakt, organisasjon som bistår svensker og Svenske "
+"etterkommere i utlandet, søker å bevare det svenske språket blant dem, sprer "
+"seg kunnskap i utlandet om svensk kultur og ta vare på svenske minner i "
+"utlandet. R. har base i Gøteborg. I 1908-79 ble det kalt Riksförbundet för "
+"svenskhet bevaring i utlandet."
+
+#: site/app/addition/menu.json.php:11
+msgid "fotodatabas"
+msgstr "fotodatabase"
+
+#: site/app/addition/menu.json.php:11
+msgid "Fotografier och filmer"
+msgstr "Fotografier og filmer"
+
+#: site/app/admin/admin.class.php:35 site/default/default.class.php:63
+msgid "Ditt lösenord är för kort"
+msgstr "Passordet ditt er for kort"
+
+#: site/app/admin/admin.class.php:38 site/default/default.class.php:66
+msgid "Ditt E-postadress är för kort"
+msgstr "E-postadressen din er for kort"
+
+#: site/app/admin/login/index.php:5
+msgid "Inloggning"
+msgstr "Logg Inn"
+
+#: site/app/admin/login/index.php:91 site/app/admin/login/index.php:121
+msgid "Logga in"
+msgstr "Logg inn"
+
+#: site/app/admin/login/index.php:103 site/app/admin/user/edit.php:708
+#: site/app/admin/user/edit.php:747 site/app/admin/user/edit.php:785
+#: site/app/admin/user/list.php:2378 site/app/admin/user/list.php:2579
+#: site/app/admin/user/list.php:2618 site/app/admin/user/new.php:699
+#: site/app/admin/user/new.php:738 site/app/admin/user/new.php:777
+#: site/app/archive/index.php:2351 site/app/archive/index.php:2609
+#: site/app/archive/index.php:2648 site/app/error.php:119
+#: site/app/index.php:1783 site/app/index.php:1814 site/app/index.php:1857
+#: site/app/profile/index.php:615 site/app/profile/index.php:654
+#: site/app/profile/index.php:694 site/app/show/image.php:1821
+#: site/app/show/image.php:1937 site/app/show/image.php:1975
+msgid "Utforskaren"
+msgstr "Utforskeren"
+
+#: site/app/admin/login/index.php:110
+msgid "E-postadress:"
+msgstr "Epostadresse:"
+
+#: site/app/admin/login/index.php:117
+msgid "Lösenord:"
+msgstr "Passord:"
+
+#: site/app/admin/user/edit.php:5
+#, php-format
+msgid "Kinship Center Utforskaren - Redigera användare %s %s"
+msgstr "Kinship Center Explorer - Rediger bruker %s %s"
+
+#: site/app/admin/user/edit.php:544 site/app/admin/user/new.php:536
+#, php-format
+msgid "Nytt konto har skapats för %s %ss"
+msgstr "Ny konto er opprettet for %s %ss"
+
+#: site/app/admin/user/edit.php:547 site/app/admin/user/new.php:539
+msgid "Det uppstod ett problem vid skapandet av användaren"
+msgstr "Det oppsto et problem med å opprette brukeren"
+
+#: site/app/admin/user/edit.php:589
+#, php-format
+msgid ""
+"Är du säker på att du vill konvertera från Arkivanvändare till %s, det "
+"betyder att användare kommer förlora koppling till Arkivet"
+msgstr ""
+"Er du sikker på at du vil konvertere fra Arkivbruker til %s, det betyr at "
+"brukere vil miste forbindelsen til arkivet"
+
+#: site/app/admin/user/edit.php:597
+#, php-format
+msgid ""
+"Är du säker på att du vill konvertera från Arkivanvändare till %s, det "
+"betyder att användare kommer förlora koppling till Arkivet men kommer "
+"fortsätta kunna ändra arkivet"
+msgstr ""
+"Er du sikker på at du vil konvertere fra Arkivbruker til %s, det betyr at "
+"brukere vil miste forbindelsen til arkivet, men vil fortsette å kunne endre "
+"arkivet"
+
+#: site/app/admin/user/edit.php:605 site/app/admin/user/edit.php:612
+#, php-format
+msgid ""
+"Är du säker på att du vill konvertera från Administratör för organisation "
+"till %s, det betyder att användare kommer förlora koppling och hela "
+"organisation kommer försvinna"
+msgstr ""
+"Er du sikker på at du vil konvertere fra organisasjonsadministrator? til %s "
+"betyr det at brukere vil miste forbindelsen og hele organisasjonen vil "
+"forsvinne"
+
+#: site/app/admin/user/edit.php:686 site/app/admin/user/list.php:2258
+#: site/app/admin/user/new.php:677 site/app/archive/index.php:2231
+#: site/app/error.php:88 site/app/index.php:1755 site/app/profile/index.php:593
+#: site/app/show/image.php:1482
+msgid ""
+"Det är så att du kan inte fortsätta för att du har förlorat din anslutning "
+"till internet."
+msgstr ""
+"Det vil si at du ikke kan fortsette fordi du har mistet forbindelsen til "
+"internett."
+
+#: site/app/admin/user/edit.php:692 site/app/admin/user/edit.php:902
+#: site/app/admin/user/list.php:2362 site/app/admin/user/list.php:2779
+#: site/app/admin/user/new.php:683 site/app/admin/user/new.php:894
+#: site/app/archive/index.php:2335 site/app/archive/index.php:2822
+#: site/app/index.php:1798 site/app/index.php:1994
+#: site/app/profile/index.php:599 site/app/profile/index.php:812
+#: site/app/show/image.php:1805 site/app/show/image.php:2137
+msgid "Logga ut"
+msgstr "Logg ut"
+
+#: site/app/admin/user/edit.php:694 site/app/admin/user/edit.php:733
+#: site/app/admin/user/edit.php:754 site/app/admin/user/edit.php:812
+#: site/app/admin/user/list.php:2266 site/app/admin/user/list.php:2299
+#: site/app/admin/user/list.php:2310 site/app/admin/user/list.php:2354
+#: site/app/admin/user/list.php:2364 site/app/admin/user/list.php:2402
+#: site/app/admin/user/list.php:2431 site/app/admin/user/list.php:2503
+#: site/app/admin/user/list.php:2555 site/app/admin/user/list.php:2565
+#: site/app/admin/user/list.php:2586 site/app/admin/user/list.php:2665
+#: site/app/admin/user/new.php:685 site/app/admin/user/new.php:724
+#: site/app/admin/user/new.php:745 site/app/admin/user/new.php:804
+#: site/app/archive/index.php:2239 site/app/archive/index.php:2272
+#: site/app/archive/index.php:2283 site/app/archive/index.php:2327
+#: site/app/archive/index.php:2337 site/app/archive/index.php:2375
+#: site/app/archive/index.php:2404 site/app/archive/index.php:2449
+#: site/app/archive/index.php:2533 site/app/archive/index.php:2585
+#: site/app/archive/index.php:2595 site/app/archive/index.php:2616
+#: site/app/archive/index.php:2695 site/app/error.php:274
+#: site/app/index.php:1768 site/app/index.php:1790 site/app/index.php:1800
+#: site/app/index.php:1904 site/app/profile/index.php:601
+#: site/app/profile/index.php:640 site/app/profile/index.php:661
+#: site/app/profile/index.php:722 site/app/show/image.php:1490
+#: site/app/show/image.php:1523 site/app/show/image.php:1534
+#: site/app/show/image.php:1560 site/app/show/image.php:1585
+#: site/app/show/image.php:1602 site/app/show/image.php:1614
+#: site/app/show/image.php:1797 site/app/show/image.php:1807
+#: site/app/show/image.php:1846 site/app/show/image.php:1875
+#: site/app/show/image.php:1923 site/app/show/image.php:1984
+msgid "Stäng"
+msgstr "Lukk"
+
+#: site/app/admin/user/edit.php:716 site/app/admin/user/list.php:2384
+#: site/app/admin/user/new.php:707 site/app/archive/index.php:2357
+#: site/app/index.php:1820 site/app/profile/index.php:623
+#: site/app/show/image.php:1828
+msgid "Är du säker på att du vill logga ut?"
+msgstr "Er du sikker på at du vil logge ut?"
+
+#: site/app/admin/user/edit.php:722 site/app/admin/user/list.php:2390
+#: site/app/admin/user/list.php:2551 site/app/admin/user/new.php:713
+#: site/app/archive/index.php:2363 site/app/archive/index.php:2581
+#: site/app/index.php:1826 site/app/profile/index.php:629
+#: site/app/show/image.php:1834
+msgid "OK"
+msgstr "OK"
+
+#: site/app/admin/user/edit.php:723 site/app/admin/user/list.php:2391
+#: site/app/admin/user/list.php:2420 site/app/admin/user/list.php:2465
+#: site/app/admin/user/new.php:714 site/app/archive/index.php:2364
+#: site/app/archive/index.php:2393 site/app/archive/index.php:2438
+#: site/app/archive/index.php:2495 site/app/index.php:1827
+#: site/app/profile/index.php:630 site/app/show/image.php:1835
+#: site/app/show/image.php:1864 site/app/show/image.php:1912
+msgid "Avbryt"
+msgstr "Avbryt"
+
+#: site/app/admin/user/edit.php:731 site/app/admin/user/edit.php:811
+#: site/app/admin/user/list.php:2563 site/app/admin/user/list.php:2664
+#: site/app/admin/user/new.php:722 site/app/admin/user/new.php:803
+#: site/app/archive/index.php:2593 site/app/archive/index.php:2694
+#: site/app/index.php:1766 site/app/index.php:1903
+#: site/app/profile/index.php:638 site/app/profile/index.php:721
+#: site/app/show/image.php:1921 site/app/show/image.php:1983
+msgid "Om Utforskaren"
+msgstr "Om Explorer"
+
+#: site/app/admin/user/edit.php:749 site/app/admin/user/list.php:2581
+#: site/app/admin/user/new.php:740 site/app/archive/index.php:2611
+#: site/app/index.php:1785 site/app/profile/index.php:656
+#: site/app/show/image.php:1939
+msgid ""
+"Projekt \"Utforskaren\" av Erik Gustavson<br>Produktion av Marcus "
+"Larsson<br>&#169; 2022 Kinship Center. All rights reserved<br><br>Projekt "
+"Utforskaren baserad på Sandstorm som är ett MVC-ramverk i PHP med MySQL i "
+"backend som är framtaget av Marcus själv. I frontend är den ny generation av "
+"användargränssnitt och design kommer med flertalet nya funktioner, en helt "
+"ny och förenklad design som skapar nästintill obegränsade möjligheter och "
+"skräddarsydda för olika arkiv. Användargränssnitt består av flera olika "
+"språk som HTML 5, CSS, SVG, Javascript, Jquery, Java"
+msgstr ""
+"Prosjekt \"Utforskeren\" av Erik Gustavson<br>Produksjon av Marcus "
+"Larsson<br>&#169; 2022 Slektssenter. Alle rettigheter "
+"forbeholdt<br><br>Project Explorer basert på Sandstorm som er et MVC-"
+"rammeverk i PHP med MySQL i backend utviklet av Marcus selv. I frontend "
+"kommer den nye generasjonen brukergrensesnitt og design med flere nye "
+"funksjoner, et helt nytt og forenklet design som skaper nesten ubegrensede "
+"muligheter og skreddersydd for ulike arkiver. Brukergrensesnittet består av "
+"flere forskjellige språk som HTML 5, CSS, SVG, Javascript, Jquery,Java"
+
+#: site/app/admin/user/edit.php:808 site/app/admin/user/list.php:2661
+#: site/app/admin/user/new.php:800 site/app/archive/index.php:2691
+#: site/app/index.php:1900 site/app/profile/index.php:718
+#: site/app/show/image.php:1980
+msgid "Startsidan"
+msgstr "Hjemmeside"
+
+#: site/app/admin/user/edit.php:809 site/app/admin/user/list.php:2662
+#: site/app/admin/user/new.php:801 site/app/archive/index.php:2692
+#: site/app/index.php:1901 site/app/profile/index.php:719
+#: site/app/show/image.php:1981
+msgid "Maximera"
+msgstr "Maksimer"
+
+#: site/app/admin/user/edit.php:810 site/app/admin/user/list.php:2663
+#: site/app/admin/user/new.php:802 site/app/archive/index.php:2693
+#: site/app/index.php:1902 site/app/profile/index.php:720
+#: site/app/show/image.php:1982
+msgid "Minimera"
+msgstr "Minimer"
+
+#: site/app/admin/user/edit.php:827 site/app/admin/user/list.php:2680
+#: site/app/admin/user/new.php:819 site/app/archive/index.php:2710
+#: site/app/index.php:1919 site/app/profile/index.php:737
+#: site/app/show/image.php:2000
+msgid "Lägg en Användare"
+msgstr "Legg til en bruker"
+
+#: site/app/admin/user/edit.php:828 site/app/admin/user/list.php:2681
+#: site/app/admin/user/new.php:820 site/app/archive/index.php:2711
+#: site/app/index.php:1920 site/app/profile/index.php:738
+#: site/app/show/image.php:2001
+msgid "Alla Användare"
+msgstr "Alle brukere"
+
+#: site/app/admin/user/edit.php:840 site/app/admin/user/list.php:2693
+#: site/app/admin/user/new.php:832 site/app/archive/index.php:2723
+#: site/app/index.php:1932 site/app/profile/index.php:750
+#: site/app/show/image.php:2013
+msgid "Akriv"
+msgstr "Akriv"
+
+#: site/app/admin/user/edit.php:843 site/app/admin/user/list.php:2696
+#: site/app/admin/user/new.php:835 site/app/archive/index.php:2726
+#: site/app/index.php:1935 site/app/profile/index.php:753
+#: site/app/show/image.php:2016
+msgid "Nytt Akriv"
+msgstr "Nye Akriv"
+
+#: site/app/admin/user/edit.php:844 site/app/admin/user/list.php:2697
+#: site/app/admin/user/new.php:836 site/app/archive/index.php:2727
+#: site/app/index.php:1936 site/app/profile/index.php:754
+#: site/app/show/image.php:2017
+msgid "Alla Akriv"
+msgstr "Alle Akriv"
+
+#: site/app/admin/user/edit.php:857 site/app/admin/user/list.php:2710
+#: site/app/admin/user/new.php:849 site/app/archive/index.php:2753
+#: site/app/index.php:1949 site/app/profile/index.php:767
+#: site/app/show/image.php:2030
+msgid "Sök i alla arkiv"
+msgstr "Søk i alle arkiver"
+
+#: site/app/admin/user/edit.php:875 site/app/admin/user/list.php:2728
+#: site/app/admin/user/new.php:867 site/app/archive/index.php:2771
+#: site/app/index.php:1967 site/app/profile/index.php:785
+#: site/app/show/image.php:2049
+msgid "Visa sidobar"
+msgstr "Vis sidefelt"
+
+#: site/app/admin/user/edit.php:877 site/app/admin/user/list.php:2730
+#: site/app/admin/user/new.php:869 site/app/archive/index.php:2773
+#: site/app/index.php:1969 site/app/profile/index.php:787
+#: site/app/show/image.php:2051
+msgid "Dölj sidobar"
+msgstr "Skjul sidefeltet"
+
+#: site/app/admin/user/edit.php:890 site/app/admin/user/list.php:2767
+#: site/app/admin/user/new.php:882 site/app/archive/index.php:2810
+#: site/app/index.php:1982 site/app/profile/index.php:800
+#: site/app/profile/index.php:946 site/app/show/image.php:2125
+msgid "Mina Sidor"
+msgstr "Mine sider"
+
+#: site/app/admin/user/edit.php:1043
+#, php-format
+msgid "Redigera användare %s %s"
+msgstr "Rediger bruker %s %s"
+
+#: site/app/admin/user/edit.php:1054 site/app/admin/user/new.php:1046
+#: site/app/profile/index.php:971
+msgid "Ladda upp ny bild"
+msgstr "Last opp nytt bilde"
+
+#: site/app/admin/user/edit.php:1068 site/app/admin/user/edit.php:1352
+#: site/app/admin/user/new.php:1060 site/app/admin/user/new.php:1289
+#: site/app/profile/index.php:985
+msgid "Email"
+msgstr "E-post"
+
+#: site/app/admin/user/edit.php:1068 site/app/admin/user/edit.php:1352
+#: site/app/admin/user/new.php:1060 site/app/admin/user/new.php:1289
+msgid "exempel@mail.com"
+msgstr "eksempel@mail.com"
+
+#: site/app/admin/user/edit.php:1076 site/app/admin/user/new.php:1068
+msgid "yyyy-mm-dd"
+msgstr "åååå-mm-dd"
+
+#: site/app/admin/user/edit.php:1080 site/app/admin/user/new.php:1072
+#: site/app/profile/index.php:993
+msgid "Mitt språk"
+msgstr "Mitt språk"
+
+#: site/app/admin/user/edit.php:1092 site/app/admin/user/edit.php:1289
+#, php-format
+msgid "Du har valt %s"
+msgstr "Du har valgt %s"
+
+#: site/app/admin/user/edit.php:1258 site/app/admin/user/new.php:1207
+#: site/app/profile/index.php:1135
+msgid "Övriga uppgifter "
+msgstr "Andre data "
+
+#: site/app/admin/user/edit.php:1297 site/app/admin/user/new.php:1238
+#: site/app/profile/index.php:1156
+msgid "Ex Sverige"
+msgstr "Eks Sverige"
+
+#: site/app/admin/user/edit.php:1302 site/app/admin/user/new.php:1243
+#: site/app/profile/index.php:1162
+msgid "Ex Karlstad"
+msgstr "Eks Karlstad"
+
+#: site/app/admin/user/edit.php:1306 site/app/admin/user/new.php:1247
+#: site/app/profile/index.php:1167
+msgid "Telefonnummer"
+msgstr "Telefonnummer"
+
+#: site/app/admin/user/edit.php:1307 site/app/admin/user/new.php:1248
+#: site/app/profile/index.php:1168
+msgid "Ex 070 6712070"
+msgstr "Eks. 070 6712070"
+
+#: site/app/admin/user/edit.php:1317 site/app/admin/user/edit.php:1318
+#: site/app/admin/user/new.php:1254 site/app/admin/user/new.php:1255
+msgid "Institutionens namn"
+msgstr "Navn på institusjonen"
+
+#: site/app/admin/user/edit.php:1330 site/app/admin/user/edit.php:1331
+#: site/app/admin/user/new.php:1267 site/app/admin/user/new.php:1268
+msgid "Postnr"
+msgstr "Postnr"
+
+#: site/app/admin/user/edit.php:1336 site/app/admin/user/edit.php:1337
+#: site/app/admin/user/new.php:1273 site/app/admin/user/new.php:1274
+msgid "Organisationsnr"
+msgstr "Organisasjonsnr"
+
+#: site/app/admin/user/edit.php:1343 site/app/admin/user/new.php:1280
+msgid "Antalet datorer som kommer användas"
+msgstr "Antall datamaskiner som skal brukes"
+
+#: site/app/admin/user/edit.php:1344 site/app/admin/user/new.php:1281
+msgid "Antal sessioner"
+msgstr "Antall økter"
+
+#: site/app/admin/user/edit.php:1348 site/app/admin/user/new.php:1285
+msgid "Ex Karlstads stadsbibliotek"
+msgstr "Eks Karlstad bybibliotek"
+
+#: site/app/admin/user/edit.php:1363 site/app/admin/user/new.php:1300
+msgid "Ange fasta IP-adress. "
+msgstr "Skriv inn fast IP-adresse. "
+
+#: site/app/admin/user/edit.php:1364 site/app/admin/user/new.php:1301
+msgid "ex 98.23.45.8, etc"
+msgstr "ex 98.23.45.8, etc"
+
+#: site/app/admin/user/edit.php:1374 site/app/admin/user/new.php:1311
+#: site/app/profile/index.php:1183
+msgid "Mina inställningar"
+msgstr "Mine innstillinger"
+
+#: site/app/admin/user/edit.php:1389 site/app/admin/user/new.php:1326
+#: site/app/profile/index.php:1210
+msgid "Du kan välja ett mörkt eller ljust utseende på webbplatsen"
+msgstr "Du kan velge et mørkt eller lyst utseende for nettstedet"
+
+#: site/app/admin/user/edit.php:1395 site/app/admin/user/new.php:1332
+msgid "Utgående abonnemang"
+msgstr "Utgående abonnement"
+
+#: site/app/admin/user/edit.php:1396 site/app/admin/user/new.php:1333
+msgid "Ex yyyy-mm-dd tt:mm:ss"
+msgstr "Eks åååå-mm-dd tt:mm:ss"
+
+#: site/app/admin/user/edit.php:1402
+msgid "Anknytning till administratör för organisation"
+msgstr "Tilkobling til administrator for organisasjon"
+
+#: site/app/admin/user/edit.php:1403
+msgid "Ex exempel@mail.com"
+msgstr "Eks eksempel@mail.com"
+
+#: site/app/admin/user/edit.php:1419 site/app/admin/user/new.php:1340
+msgid "Anknytning till Akriv"
+msgstr "Tilknytning til Akriv"
+
+#: site/app/admin/user/edit.php:1446 site/app/admin/user/list.php:2464
+#: site/app/admin/user/new.php:1367 site/app/archive/index.php:2437
+#: site/app/archive/index.php:2494 site/app/show/image.php:1548
+#: site/app/show/image.php:1796 site/app/show/image.php:1911
+msgid "Spara"
+msgstr "Lagre"
+
+#: site/app/admin/user/edit.php:1472 site/app/admin/user/list.php:3149
+#: site/app/admin/user/new.php:1393 site/app/archive/index.php:3324
+#: site/app/profile/index.php:1276
+msgid "Information"
+msgstr "Informasjon"
+
+#: site/app/admin/user/edit.php:1474 site/app/admin/user/list.php:3154
+#: site/app/admin/user/new.php:1395 site/app/archive/index.php:3329
+#: site/app/profile/index.php:1278
+msgid ""
+"Visa mer information genom om du klickar på filen. <br> Om du dubbelklickar "
+"då öppnas filen"
+msgstr ""
+"Vis mer informasjon gbare hvis du klikker på filen. <br> Hvis du "
+"dobbeltklikker så åpnes filen"
+
+#: site/app/admin/user/edit.php:1482 site/app/admin/user/list.php:3164
+#: site/app/admin/user/new.php:1404 site/app/archive/index.php:3339
+#: site/app/index.php:2161 site/app/profile/index.php:1287
+msgid "Plats"
+msgstr "Plass"
+
+#: site/app/admin/user/list.php:142 site/app/archive/index.php:142
+#, php-format
+msgid "Är du säker på att du vill ta bort den här %s?"
+msgstr "Er du sikker på at du vil slette denne %s?"
+
+#: site/app/admin/user/list.php:150 site/app/archive/index.php:150
+#, php-format
+msgid "Redigera %s"
+msgstr "Rediger %s"
+
+#: site/app/admin/user/list.php:283 site/app/archive/index.php:283
+msgid ""
+"Visa mer information genom om du klickar på den.\\nOm du dubbelklickar då "
+"öppnas filen"
+msgstr ""
+"Vis mer informasjon gjennom hvis du klikker på den.\\nHvis du dobbeltklikker "
+"da åpner filen"
+
+#: site/app/admin/user/list.php:338 site/app/archive/index.php:337
+#, php-format
+msgid "Sökning i %s och fallande på"
+msgstr "Søk i %s og synkende på"
+
+#: site/app/admin/user/list.php:343 site/app/archive/index.php:340
+#, php-format
+msgid "Sökning i %s och stigande på"
+msgstr "Søk i %s og stigende på"
+
+#: site/app/admin/user/list.php:595 site/app/admin/user/list.php:666
+#: site/app/admin/user/list.php:946 site/app/admin/user/list.php:1492
+#: site/app/archive/index.php:591 site/app/archive/index.php:662
+#: site/app/archive/index.php:942 site/app/archive/index.php:1445
+msgid "Sida 1"
+msgstr "Side 1"
+
+#: site/app/admin/user/list.php:602 site/app/admin/user/list.php:749
+#: site/app/admin/user/list.php:779 site/app/admin/user/list.php:817
+#: site/app/admin/user/list.php:872 site/app/admin/user/list.php:1026
+#: site/app/admin/user/list.php:1092 site/app/admin/user/list.php:1210
+#: site/app/admin/user/list.php:1250 site/app/admin/user/list.php:1512
+#: site/app/admin/user/list.php:1956 site/app/admin/user/list.php:2965
+#: site/app/archive/index.php:598 site/app/archive/index.php:745
+#: site/app/archive/index.php:775 site/app/archive/index.php:813
+#: site/app/archive/index.php:868 site/app/archive/index.php:1022
+#: site/app/archive/index.php:1088 site/app/archive/index.php:1204
+#: site/app/archive/index.php:1465 site/app/archive/index.php:1928
+#: site/app/archive/index.php:3008 site/app/index.php:591
+#: site/app/index.php:1252
+msgid "Hem"
+msgstr "Hjem"
+
+#: site/app/admin/user/list.php:717 site/app/admin/user/list.php:998
+#: site/app/archive/index.php:713 site/app/archive/index.php:994
+msgid "Se mer av sökningen."
+msgstr "Se mer av søket."
+
+#: site/app/admin/user/list.php:1071 site/app/admin/user/list.php:1189
+#: site/app/archive/index.php:1067
+msgid "Objekt har uppdateras"
+msgstr "Elementet er oppdatert"
+
+#: site/app/admin/user/list.php:1185 site/app/show/image.php:395
+msgid "Objekt har tagit bort "
+msgstr "Varen er fjernet "
+
+#: site/app/admin/user/list.php:1710 site/app/archive/index.php:1682
+#: site/app/show/image.php:872
+msgid "Texten har kopierats till urklipp"
+msgstr "Teksten er kopiert til utklippstavlen"
+
+#: site/app/admin/user/list.php:1712 site/app/archive/index.php:1684
+#: site/app/show/image.php:874
+msgid "Kopieringen misslyckades. Prova igen senare."
+msgstr "Kopien mislyktes. Prøv igjen senere."
+
+#: site/app/admin/user/list.php:1946 site/app/archive/index.php:1918
+#: site/app/show/image.php:114
+msgid "Sida"
+msgstr "Side"
+
+#: site/app/admin/user/list.php:2264 site/app/admin/user/list.php:3179
+#: site/app/archive/index.php:2237 site/app/archive/index.php:3354
+#: site/app/show/image.php:1488 site/app/show/image.php:2883
+msgid "Dela"
+msgstr "Dele"
+
+#: site/app/admin/user/list.php:2275 site/app/archive/index.php:2248
+#: site/app/show/image.php:1499
+msgid ""
+"Det är lätt dela med sig, Genom att du trycker på Kopiera knappen och sedan "
+"klistra in länk exempelvis i ett e-postmeddelande."
+msgstr ""
+"Det er enkelt å dele, ved å trykke på Kopier-knappen og deretter lim inn "
+"lenke for eksempel i en e-postmelding."
+
+#: site/app/admin/user/list.php:2298 site/app/archive/index.php:2271
+#: site/app/show/image.php:1522
+msgid "Kopiera"
+msgstr "Kopiere"
+
+#: site/app/admin/user/list.php:2308 site/app/admin/user/list.php:2353
+#: site/app/admin/user/list.php:2743 site/app/archive/index.php:2281
+#: site/app/archive/index.php:2326 site/app/archive/index.php:2786
+#: site/app/index.php:2048
+msgid "Sök"
+msgstr "Søk"
+
+#: site/app/admin/user/list.php:2320 site/app/archive/index.php:2293
+msgid ""
+"Ibland är det svårt att veta exempelvis om ett efternamn har ett s eller två "
+"ss etc.. \n"
+"\t\t\t\tDu kan skriva så här gustavs.on då kommer du få både gustavson och "
+"gustavsson i din sökningsresultat.\n"
+"\t\t\t\tOm du väljer \"eller\" då kommer du få både exempelvis år eller namn "
+"i din sökningsresultat."
+msgstr ""
+"Noen ganger er det vanskelig å vite for eksempel om et etternavn har ett s "
+"eller to ss osv.. \n"
+"\t\t\t\tDu kan skrive slik gustavs.på så får du både gustavson og gustavsson "
+"i søkeresultatene dine.\n"
+"\t\t\t\tHvis du velger \\eller\\ så får du begge deler, for eksempel år "
+"eller navn i søkeresultatene dine.\\Noen ganger er det vanskelig å vite, f."
+"eks. om et etternavn har ett s eller to ss osv..\n"
+"Du kan skrive slik gustavs.på da får du både gustavson og gustavsson i "
+"søkeresultatene dine.\n"
+"Velger du \\eller\\ så får du begge, for eksempel år eller navn inn "
+"søkeresultatene dine."
+
+#: site/app/admin/user/list.php:2339 site/app/archive/index.php:2312
+msgid "Eller"
+msgstr "Eller"
+
+#: site/app/admin/user/list.php:2400 site/app/archive/index.php:2373
+#: site/app/show/image.php:1844
+msgid "Ta bort en objekt"
+msgstr "Slett et element"
+
+#: site/app/admin/user/list.php:2415 site/app/archive/index.php:2388
+#: site/app/show/image.php:223 site/app/show/image.php:1859
+msgid "Är du säker på att du vill ta bort den här?"
+msgstr "Er du sikker på at du vil slette dette?"
+
+#: site/app/admin/user/list.php:2419 site/app/admin/user/list.php:3196
+#: site/app/archive/index.php:2392 site/app/archive/index.php:3379
+#: site/app/show/image.php:1863 site/app/show/image.php:2900
+msgid "Ta bort"
+msgstr "Fjerne"
+
+#: site/app/admin/user/list.php:2429 site/app/archive/index.php:2402
+#: site/app/show/image.php:1873
+msgid "Redigera en objekt"
+msgstr "Rediger et element"
+
+#: site/app/admin/user/list.php:2501 site/app/admin/user/list.php:2755
+#: site/app/archive/index.php:2531 site/app/archive/index.php:2798
+msgid "Sortera efter"
+msgstr "Sorter etter"
+
+#: site/app/admin/user/list.php:2515 site/app/archive/index.php:2545
+msgid "Kolumner"
+msgstr "Kolonner"
+
+#: site/app/admin/user/list.php:2524 site/app/archive/index.php:2554
+msgid ""
+"Här har du möjlighet att justera ordningen på hur kolumnerna visas i listan "
+"eller gå till biblioteket sedan flytta en kolumn i listan (Spara "
+"automatiskt)."
+msgstr ""
+"Her har du mulighet til å justere rekkefølgen på hvordan kolonnene vises i "
+"listen eller gå til biblioteket og flytt deretter en kolonne i listen (Lagre "
+"automatisk)."
+
+#: site/app/admin/user/list.php:2539 site/app/archive/index.php:2569
+msgid "Fält"
+msgstr "Felt"
+
+#: site/app/admin/user/list.php:2547 site/app/archive/index.php:2577
+msgid ""
+"Här har du möjlighet sortera data i en tabell alfabetiskt eller efter "
+"stigande eller fallande ordning. Du kan också gå till biblioteket sedan "
+"klicka på den kolumn som du vill sortera efter  (Spara temporärt)"
+msgstr ""
+"Her har du muligheten til å sortere dataene i en tabell alfabetisk eller "
+"etter stigende eller synkende rekkefølge. Du kan også gå på biblioteket da  "
+"klikk på kolonnen du vil sortere etter (Lagre midlertidig)"
+
+#: site/app/admin/user/list.php:2938
+msgid "Snabbsök i Användare"
+msgstr "Hurtigsøk i Users"
+
+#: site/app/admin/user/list.php:2975 site/app/archive/index.php:3018
+#: site/app/index.php:2077
+msgid "Visa som en lista"
+msgstr "Vis som en liste"
+
+#: site/app/admin/user/list.php:2978 site/app/archive/index.php:3021
+#: site/app/index.php:2080
+msgid "Visa som ikoner"
+msgstr "Vis som ikoner"
+
+#: site/app/admin/user/list.php:3188 site/app/archive/index.php:3371
+#: site/app/profile/index.php:986 site/app/profile/index.php:990
+#: site/app/show/image.php:231 site/app/show/image.php:2892
+msgid "Redigera"
+msgstr "Redigere"
+
+#: site/app/admin/user/new.php:5
+msgid "Kinship Center Utforskaren - Ny användare"
+msgstr "Kinship Center Explorer - Ny bruker"
+
+#: site/app/admin/user/new.php:587
+msgid "Var vänlig börjar med år och före 1900"
+msgstr "Begynn med år og før 1900"
+
+#: site/app/admin/user/new.php:1034
+msgid "Ny användare"
+msgstr "Ny bruker"
+
+#: site/app/admin/user/new.php:1073
+msgid "Välj språk"
+msgstr "Velg ditt språk"
+
+#: site/app/archive/index.php:5 site/app/show/image.php:5
+#, php-format
+msgid "Kinship Center Utforskaren - %s"
+msgstr "Kinship Center Explorer - %s"
+
+#: site/app/archive/index.php:1185
+msgid "Objekt har lagt"
+msgstr "Varen er lagt til"
+
+#: site/app/archive/index.php:2447
+#, php-format
+msgid "Lägga till ny objekt i %s"
+msgstr "Legger til nytt element til %s"
+
+#: site/app/archive/index.php:2739
+msgid "Lägga till <br>ny objekt"
+msgstr "Legg til et nytt element"
+
+#: site/app/archive/index.php:2981
+msgid "Snabbsök i arkivet"
+msgstr "Hurtigsøk i arkivet"
+
+#: site/app/archive/index.php:3060
+#, php-format
+msgid "Upphovsmakare %s"
+msgstr "Forfatter %s"
+
+#: site/app/archive/index.php:3077
+#, php-format
+msgid "År %s"
+msgstr "År %s"
+
+#: site/app/archive/index.php:3108
+msgid "HDR"
+msgstr "HDR"
+
+#: site/app/archive/index.php:3113
+msgid "Ej HDR"
+msgstr "Ikke HDR"
+
+#: site/app/archive/index.php:3119
+msgid "Video kvalitet"
+msgstr "Video kvalitet"
+
+#: site/app/archive/index.php:3123
+msgid "Hd kvalitet"
+msgstr "HD-kvalitet"
+
+#: site/app/archive/index.php:3127
+msgid "Hög kvalitet"
+msgstr "Høy kvalitet"
+
+#: site/app/archive/index.php:3131 site/app/archive/index.php:3141
+msgid "4k kvalitet"
+msgstr "4k kvalitet"
+
+#: site/app/archive/index.php:3137
+msgid "Foto"
+msgstr "Foto"
+
+#: site/app/archive/index.php:3147
+#, php-format
+msgid "Genre %s"
+msgstr "Sjanger %s"
+
+#: site/app/archive/index.php:3151
+#, php-format
+msgid "Antal objekt %s"
+msgstr "Antall objekter %s"
+
+#: site/app/archive/index.php:3154
+msgid "Personer som har samverkan i den här arkivet."
+msgstr "Folk som samarbeider i dette arkivet."
+
+#: site/app/archive/index.php:3167
+msgid "Beskrivning om arkivet"
+msgstr "Beskrivelse om arkivet"
+
+#: site/app/archive/index.php:3293
+msgid "Visa mer"
+msgstr "Vis mer"
+
+#: site/app/archive/index.php:3363
+msgid "Ny"
+msgstr "Ny"
+
+#: site/app/error.php:5
+msgid "Kinship center Utforskaren"
+msgstr "The Kinship Center Explorer"
+
+#: site/app/error.php:255
+msgid "Vill du stänga ner denna här fönstret?"
+msgstr "Vil du lukke dette vinduet?"
+
+#: site/app/error.php:271
+msgid "Fel"
+msgstr "Feil"
+
+#: site/app/error.php:292
+msgid "Felmeddelande"
+msgstr "Feilmelding"
+
+#: site/app/error.php:293
+msgid "Kunde inte visa sidan"
+msgstr "Kunne ikke vise siden"
+
+#: site/app/error.php:298 site/app/show/image.php:2554
+#: site/app/show/image.php:2681 site/app/show/image.php:2760
+#: site/app/show/image.php:2838
+msgid "Genre"
+msgstr "Sjanger"
+
+#: site/app/error.php:298
+msgid "404 fel"
+msgstr "404 feil"
+
+#: site/app/error.php:302
+msgid "Var vänling kontakta Kinship Center"
+msgstr "Ta kontakt med slektssenteret"
+
+#: site/app/error.php:304
+msgid "För hjälp"
+msgstr "For hjelp"
+
+#: site/app/error.php:307
+msgid "Beskrivning om felet"
+msgstr "Beskrivelse av feilen"
+
+#: site/app/index.php:6 site/app/index.php:560
+msgid "Kinship Center Utforskaren"
+msgstr "The Kinship Center Explorer"
+
+#: site/app/index.php:256 site/app/index.php:554 site/app/index.php:2151
+#: site/app/index.php:2164
+msgid "Filinnehåll"
+msgstr "Filinnhold"
+
+#: site/app/index.php:552 site/app/index.php:553 site/app/index.php:2072
+#: site/app/index.php:2147
+msgid "Snabbåkomst"
+msgstr "Rask tilgang"
+
+#: site/app/index.php:585 site/app/index.php:591
+msgid "Sökning i alla arkiv"
+msgstr "Søk i alle arkiver"
+
+#: site/app/index.php:594
+#, php-format
+msgid "Din sökning gav %s träffar"
+msgstr "Søket ditt returnerte %s treff"
+
+#: site/app/index.php:595
+msgid "Sökning"
+msgstr "Søk"
+
+#: site/app/index.php:621
+msgid "Du är på sidan "
+msgstr "Du er på siden "
+
+#: site/app/index.php:622
+msgid "Du är på "
+msgstr "Du er på "
+
+#: site/app/index.php:622 site/app/index.php:1283
+msgid "av "
+msgstr "av "
+
+#: site/app/index.php:635
+msgid " Hem "
+msgstr "  Hjem "
+
+#: site/app/index.php:635 site/app/index.php:1252 site/app/index.php:1295
+msgid "Sökning i alla arkiv "
+msgstr "Søk i alle arkiver "
+
+#: site/app/index.php:638 site/app/index.php:1299
+msgid "Din sökning gav tyvärr inga träffar"
+msgstr "Søket ditt ga ingen resultater"
+
+#: site/app/index.php:899
+msgid "Gå till sökning för det här arkiv "
+msgstr "Gå til søk etter dette arkivet "
+
+#: site/app/index.php:900
+msgid " Gå till sidan för Objektet"
+msgstr "  Gå til varesiden"
+
+#: site/app/index.php:953 site/app/index.php:968 site/app/index.php:987
+#: site/app/index.php:1003 site/app/index.php:1018 site/app/index.php:1032
+#: site/app/show/image.php:472 site/app/show/image.php:485
+msgid "Det gick inte att spara data"
+msgstr "Kunne ikke lagre data"
+
+#: site/app/index.php:1256
+#, php-format
+msgid "Din sökning gav %s träffar "
+msgstr "Søket ditt returnerte %s treff "
+
+#: site/app/index.php:1257
+msgid "Sökning "
+msgstr "Søk "
+
+#: site/app/index.php:1262
+msgid "Gå till den här arkivet"
+msgstr "Gå til dette arkivet"
+
+#: site/app/index.php:1267
+msgid "Gå till den här sökningen"
+msgstr "Gå til dette søket"
+
+#: site/app/index.php:1282
+msgid " Du är på sidan "
+msgstr " Du er på siden "
+
+#: site/app/index.php:1283
+msgid " Du är på rader "
+msgstr " Du er på linje "
+
+#: site/app/index.php:1295
+msgid "Hem "
+msgstr "Hjem "
+
+#: site/app/profile/index.php:5
+#, php-format
+msgid "Kinship Center Utforskaren - %s %s"
+msgstr "Kinship Center Explorer - %s %s"
+
+#: site/app/profile/index.php:488
+msgid "Det gick inte spara språket"
+msgstr "Språket kunne ikke lagres"
+
+#: site/app/profile/index.php:496
+msgid "Något gick fel med anropet till API:et."
+msgstr "Noe gikk galt med kallet til API."
+
+#: site/app/profile/index.php:1224
+msgid "Ta bort konto"
+msgstr "Slett konto"
+
+#: site/app/profile/index.php:1245
+msgid "Om du inaktiverar ditt konto sätts det i kö för permanent radering."
+msgstr ""
+"Deaktivering av kontoen din vil sette den i en kø for permanent sletting."
+
+#: site/app/profile/index.php:1246
+msgid "Inaktiverar ditt konto"
+msgstr "Deaktiverer kontoen din"
+
+#: site/app/show/image.php:112
+msgid "Sökning är klar"
+msgstr "Søket er fullført"
+
+#: site/app/show/image.php:117
+msgid "Slut av sida"
+msgstr "Slutt på siden"
+
+#: site/app/show/image.php:126
+msgid "Ladda Tesseract system"
+msgstr "Last inn Tesseract-systemet"
+
+#: site/app/show/image.php:131
+msgid "Initiering Tesseract system"
+msgstr "Initiering Tesseract-system"
+
+#: site/app/show/image.php:135 site/app/show/image.php:139
+msgid "Laddar Språket"
+msgstr "Laster språk"
+
+#: site/app/show/image.php:144
+msgid "Laddar Språket från minnet"
+msgstr "Laster språket fra minnet"
+
+#: site/app/show/image.php:148
+msgid "Språket är laddat"
+msgstr "Språket er lastet inn"
+
+#: site/app/show/image.php:155
+msgid "Förbereder att söka efter text, Var vänlig att vänta."
+msgstr "Forbereder søk etter tekst, vennligst vent."
+
+#: site/app/show/image.php:164
+msgid "Sökning av text"
+msgstr "Søk etter tekst"
+
+#: site/app/show/image.php:327
+msgid "Det gick inte köra OCR eftersom du har inte valt några bilder."
+msgstr "Kunne ikke kjøre OCR fordi du ikke har valgt noen bilder."
+
+#: site/app/show/image.php:600 site/app/show/image.php:805
+#: site/app/show/image.php:1088 site/app/show/image.php:1108
+msgid "Zooma"
+msgstr "Zoom"
+
+#: site/app/show/image.php:783
+msgid "Det går inte spara just nu."
+msgstr "Det er ikke mulig å lagre akkurat nå."
+
+#: site/app/show/image.php:1532 site/app/show/image.php:1558
+#: site/app/show/image.php:2078
+msgid "Lägg en kommentar"
+msgstr "Legg til en kommentar"
+
+#: site/app/show/image.php:1542
+msgid ""
+"Vi vill bli bättre och gör vårt arkiv mer sökbart därför Vi gjort möjligt "
+"för dig att kommenterar vår arkiv. Självklart kommer en administratör läsa "
+"igenom och godkänna kommentaren och sedan bli det sökbart i vårt system.\n"
+"\t\t\t\tTack så mycket att du kommenterar vår arkiv."
+msgstr ""
+"Vi ønsker å bli bedre og gjøre arkivet vårt mer søkbart, derfor har vi gjort "
+"det mulig for deg å kommentere på arkivet vårt. Selvfølgelig vil en "
+"administrator lese gjennomgå og godkjenne kommentaren, så blir den søkbar i "
+"systemet vårt.\n"
+" \t\t\t\tTusen takk for at du kommenterer på arkivet vårt.\\Vi ønsker å bli "
+"bedre og gjør arkivet vårt mer søkbart, så vi gjorde det mulig for deg "
+"kommentere arkivet vårt. Selvfølgelig vil en administrator lese gjennom og "
+"godkjenne kommentaren, så vil den være søkbar i systemet vårt.\n"
+" Tusen takkfor å kommentere arkivet vårt."
+
+#: site/app/show/image.php:1549
+msgid "Släng"
+msgstr "Kast bort"
+
+#: site/app/show/image.php:1569
+msgid "Din Kommentar är sparad"
+msgstr "Kommentaren din er lagret"
+
+#: site/app/show/image.php:1583
+msgid "Det har sparats"
+msgstr "Den er lagret"
+
+#: site/app/show/image.php:1594
+msgid ""
+"Tack för att du använder vår OCR-inläsningstjänst och för att du delar med "
+"dig av dina resultat. Det är genom sådana insatser som vår tjänst "
+"kontinuerligt förbättras. Vänligen observera att administratören kommer att "
+"granska och verifiera texten innan den görs sökbar. Vi vill också informera "
+"dig om att missbruk av tjänsten kan resultera i att ditt konto avstängs."
+msgstr ""
+"Takk for at du bruker vår OCR-skanningstjeneste og for at du deler deg av "
+"resultatene dine. Det er gjennom innsats som vår tjeneste kontinuerlig "
+"forbedret. Vær oppmerksom på at administratoren vil gå gjennom og verifiser "
+"teksten før du gjør den søkbar. Vi ønsker også å informere at misbruk av "
+"tjenesten kan føre til at kontoen din blir suspendert."
+
+#: site/app/show/image.php:1612
+msgid "Extrahera text från bilder"
+msgstr "Trekk ut tekst fra bilder"
+
+#: site/app/show/image.php:1622
+msgid ""
+"Här kan du extrahera text från bilderna eller skriva av bilderna och bidra "
+"med ditt resultat till oss, så att andra kan dra nytta av det. Om du önskar "
+"att experimentera med ditt arbete är det viktigt att se till att texten från "
+"bilderna grupperas med tydliga titlar som markerar början och slut på varje "
+"textsegment."
+msgstr ""
+"Her kan du trekke ut tekst fra bildene eller skrive av bildene og bidra med "
+"resultatet til oss, slik at andre kan dra nytte av det. Hvis du ønsker å "
+"eksperimentere med arbeidet ditt er det viktig å sørge for at teksten fra "
+"bildene er gruppert med tydelige titler som markerer begynnelsen og slutten "
+"av hvert tekstsegment."
+
+#: site/app/show/image.php:1739
+msgid "Välj"
+msgstr "Velge"
+
+#: site/app/show/image.php:1755
+msgid "Flytta"
+msgstr "Bevege seg"
+
+#: site/app/show/image.php:1763
+msgid "Flytta tillbaka"
+msgstr "Flytte tilbake"
+
+#: site/app/show/image.php:1770
+msgid "Flytta alla"
+msgstr "Beveg alle"
+
+#: site/app/show/image.php:1778
+msgid "Flytta alla tillbaka"
+msgstr "Flytt alle tilbake"
+
+#: site/app/show/image.php:1790
+msgid "De bilder som ska läsas in"
+msgstr "Bildene som skal lastes inn"
+
+#: site/app/show/image.php:2066
+msgid "Bild till text"
+msgstr "Bilde til tekst"
+
+#: site/app/show/image.php:2081
+msgid ""
+"Rita en ram. Där du vill kommentera sedan väntar du en 1 sekund då kommer en "
+"ruta med fält sedan ange dem och sedan klicka på spara."
+msgstr ""
+"Tegn en ramme. Der du vil kommentere så venter du 1 sekund så kommer en boks "
+"med felt, skriv dem inn og klikk deretter lagre."
+
+#: site/app/show/image.php:2081
+msgid "Lägg en Kommentar"
+msgstr "Legg til en kommentar"
+
+#: site/app/show/image.php:2082
+msgid "Dölj alla Kommentarersramar"
+msgstr "Skjul alle kommentarrammer"
+
+#: site/app/show/image.php:2096
+msgid "Skriv ut"
+msgstr "Skrive ut"
+
+#: site/app/show/image.php:2109
+msgid "Zooma 100%"
+msgstr "Zoom 100%"
+
+#: site/app/show/image.php:2274
+msgid "Tillbaka till föregående sida"
+msgstr "Tilbake til forrige side"
+
+#: site/app/show/image.php:2280 site/app/show/image.php:2306
+#: site/app/show/image.php:2310 site/app/show/image.php:2563
+#: site/app/show/image.php:2821 site/app/show/image.php:2858
+msgid "Dokumentbeskrivning"
+msgstr "Dokumentbeskrivelse"
+
+#: site/app/show/image.php:2284
+msgid "Bakåt"
+msgstr "Bakover"
+
+#: site/app/show/image.php:2289
+msgid "Framåt"
+msgstr "Framover"
+
+#: site/app/show/image.php:2307
+msgid "Det finns inga bilder i dokumentet"
+msgstr "Det er ingen bilder i dokumentet"
+
+#: site/app/show/image.php:2548 site/app/show/image.php:2675
+#: site/app/show/image.php:2754
+msgid "Kinship Center"
+msgstr "Slektskapssenter"
+
+#: site/app/show/image.php:2553 site/app/show/image.php:2680
+#: site/app/show/image.php:2759 site/app/show/image.php:2837
+msgid "Arkiv"
+msgstr "Fil"
+
+#: site/app/show/image.php:2555 site/app/show/image.php:2682
+#: site/app/show/image.php:2761 site/app/show/image.php:2839
+msgid "Upphovsmakare"
+msgstr "Skaper"
+
+#: site/app/show/image.php:2603
+msgid ""
+"Den här QR-koden innehåller länken till den här sidan. Så att du kan komma "
+"snabbt tillbaka."
+msgstr ""
+"Denne QR-koden inneholder lenken til denne siden. Slik at du kan komme raskt "
+"tilbake."
+
+#: site/app/show/image.php:2604
+msgid "En QR kod till den här sidan"
+msgstr "En QR-kode til denne siden"
+
+#: site/app/show/image.php:2823
+msgid "Släktskap"
+msgstr "Forhold"
+
+#: site/errorpages/404.php:5 site/errorpages/404.php:63
+msgid "404"
+msgstr "404"
+
+#: site/errorpages/404.php:65
+msgid "Sidan du försöker hitta finns inte"
+msgstr "Siden du prøver å finne eksisterer ikke"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "Fil"
+#~ msgstr "Fil"

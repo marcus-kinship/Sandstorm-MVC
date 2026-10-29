@@ -13,6 +13,13 @@
  */
 class default_ini
 {
+	/**
+	 * Configuration settings
+	 *
+	 * @var array
+	 */
+	public $set = [];
+
 	function __construct()
 	{
 		$start = $_SERVER['DOCUMENT_ROOT'];

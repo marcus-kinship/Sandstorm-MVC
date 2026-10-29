@@ -18,4 +18,6 @@ class default_db
     public $type = "as:text";
     public $charset = "utf8mb4";
     public $logpath = "";
+    public $lengthmax = 0;
+    public $settingsname = "";
 }

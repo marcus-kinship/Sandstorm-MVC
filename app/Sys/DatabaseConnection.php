@@ -50,7 +50,8 @@ class DatabaseConnection
             $config->password,
             $config->name,
             $config->type,
-            $config->charset
+            $config->charset,
+            $config->lengthmax
         );
     }
 
@@ -241,24 +242,21 @@ class DatabaseConnection
     {
         $config = DatabaseManager::getConnection($connectionstring);
 
-        $uname = ucfirst($config->driver);
-        $path = $_SERVER['HTTP_path_sys'] . "DatabaseConnection/$uname/$uname.driver.php";
+        $className = "\\Sys\\DatabaseConnection\\" . ucfirst($config->driver) . "\\Driver";
 
-        if (file_exists($path)) {
-            include_once($path);
-        }
-
-        if (class_exists($uname, false)) {
-            $db = new $uname(
+        // A failed connection means "not active", not an error
+        try {
+            $db = new $className(
                 $config->hostname,
                 $config->user,
                 $config->password,
                 $config->name,
-                true,
-                $config->type
+                $config->type,
+                $config->charset,
+                $config->lengthmax
             );
-        } else {
-            throw new SystemException(sprintf(_("Could not load %s class."), $uname));
+        } catch (\Throwable $e) {
+            return false;
         }
 
         return $db->check();

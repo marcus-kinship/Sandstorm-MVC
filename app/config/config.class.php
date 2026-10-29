@@ -64,7 +64,9 @@ class config
 	private function ClassAutoLoader(string $class): void
 	{
 		if (str_contains($class, '\\')) {
-			$file = $_SERVER['DOCUMENT_ROOT'] . '/app/' . str_replace('\\', '/', $class) . '.php';
+			// From the app folder itself (the parent of app/Sys), not DOCUMENT_ROOT,
+			// so it also works when the web root is another folder
+			$file = dirname($_SERVER['HTTP_path_sys']) . '/' . str_replace('\\', '/', $class) . '.php';
 		} elseif (is_file($_SERVER['HTTP_path_dll'] . $class . '.php')) {
 			$file = $_SERVER['HTTP_path_dll'] . $class . '.php';
 		} elseif (is_file($_SERVER['HTTP_path_sys'] . $class . '.php')) {

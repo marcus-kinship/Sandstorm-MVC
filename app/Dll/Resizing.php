@@ -1,5 +1,10 @@
 <?php
 
+use Dll\Resizing\Canvas;
+use Dll\Resizing\Effect;
+use Dll\Resizing\Format;
+use Dll\Resizing\Size;
+
 /**
  * Resize, crop and convert images (GD).
  *
@@ -14,6 +19,11 @@
  *
  * $logo = (new Resizing())->load('res/logo.png')->pad(200, 200, '#ffffff')->toDataUri();
  * </code>
+ *
+ * The work is done in small classes that are only loaded when they are used:
+ * Resizing\Format (read and write files), Resizing\Size (resize, fit, cover,
+ * pad, crop), Resizing\Effect (rotate, flip, grayscale, watermark) and
+ * Resizing\Canvas (new canvases and colours).
  *
  * - Reads and writes JPEG, PNG, GIF, WebP, AVIF and BMP (what this PHP's GD supports).
  * - save() picks the type from the file extension and only writes inside the project.
@@ -34,21 +44,6 @@ class Resizing
 
     /** @var int Largest image (width × height) that load() accepts */
     private int $maxPixels = 40_000_000;
-
-    /** @var array<int, array{0: string, 1: string, 2: string}> type => [read function, write function, mime] */
-    private const TYPES = [
-        IMAGETYPE_JPEG => ['imagecreatefromjpeg', 'imagejpeg', 'image/jpeg'],
-        IMAGETYPE_PNG => ['imagecreatefrompng', 'imagepng', 'image/png'],
-        IMAGETYPE_GIF => ['imagecreatefromgif', 'imagegif', 'image/gif'],
-        IMAGETYPE_WEBP => ['imagecreatefromwebp', 'imagewebp', 'image/webp'],
-        IMAGETYPE_BMP => ['imagecreatefrombmp', 'imagebmp', 'image/bmp'],
-    ];
-
-    /** @var array<string, int> File extension => IMAGETYPE_* */
-    private const EXTENSIONS = [
-        'jpg' => IMAGETYPE_JPEG, 'jpeg' => IMAGETYPE_JPEG, 'png' => IMAGETYPE_PNG, 'gif' => IMAGETYPE_GIF,
-        'webp' => IMAGETYPE_WEBP, 'bmp' => IMAGETYPE_BMP, 'avif' => 19,
-    ];
 
     /**
      * Largest image (width × height) that load() accepts.
@@ -81,17 +76,11 @@ class Resizing
             throw new SystemException(sprintf(_('The image is too large (%d × %d pixels)'), $width, $height));
         }
 
-        $read = $this->functions($type)[0];
-        $image = @$read($filename);
-        if (!$image instanceof \GdImage) {
-            throw new SystemException(sprintf(_('Could not read the image %s'), basename((string) $filename)));
-        }
-
-        $this->image = $image;
+        $this->image = Format::read($filename, $type);
         $this->image_type = $type;
 
         if ($type === IMAGETYPE_JPEG) {
-            $this->fixOrientation($filename);
+            $this->image = Effect::orientation($this->image, $filename);
         }
 
         return $this;
@@ -102,12 +91,12 @@ class Resizing
      *
      * @param int          $width
      * @param int          $height
-     * @param string|array $color '#rrggbb', '#rgb' or [r, g, b]; 'transparent' for none
+     * @param string|array $color '#rrggbb', '#rgb', [r, g, b] or 'transparent'
      * @return $this
      */
     public function create(int $width, int $height, string|array $color = '#ffffff')
     {
-        $this->image = $this->canvas($width, $height, $color);
+        $this->image = Canvas::create($width, $height, $color);
         $this->image_type = IMAGETYPE_PNG;
         return $this;
     }
@@ -142,20 +131,10 @@ class Resizing
      * @param int|float $width
      * @param int|float $height
      * @return $this
-     * @throws SystemException When width or height is below 1
      */
     public function resize($width, $height)
     {
-        $width = (int) round($width);
-        $height = (int) round($height);
-        if ($width < 1 || $height < 1) {
-            throw new SystemException(_('Width and height must be at least 1'));
-        }
-
-        $new = $this->canvas($width, $height, 'transparent');
-        imagecopyresampled($new, $this->gd(), 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
-        $this->image = $new;
-
+        $this->image = Size::resize($this->gd(), $width, $height);
         return $this;
     }
 
@@ -202,12 +181,8 @@ class Resizing
      */
     public function fit(int $width, int $height, bool $upscale = false)
     {
-        $ratio = min($width / $this->getWidth(), $height / $this->getHeight());
-        if ($ratio >= 1 && !$upscale) {
-            return $this;
-        }
-
-        return $this->resize(max(1, $this->getWidth() * $ratio), max(1, $this->getHeight() * $ratio));
+        $this->image = Size::fit($this->gd(), $width, $height, $upscale);
+        return $this;
     }
 
     /**
@@ -219,10 +194,8 @@ class Resizing
      */
     public function cover(int $width, int $height)
     {
-        $ratio = max($width / $this->getWidth(), $height / $this->getHeight());
-        $this->resize(max($width, $this->getWidth() * $ratio), max($height, $this->getHeight() * $ratio));
-
-        return $this->crop($width, $height, intdiv($this->getWidth() - $width, 2), intdiv($this->getHeight() - $height, 2));
+        $this->image = Size::cover($this->gd(), $width, $height);
+        return $this;
     }
 
     /**
@@ -235,23 +208,13 @@ class Resizing
      */
     public function pad(int $width, int $height, string|array $color = '#ffffff')
     {
-        $this->fit($width, $height, true);
-
-        $canvas = $this->canvas($width, $height, $color);
-        imagecopy($canvas, $this->gd(), intdiv($width - $this->getWidth(), 2), intdiv($height - $this->getHeight(), 2), 0, 0, $this->getWidth(), $this->getHeight());
-        $this->image = $canvas;
-
+        $this->image = Size::pad($this->gd(), $width, $height, $color);
         return $this;
     }
 
     /**
      * Older name: fit inside width × height on a background of R, G, B.
      *
-     * @param int $width
-     * @param int $height
-     * @param int $R
-     * @param int $G
-     * @param int $B
      * @return $this
      */
     public function smartResize($width, $height, $R, $G, $B)
@@ -260,7 +223,7 @@ class Resizing
     }
 
     /**
-     * Square-ish thumbnail: the longest side becomes $size.
+     * Thumbnail: the longest side becomes $size.
      *
      * @param int $size
      * @return $this
@@ -273,8 +236,6 @@ class Resizing
     /**
      * Older name for resize().
      *
-     * @param int $width
-     * @param int $height
      * @return $this
      */
     public function thumbnailsTo($width, $height)
@@ -290,34 +251,21 @@ class Resizing
      * @param int $x
      * @param int $y
      * @return $this
-     * @throws SystemException When width or height is below 1
      */
     public function crop($width, $height, $x, $y)
     {
-        $width = (int) $width;
-        $height = (int) $height;
-        if ($width < 1 || $height < 1) {
-            throw new SystemException(_('Width and height must be at least 1'));
-        }
-
-        $new = $this->canvas($width, $height, 'transparent');
-        imagecopy($new, $this->gd(), 0, 0, max(0, (int) $x), max(0, (int) $y), $width, $height);
-        $this->image = $new;
-
+        $this->image = Size::crop($this->gd(), (int) $width, (int) $height, (int) $x, (int) $y);
         return $this;
     }
 
     /**
-     * Older name: copy width × height from x, y to x1, y1 on a new canvas.
+     * Older name: copy from x, y to x1, y1 on a new width × height canvas.
      *
      * @return $this
      */
     public function smartCrop($width, $height, $x, $y, $x1, $y1)
     {
-        $new = $this->canvas((int) $width, (int) $height, 'transparent');
-        imagecopy($new, $this->gd(), (int) $x1, (int) $y1, (int) $x, (int) $y, $this->getWidth(), $this->getHeight());
-        $this->image = $new;
-
+        $this->image = Size::place($this->gd(), (int) $width, (int) $height, (int) $x, (int) $y, (int) $x1, (int) $y1);
         return $this;
     }
 
@@ -329,10 +277,7 @@ class Resizing
      */
     public function rotate($degrees = 0)
     {
-        $transparent = imagecolorallocatealpha($this->gd(), 0, 0, 0, 127);
-        $this->image = imagerotate($this->gd(), $degrees, $transparent);
-        imagesavealpha($this->image, true);
-
+        $this->image = Effect::rotate($this->gd(), $degrees);
         return $this;
     }
 
@@ -344,13 +289,7 @@ class Resizing
      */
     public function flip(string $direction = 'horizontal')
     {
-        $mode = match ($direction) {
-            'vertical', 'v' => IMG_FLIP_VERTICAL,
-            'both' => IMG_FLIP_BOTH,
-            default => IMG_FLIP_HORIZONTAL,
-        };
-        imageflip($this->gd(), $mode);
-
+        Effect::flip($this->gd(), $direction);
         return $this;
     }
 
@@ -361,7 +300,7 @@ class Resizing
      */
     public function grayscale()
     {
-        imagefilter($this->gd(), IMG_FILTER_GRAYSCALE);
+        Effect::grayscale($this->gd());
         return $this;
     }
 
@@ -377,7 +316,7 @@ class Resizing
      */
     public function backgroundcolor($g, $r, $b, $width, $height)
     {
-        $this->image = $this->canvas((int) $width, (int) $height, [(int) $g, (int) $r, (int) $b]);
+        $this->image = Canvas::create((int) $width, (int) $height, [(int) $g, (int) $r, (int) $b]);
         return $this;
     }
 
@@ -386,38 +325,13 @@ class Resizing
      *
      * @param string|int  $y         'top', 'bottom' or pixels from the bottom
      * @param string|int  $x         'left', 'right' or pixels from the right
-     * @param string|null $stampFile PNG in the project (default: config::get('stamp'))
+     * @param string|null $stampFile PNG (default: config::get('stamp'))
      * @param int         $margin    Space from the edge in pixels
      * @return $this
-     * @throws SystemException For an invalid position or a missing stamp
      */
     public function watermark($y, $x, ?string $stampFile = null, int $margin = 10)
     {
-        $stampFile ??= (string) config::get('stamp', true);
-        $stamp = $stampFile !== '' && is_file($stampFile) ? @imagecreatefrompng($stampFile) : false;
-        if (!$stamp instanceof \GdImage) {
-            throw new SystemException(sprintf(_('Could not read the watermark %s'), $stampFile));
-        }
-
-        $sx = imagesx($stamp);
-        $sy = imagesy($stamp);
-
-        $left = match (true) {
-            $x === 'left' => $margin,
-            $x === 'right' => $this->getWidth() - $sx - $margin,
-            is_numeric($x) => $this->getWidth() - $sx - (int) $x,
-            default => throw new SystemException(sprintf(_('Invalid x position for the watermark: %s'), $x)),
-        };
-        $top = match (true) {
-            $y === 'top' => $margin,
-            $y === 'bottom' => $this->getHeight() - $sy - $margin,
-            is_numeric($y) => $this->getHeight() - $sy - (int) $y,
-            default => throw new SystemException(sprintf(_('Invalid y position for the watermark: %s'), $y)),
-        };
-
-        imagealphablending($this->gd(), true);
-        imagecopy($this->gd(), $stamp, $left, $top, 0, 0, $sx, $sy);
-
+        Effect::watermark($this->gd(), $stampFile ?? (string) config::get('stamp', true), $y, $x, $margin);
         return $this;
     }
 
@@ -435,13 +349,13 @@ class Resizing
     public function save($filename, $image_type = null, $compression = 75, $permissions = null)
     {
         $path = Filesystem::resolve((string) $filename);
-        $type = $image_type ?? (self::EXTENSIONS[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? $this->image_type);
+        $type = $image_type ?? Format::fromExtension($path, $this->image_type);
 
         if (!is_dir(dirname($path)) && !mkdir(dirname($path), 0775, true) && !is_dir(dirname($path))) {
             throw new SystemException(sprintf(_('Could not create the folder %s'), dirname($path)));
         }
 
-        if (!$this->write($type, $path, (int) $compression)) {
+        if (!Format::write($this->gd(), $type, $path, (int) $compression)) {
             throw new SystemException(sprintf(_('Could not save the image %s'), $filename));
         }
         if ($permissions !== null) {
@@ -463,7 +377,7 @@ class Resizing
         if (!headers_sent()) {
             header('Content-Type: ' . image_type_to_mime_type($image_type));
         }
-        $this->write($image_type, null, (int) $compression);
+        Format::write($this->gd(), $image_type, null, (int) $compression);
     }
 
     /**
@@ -476,122 +390,8 @@ class Resizing
     public function toDataUri($image_type = IMAGETYPE_PNG, $compression = 75): string
     {
         ob_start();
-        $this->write($image_type, null, (int) $compression);
+        Format::write($this->gd(), $image_type, null, (int) $compression);
         return 'data:' . image_type_to_mime_type($image_type) . ';base64,' . base64_encode((string) ob_get_clean());
-    }
-
-    /**
-     * Write to a file, or to the output when $path is null.
-     */
-    private function write(int $type, ?string $path, int $compression): bool
-    {
-        $image = $this->gd();
-        $write = $this->functions($type)[1];
-
-        if ($type === IMAGETYPE_JPEG || $type === IMAGETYPE_BMP) {
-            // No transparency in these: put the image on white
-            $flat = $this->canvas($this->getWidth(), $this->getHeight(), '#ffffff');
-            imagealphablending($flat, true);
-            imagecopy($flat, $image, 0, 0, 0, 0, $this->getWidth(), $this->getHeight());
-            $image = $flat;
-        } else {
-            imagealphablending($image, false);
-            imagesavealpha($image, true);
-        }
-
-        $quality = max(0, min(100, $compression));
-
-        return match ($type) {
-            IMAGETYPE_JPEG, IMAGETYPE_WEBP => $write($image, $path, $quality),
-            19 => $write($image, $path, $quality),
-            IMAGETYPE_PNG => $write($image, $path, $compression >= 0 && $compression <= 9 ? $compression : 6),
-            default => $write($image, $path),
-        };
-    }
-
-    /**
-     * Read and write functions for a type.
-     *
-     * @return array{0: string, 1: string}
-     * @throws SystemException When this PHP cannot handle the type
-     */
-    private function functions(int $type): array
-    {
-        $functions = $type === 19 ? ['imagecreatefromavif', 'imageavif'] : (self::TYPES[$type] ?? null);
-
-        if ($functions === null || !function_exists($functions[0]) || !function_exists($functions[1])) {
-            throw new SystemException(sprintf(_('The image type is not supported: %s'), image_type_to_mime_type($type)));
-        }
-
-        return $functions;
-    }
-
-    /**
-     * A new true colour canvas.
-     *
-     * @param int          $width
-     * @param int          $height
-     * @param string|array $color '#rrggbb', '#rgb', [r, g, b] or 'transparent'
-     * @return \GdImage
-     */
-    private function canvas(int $width, int $height, string|array $color): \GdImage
-    {
-        $canvas = imagecreatetruecolor(max(1, $width), max(1, $height));
-        imagealphablending($canvas, false);
-        imagesavealpha($canvas, true);
-
-        if ($color === 'transparent') {
-            $fill = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
-        } else {
-            [$r, $g, $b] = is_array($color) ? array_values($color) + [0, 0, 0] : self::hexColor($color);
-            $fill = imagecolorallocate($canvas, (int) $r, (int) $g, (int) $b);
-        }
-        imagefilledrectangle($canvas, 0, 0, $width, $height, $fill);
-        imagealphablending($canvas, true);
-
-        return $canvas;
-    }
-
-    /**
-     * '#rrggbb' or '#rgb' to [r, g, b].
-     *
-     * @param string $hex
-     * @return array{0: int, 1: int, 2: int}
-     * @throws \InvalidArgumentException
-     */
-    private static function hexColor(string $hex): array
-    {
-        $hex = ltrim($hex, '#');
-        if (strlen($hex) === 3) {
-            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-        }
-        if (!preg_match('/^[0-9a-f]{6}$/i', $hex)) {
-            throw new \InvalidArgumentException(sprintf(_('Invalid colour: %s'), $hex));
-        }
-
-        return [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
-    }
-
-    /**
-     * Turn a JPEG the right way up from its EXIF orientation (photos from phones).
-     */
-    private function fixOrientation(string $filename): void
-    {
-        if (!function_exists('exif_read_data')) {
-            return;
-        }
-
-        $orientation = (int) (@exif_read_data($filename)['Orientation'] ?? 1);
-        match ($orientation) {
-            2 => $this->flip('horizontal'),
-            3 => $this->rotate(180),
-            4 => $this->flip('vertical'),
-            5 => $this->rotate(-90)->flip('horizontal'),
-            6 => $this->rotate(-90),
-            7 => $this->rotate(90)->flip('horizontal'),
-            8 => $this->rotate(90),
-            default => null,
-        };
     }
 
     /**

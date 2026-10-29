@@ -22,6 +22,7 @@ Routes are `SetEnvIfNoCase` lines in `.htaccess`, read by Apache before PHP star
 - One class per file, the file named after the class.
 - New parts of the core live under a namespace that matches the folder (`Sys\Session\Store` in `app/Sys/Session/Store.php`). Classes that sites call by name (`config`, `Start`, `Session`, `IController`, `DatabaseConnection`, `Record`, ...) keep their global name, so site code keeps working.
 - Inside a namespace, global classes are written with a leading `\` (`\config::get()`, `\DatabaseConnection`).
+- A large class is split into parts in a folder with its name, so a request only loads the part it uses: `Minifier` + `Minifier/Css.php`, `Minifier/Js.php`; `Resizing` + `Resizing/Format.php`, `Size.php`, `Effect.php`, `Canvas.php`; `Validation` + `Validation/Password.php`. The main class keeps the public methods and hands the work to the parts.
 
 ## Types and docblocks
 

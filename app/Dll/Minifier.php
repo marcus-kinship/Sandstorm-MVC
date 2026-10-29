@@ -1,213 +1,379 @@
 <?php
 
 /**
- * Minifier Class for static assets (CSS and JavaScript) for Sandstorm.
+ * Serves minified CSS and JavaScript from res/css/.
  *
- * This class minifies CSS and JavaScript files to improve performance by reducing file size.
- * It checks if the minified version of the file exists, and if not, it creates one.
- * If the original file is modified, the minified file is recreated. Sandstorm uses this class on startup.
- * The .htaccess file intercepts requests for specific URLs (\/res\/css\/[A-Za-z0-9\/]{1,16})\.minify\.(CSS|css|js|JS)
- * and routes .css and .js files to this class, which serves the minified version.
+ * .htaccess sends /res/css/<name>.minify.css (or .js) here; the original is
+ * res/css/<name>.css. The minified copy is kept in res/css/minify/ and only
+ * made again when the original changes, so a request costs two stat() calls
+ * and a readfile(). The browser gets an ETag: when it already has the file
+ * it gets "304 Not Modified" and no body.
  *
- * @category __("Utility class")
+ * Minifying is careful on purpose: strings, url(...) and regular
+ * expressions are never touched, and JavaScript keeps its line breaks
+ * (code without semicolons depends on them).
+ *
+ * Cache: one week outside devmode; in devmode the browser asks every time,
+ * so changes show at once.
+ *
+ * @category _("Utility class")
  */
 class Minifier
 {
-
     /**
-     * Constructor method
+     * Serve the file for a route from .htaccess.
      *
-     * Initializes the Minifier object and minifies the specified CSS or JavaScript file.
-     *
-     * @param array $args An array containing information about the file to minify:
-     *                    - $args[0]: (unused in current implementation)
-     *                    - $args[1]: File path (relative or absolute)
-     *                    - $args[2]: File type ('css' or 'js')
+     * @param array $args [route name, path without extension ("/res/css/site"), type ("css" or "js")]
      */
     public function __construct($args)
     {
-        // Set the paths for the original and minified files
-        $realFile = $_SERVER['DOCUMENT_ROOT'] . $args[1] . '.' . $args[2];
-        $directoryPath = dirname($args[1]);
-        $minifyFile = $_SERVER['DOCUMENT_ROOT'] . $directoryPath . '/minify/' . basename($args[1]) . '.' . $args[2];
+        $this->serve((string) ($args[1] ?? ''), strtolower((string) ($args[2] ?? '')));
+    }
 
-        // Check if the original file exists and get its modified time
-        if (file_exists($realFile)) {
-            $realFileModifiedTime = filemtime($realFile);
-
-            // Create the "minify" directory if it doesn't exist
-            $minifyFolderPath = $_SERVER['DOCUMENT_ROOT'] . $directoryPath . '/minify';
-            if (!file_exists($minifyFolderPath)) {
-                mkdir($minifyFolderPath, 0777, true); // Create the directory recursively with full permissions
-            }
-
-
-            // Check if the minified file exists
-            if (file_exists($minifyFile)) {
-                $minifyFileModifiedTime = filemtime($minifyFile);
-
-                // If the minified file is older than the original file
-                if ($minifyFileModifiedTime < $realFileModifiedTime) {
-                    // Minify the content and write it to the minified file
-                    $content = file_get_contents($realFile);
-                    $content = $this->minifyContent($content, $args[2]);
-                    file_put_contents($minifyFile, $content);
-                    chmod($minifyFile, 0644); // Set file permissions
-                }
-
-                // Set appropriate content type header
-                $this->setContentTypeHeader($args[2]);
-                // Set cache headers
-                header('Cache-Control: max-age=604800'); // 1 week in seconds
-                header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 604800) . ' GMT'); // 1 week from now
-                readfile($minifyFile);
-            } else {
-                // Create the minified file and write the content
-                $content = file_get_contents($realFile);
-                $content = $this->minifyContent($content, $args[2]);
-                file_put_contents($minifyFile, $content);
-                chmod($minifyFile, 0644); // Set file permissions
-
-                // Set appropriate content type header
-                $this->setContentTypeHeader($args[2]);
-                // Set cache headers
-                header('Cache-Control: max-age=604800'); // 1 week in seconds
-                header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 604800) . ' GMT'); // 1 week from now
-                readfile($minifyFile);
-            }
-        } else {
-            // If the original file doesn't exist, send a 404 error
-            $this->load(Config::get('404 page'));
+    /**
+     * Send the minified file, 304 when the browser has it, 404 when there is no original.
+     *
+     * @param string $path Path from the project folder, without extension
+     * @param string $type 'css' or 'js'
+     * @return void
+     */
+    public function serve(string $path, string $type): void
+    {
+        if (!in_array($type, ['css', 'js'], true) || !preg_match('#^/?res/css/[A-Za-z0-9/]{1,16}$#', $path)) {
+            $this->notFound();
+            return;
         }
 
-        die(); // Terminate script execution
-    }
+        $source = Filesystem::resolve(ltrim($path, '/') . '.' . $type);
+        $target = dirname($source) . '/minify/' . basename($source);
 
-    /**
-     * Set Content-Type header based on file type
-     *
-     * @param string $type The file type ('css' or 'js')
-     */
-    private function setContentTypeHeader($type)
-    {
-        if ($type === 'css') {
-            header('Content-Type: text/css');
-        } elseif ($type === 'js') {
-            header('Content-Type: application/javascript');
+        if (!is_file($source)) {
+            $this->notFound();
+            return;
         }
-    }
 
-    /**
-     * Minify CSS content
-     *
-     * Minifies the provided CSS content.
-     *
-     * @param string $css The CSS content to minify
-     * @return string The minified CSS content
-     */
-    private function minifyCSS($css)
-    {
-        // Remove PHP tags
-        $css = preg_replace('/<\?(php)?/i', '', $css);
+        if (!is_file($target) || filemtime($target) < filemtime($source)) {
+            $this->build($source, $target, $type);
+        }
 
-        // Remove CSS comments
-        $css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
+        clearstatcache(true, $target);
+        $etag = sprintf('"%x-%x"', filemtime($target), filesize($target));
 
-        // Remove newlines
-        $css = preg_replace('![\n\r]!', '', $css);
-
-        // Remove extra spaces (2 or more)
-        $css = preg_replace('![ ]{2,}!', '', $css);
-
-        // Remove space before opening curly brace
-        $css = preg_replace('! {!', '{', $css);
-
-        // Remove space after colon
-        $css = preg_replace('!: !', ':', $css);
-
-        // Remove space before colon
-        $css = preg_replace('! :!', ':', $css);
-
-        // Remove space after comma
-        $css = preg_replace('!, !', ',', $css);
-
-        // Remove space before comma
-        $css = preg_replace('! ,!', ',', $css);
-
-        // Remove space around slash
-        $css = preg_replace('! / !', '/', $css);
-
-        // Remove space around greater-than sign
-        $css = preg_replace('! > !', '>', $css);
-
-        // Remove space around plus sign
-        $css = preg_replace('! \+ !', '+', $css);
-
-        // Remove space before exclamation mark
-        $css = preg_replace('@ !@', '!', $css);
-
-        return $css;
-    }
-
-    /**
-     * Minify JavaScript content
-     *
-     * Minifies the provided JavaScript content.
-     *
-     * @param string $js The JavaScript content to minify
-     * @return string The minified JavaScript content
-     */
-    private function minifyJS($js)
-    {
-        // Remove PHP tags
-        $js = preg_replace('/<\?(php)?/i', '', $js);
-
-        // Remove multi-line comments
-        $js = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $js);
-
-        // Remove single-line comments (but preserve URLs with //)
-        $js = preg_replace('~//(?![\'"]).*~m', '', $js);
-
-        // Remove newlines and whitespaces
-        $js = str_replace(["\r\n", "\r", "\n", "\t", '  ', '    ', '    '], '', $js);
-
-        return $js;
-    }
-
-    /**
-     * Load a file and set appropriate headers.
-     *
-     * @param string $file The path to the file to load
-     */
-    protected function load($file)
-    {
-        // If no headers have been sent yet, set them
         if (!headers_sent()) {
-            header("HTTP/1.0 404 Not Found");
+            header('Content-Type: ' . ($type === 'css' ? 'text/css' : 'application/javascript') . '; charset=utf-8');
+            header('ETag: ' . $etag);
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime($target)) . ' GMT');
             header('Vary: Accept-Encoding');
-            header('Content-Type: text/html; charset=utf-8');
+            header(($_SERVER['HTTP_devmode'] ?? '') === 'true' ? 'Cache-Control: no-cache' : 'Cache-Control: public, max-age=604800');
         }
 
-        include_once $file;
+        if (trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+            http_response_code(304);
+            return;
+        }
+
+        readfile($target);
     }
 
     /**
-     * Minify Content
+     * Minify CSS.
      *
-     * Minifies the provided content based on its type (CSS or JavaScript).
+     * Removes comments (except /*! ... *\/), collapses white space and drops
+     * it around { } ; , > ~ and after :, removes the last ; in a block.
+     * Strings and url(...) are copied as they are.
      *
-     * @param string $content The content to minify
-     * @param string $type The type of content ('css' or 'js')
-     * @return string The minified content
+     * @param string $css
+     * @return string
      */
-    private function minifyContent($content, $type)
+    public static function css(string $css): string
     {
-        if ($type === 'css') {
-            return $this->minifyCSS($content);
-        } elseif ($type === 'js') {
-            return $this->minifyJS($content);
-        } else {
-            return $content;
+        $out = '';
+        $space = false;
+        $length = strlen($css);
+        $noSpaceAfter = '{};,>~:(';
+        $noSpaceBefore = '{};,>~)!';
+
+        for ($i = 0; $i < $length; $i++) {
+            $c = $css[$i];
+
+            if ($c === '/' && ($css[$i + 1] ?? '') === '*') {
+                $end = strpos($css, '*/', $i + 2);
+                $end = $end === false ? $length : $end + 2;
+                if (($css[$i + 2] ?? '') === '!') {
+                    $out .= substr($css, $i, $end - $i);
+                }
+                $i = $end - 1;
+                continue;
+            }
+
+            if (ctype_space($c)) {
+                $space = true;
+                continue;
+            }
+
+            // A space before : only matters in a selector (a :hover), not in a declaration (color : red)
+            $declarationColon = false;
+            if ($c === ':') {
+                $rest = strcspn($css, '{;}', $i);
+                $declarationColon = $i + $rest < $length && $css[$i + $rest] !== '{';
+            }
+
+            if ($space && $out !== '' && !$declarationColon && !str_ends_with($out, '*/')
+                && !str_contains($noSpaceAfter, substr($out, -1)) && !str_contains($noSpaceBefore, $c)) {
+                $out .= ' ';
+            }
+            $space = false;
+
+            if ($c === '"' || $c === "'") {
+                $end = self::stringEnd($css, $i, $c);
+                $out .= substr($css, $i, $end - $i + 1);
+                $i = $end;
+                continue;
+            }
+
+            if (($c === 'u' || $c === 'U') && strncasecmp(substr($css, $i, 4), 'url(', 4) === 0) {
+                $end = strpos($css, ')', $i);
+                $end = $end === false ? $length - 1 : $end;
+                $out .= substr($css, $i, $end - $i + 1);
+                $i = $end;
+                continue;
+            }
+
+            if ($c === '}' && str_ends_with($out, ';')) {
+                $out = substr($out, 0, -1);
+            }
+
+            $out .= $c;
+        }
+
+        return trim($out);
+    }
+
+    /**
+     * Minify JavaScript, carefully.
+     *
+     * Removes comments (except /*! ... *\/), collapses spaces, drops blank
+     * lines and the spaces around { } ( ) [ ] ; , : = & | ! and line breaks where
+     * no statement can end. Strings, template literals and regular
+     * expressions are copied as they are, and other line breaks are kept.
+     *
+     * @param string $js
+     * @return string
+     */
+    public static function js(string $js): string
+    {
+        $out = '';
+        $space = false;
+        $newline = false;
+        $length = strlen($js);
+        $templates = [];          // brace depth for each open ${ ... } in a template literal
+        // No space needed next to these; + - / < > are left alone (a + +b, a / /re/, a < !--b)
+        $tight = '{}()[];,:=&|!';
+
+        for ($i = 0; $i < $length; $i++) {
+            $c = $js[$i];
+            $next = $js[$i + 1] ?? '';
+
+            // Inside ${ ... } of a template literal: the } that closes it goes back to the template
+            if ($templates !== [] && $c === '}' && end($templates) === 0) {
+                array_pop($templates);
+                $out .= '}';
+                $i = self::templateEnd($js, $i + 1, $out, $templates);
+                continue;
+            }
+            if ($templates !== [] && ($c === '{' || $c === '}')) {
+                $templates[array_key_last($templates)] += $c === '{' ? 1 : -1;
+            }
+
+            if ($c === '/' && $next === '/') {
+                $end = strpos($js, "\n", $i);
+                $i = ($end === false ? $length : $end) - 1;
+                continue;
+            }
+            if ($c === '/' && $next === '*') {
+                $end = strpos($js, '*/', $i + 2);
+                $end = $end === false ? $length : $end + 2;
+                if (($js[$i + 2] ?? '') === '!') {
+                    $out .= substr($js, $i, $end - $i) . "\n";
+                }
+                $i = $end - 1;
+                $space = true;
+                continue;
+            }
+
+            if ($c === "\n" || $c === "\r") {
+                $newline = true;
+                continue;
+            }
+            if (ctype_space($c)) {
+                $space = true;
+                continue;
+            }
+
+            $last = substr(rtrim($out, ' '), -1);
+            if ($newline && $out !== '') {
+                // A line break only matters where a statement could end
+                if (str_contains('{;,([:=', $last) || str_contains('}),;.]', $c)) {
+                    $space = false;
+                } else {
+                    $out = rtrim($out, ' ') . "\n";
+                    $space = false;
+                }
+            }
+            if ($space && $out !== '' && !str_ends_with($out, "\n") && !str_contains($tight, $last) && !str_contains($tight, $c)) {
+                $out .= ' ';
+            }
+            $space = $newline = false;
+
+            if ($c === '"' || $c === "'") {
+                $end = self::stringEnd($js, $i, $c);
+                $out .= substr($js, $i, $end - $i + 1);
+                $i = $end;
+                continue;
+            }
+
+            if ($c === '`') {
+                $out .= '`';
+                $i = self::templateEnd($js, $i + 1, $out, $templates);
+                continue;
+            }
+
+            if ($c === '/' && self::regexCanStart($out)) {
+                $end = self::regexEnd($js, $i);
+                $out .= substr($js, $i, $end - $i + 1);
+                $i = $end;
+                continue;
+            }
+
+            $out .= $c;
+        }
+
+        return trim($out);
+    }
+
+    /**
+     * Index of the quote that ends the string starting at $start.
+     */
+    private static function stringEnd(string $code, int $start, string $quote): int
+    {
+        $length = strlen($code);
+        for ($i = $start + 1; $i < $length; $i++) {
+            if ($code[$i] === '\\') {
+                $i++;
+            } elseif ($code[$i] === $quote) {
+                return $i;
+            }
+        }
+        return $length - 1;
+    }
+
+    /**
+     * Copy a template literal from $start up to its closing ` or the next ${.
+     *
+     * @return int Index of the last character copied
+     */
+    private static function templateEnd(string $code, int $start, string &$out, array &$templates): int
+    {
+        $length = strlen($code);
+        for ($i = $start; $i < $length; $i++) {
+            $c = $code[$i];
+            if ($c === '\\') {
+                $out .= $c . ($code[$i + 1] ?? '');
+                $i++;
+                continue;
+            }
+            $out .= $c;
+            if ($c === '`') {
+                return $i;
+            }
+            if ($c === '$' && ($code[$i + 1] ?? '') === '{') {
+                $out .= '{';
+                $templates[] = 0;
+                return $i + 1;
+            }
+        }
+        return $length - 1;
+    }
+
+    /**
+     * Whether a / here starts a regular expression (and not a division).
+     */
+    private static function regexCanStart(string $out): bool
+    {
+        $before = rtrim($out);
+        if ($before === '') {
+            return true;
+        }
+        if (str_contains('(,=:[!&|?{};+-*%<>~^', substr($before, -1))) {
+            return true;
+        }
+        return (bool) preg_match('/(?:^|[^\w$])(?:return|typeof|instanceof|in|of|new|delete|void|throw|case|do|else|yield|await)$/', $before);
+    }
+
+    /**
+     * Index of the last character of the regular expression starting at $start (its flags included).
+     */
+    private static function regexEnd(string $code, int $start): int
+    {
+        $length = strlen($code);
+        $class = false;
+        for ($i = $start + 1; $i < $length; $i++) {
+            $c = $code[$i];
+            if ($c === '\\') {
+                $i++;
+            } elseif ($c === '[') {
+                $class = true;
+            } elseif ($c === ']') {
+                $class = false;
+            } elseif ($c === "\n") {
+                return $i - 1;
+            } elseif ($c === '/' && !$class) {
+                while ($i + 1 < $length && ctype_alpha($code[$i + 1])) {
+                    $i++;
+                }
+                return $i;
+            }
+        }
+        return $length - 1;
+    }
+
+    /**
+     * Minify, then write the copy atomically (another request never reads half a file).
+     */
+    private function build(string $source, string $target, string $type): void
+    {
+        $content = file_get_contents($source);
+        if ($content === false) {
+            throw new SystemException(sprintf(_('Could not read %s'), $source));
+        }
+
+        $minified = $type === 'css' ? self::css($content) : self::js($content);
+
+        if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0775, true) && !is_dir(dirname($target))) {
+            throw new SystemException(sprintf(_('Could not create the folder %s'), dirname($target)));
+        }
+
+        $temp = $target . '.' . bin2hex(random_bytes(4)) . '.tmp';
+        if (file_put_contents($temp, $minified) === false || !rename($temp, $target)) {
+            @unlink($temp);
+            throw new SystemException(sprintf(_('Could not write %s'), $target));
+        }
+        @chmod($target, 0644);
+    }
+
+    /**
+     * Status 404 with the site's 404 page when there is one.
+     */
+    private function notFound(): void
+    {
+        http_response_code(404);
+
+        $page = config::get('404 page', true);
+        if ($page && is_file($page)) {
+            if (!headers_sent()) {
+                header('Content-Type: text/html; charset=utf-8');
+            }
+            include $page;
         }
     }
 }

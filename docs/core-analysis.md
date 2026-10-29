@@ -57,7 +57,7 @@ Inventory of 2026-10-29. "No users" means no other file in the repository uses t
 | `Dll/Table.php`, `Dll/Rtable.php` | `Record` (creates and changes tables itself) |
 | `Dll/Tagging.php` | Uses the old database API (`mysql_escape_mimic`) that no longer exists |
 
-Done: `Dll/Comments.php` and `Sys/Session_old.php` removed (after `tests/session.php` validated the new Session); `Sys/CookieManager.php` is now a real cookie class; `Sys/Curl.php` rewritten (certificate check on, only http/https, GET data sent).
+Done: `Dll/Comments.php` and `Sys/Session_old.php` removed (after `tests/session.php` validated the new Session); `Sys/CookieManager.php` is now a real cookie class; `Sys/Curl.php` rewritten (certificate check on, only http/https, GET data sent); `Dll/Minifier.php` rewritten (CSS and JavaScript are no longer broken by minifying, ETag/304, atomic writes; `tests/minifier.php` compares JavaScript results with Node.js).
 
 **C. Two versions of the same thing (proposed: merge into one)**
 

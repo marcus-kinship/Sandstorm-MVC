@@ -8,8 +8,7 @@
  * Usage follows a simple lifecycle:
  *
  * ```php
- * Session::start();                        // Called automatically by Start
- * Session::set('user_id', 42);
+ * Session::set('user_id', 42);              // Starts the session on first use
  * $id = Session::get('user_id');           // 42
  * Session::remove('user_id');
  * Session::kill();                         // Destroy session on logout
@@ -41,7 +40,9 @@ class Session
     /**
      * Initializes the session.
      *
-     * Called automatically by the {@see Start} class on every request.
+     * Not needed in normal code: set(), get(), add() and remove() start the
+     * session the first time they are used, so pages that never touch the
+     * session get no session file, no cookie and no session lock.
      * Creates the {@see \Sys\Session\Store}, which in turn starts the
      * underlying PHP session via {@see \Sys\Session\Core::start()}.
      *
@@ -51,9 +52,30 @@ class Session
      */
     public static function start(): void
     {
-        if (!self::$store) {
-            self::$store = new \Sys\Session\Store();
-        }
+        self::store();
+    }
+
+    /**
+     * Whether the visitor already has a session (a session cookie was sent).
+     *
+     * Lets code read optional session data without starting a session for
+     * visitors who have none.
+     *
+     * @return bool
+     */
+    public static function exists(): bool
+    {
+        return self::$store !== null || isset($_COOKIE[session_name()]);
+    }
+
+    /**
+     * The session store, started on first use.
+     *
+     * @return \Sys\Session\Store
+     */
+    private static function store(): \Sys\Session\Store
+    {
+        return self::$store ??= new \Sys\Session\Store();
     }
 
     /**
@@ -99,7 +121,7 @@ class Session
      */
     public static function set(string $key, mixed $value): void
     {
-        self::$store->set($key, $value);
+        self::store()->set($key, $value);
     }
 
     /**
@@ -115,7 +137,7 @@ class Session
      */
     public static function add(string $key, mixed $value, int|string|null $i = null): void
     {
-        self::$store->add($key, $value, $i);
+        self::store()->add($key, $value, $i);
     }
 
     /**
@@ -127,7 +149,7 @@ class Session
      */
     public static function get(string $key, mixed $def = false): mixed
     {
-        return self::$store->get($key, $def);
+        return self::store()->get($key, $def);
     }
 
     /**
@@ -140,7 +162,7 @@ class Session
      */
     public static function remove(string $key): void
     {
-        self::$store->remove($key);
+        self::store()->remove($key);
     }
 
     // -------------------------------------------------------------------------

@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Initializes and manages the system startup process.
+ * Runs one request: error handling, output buffer, language, controller.
  *
- * This class handles:
- * - Error handling registration
- * - Output buffering and compression
- * - Default language initialization
- * - Controller routing and execution
- * - 404 and 500 page handling
- * - Minification requests
+ * Kept small on purpose, since it runs on every request:
+ * - the session is not started here (Session starts on first use), and the
+ *   stored language is only read for visitors who already have a session
+ * - settings are read through config::get(), which reads each file once
+ * - the @router docblock is only parsed for methods that have one
+ *
+ * index.php creates the object; the constructor registers the error
+ * handler and the destructor runs the request.
  *
  * @file Start.php
  * @author Marcus Larsson
@@ -21,194 +22,151 @@ class Start
 	/**
 	 * System-wide error handler instance
 	 *
-	 * @var SystemException
+	 * @var SystemException|null
 	 */
-	private static $errorHandler;
+	private static ?SystemException $errorHandler = null;
 
 	/**
-	 * Indicates whether the system has already been initialized
-	 *
-	 * @var bool
-	 */
-	private static $isInitialized = false;
-
-	/**
-	 * Constructor
-	 *
-	 * Registers the global error handler if not already initialized.
+	 * Register the error handler (once).
 	 */
 	public function __construct()
 	{
-		if (!self::$isInitialized) {
+		if (self::$errorHandler === null) {
 			self::$errorHandler = new SystemException();
 			self::$errorHandler->register();
-			self::$isInitialized = true;
 		}
 	}
 
 	/**
-	 * Destructor
-	 *
-	 * Handles system startup tasks, including:
-	 * - Starting the session
-	 * - Enabling output buffering and optional GZIP compression
-	 * - Initializing the default language
-	 * - Resolving the requested controller and method
-	 * - Handling minification requests
-	 * - Loading the requested file
-	 * - Executing the controller method with router arguments
+	 * Run the request.
 	 */
 	public function __destruct()
 	{
-		// Start session
-		Session::start();
+		$this->run();
+	}
 
-		// Enable output buffering
-		if (function_exists('ob_start')) {
-			if (function_exists('ob_gzhandler')) {
-				ob_start('ob_gzhandler');
-			} else {
-				ob_start();
-			}
-		} else {
-			die("Please enable Output buffering and zlib compression to be supported on this server.");
-		}
+	/**
+	 * Resolve the controller from the route in .htaccess and call it.
+	 *
+	 * HTTP_CONTROLLER (set by .htaccess) is "file|controller|method|":
+	 * an empty file means no route matched (404), "minify" serves CSS/JS.
+	 *
+	 * @return void
+	 * @throws SystemException When the controller, the method or the 404 page is missing
+	 */
+	public function run(): void
+	{
+		// One output buffer, compressed once when the page is done
+		ob_start(function_exists('ob_gzhandler') ? 'ob_gzhandler' : null);
 
-		// Initialize language
 		$this->initializeDefaultLanguage();
 
-		// Determine controller and method from HTTP headers
-		if (isset($_SERVER['REDIRECT_HTTP_CONTROLLER'])) {
-			$f = explode('|', $_SERVER['REDIRECT_HTTP_CONTROLLER']);
-		} elseif (isset($_SERVER['HTTP_CONTROLLER'])) {
-			$f = explode('|', $_SERVER['HTTP_CONTROLLER']);
-		} else {
-			$f = ['', 'default', 'index'];
-		}
+		$route = explode('|', $_SERVER['REDIRECT_HTTP_CONTROLLER'] ?? $_SERVER['HTTP_CONTROLLER'] ?? '|default|index');
+		$path = $route[0] ?? '';
+		$controller = ($route[1] ?? '') !== '' ? $route[1] : 'default';
+		$method = ($route[2] ?? '') !== '' ? $route[2] : 'index';
 
-		// Guarantee array structure
-		$f[0] = $f[0] ?? '';
-		$f[1] = $f[1] ?? 'default';
-		$f[2] = $f[2] ?? 'index';
-
-		// Handle minify requests
-		if ($f[0] === 'minify') {
-			new Minifier($f);
-
-			if (ob_get_level() > 0) {
-				$data = ob_get_contents();
-				ob_end_clean();
-				echo $data;
-			}
-
+		if ($path === 'minify') {
+			new Minifier($route);
+			ob_end_flush();
 			exit;
 		}
 
-		// Determine file path
-		$file = $_SERVER['HTTP_path_site'] . $f[0];
+		$file = $_SERVER['HTTP_path_site'] . $path;
 
-		// Developer mode router builder
-		if (isset($_SERVER['HTTP_devmode']) && $_SERVER['HTTP_devmode'] === 'true' && !file_exists($file)) {
-			$route = new RouterBuilder();
-			$route->applyRules();
+		// Devmode: write routes for new controllers into .htaccess
+		if ($path !== '' && ($_SERVER['HTTP_devmode'] ?? '') === 'true' && !is_file($file)) {
+			(new RouterBuilder())->applyRules();
 		}
 
-		// 404 page handling
-		$page404 = config::get('404 page');
-
-		if ($f[0] === '') {
-			if (file_exists($page404)) {
-				$this->load($page404);
-			} else {
-				throw new SystemException(_('Could not load 404 page because the file is missing.'));
-			}
+		if ($path === '') {
+			$this->notFound();
 		} else {
-			// Load requested file
 			$this->load($file);
 
-			// Determine controller class
-			$cname = $f[1] . 'Controller';
-
-			if (!class_exists($cname)) {
-				throw new SystemException(sprintf(_('Could not find controller with the name "%s" in %s'), $f[1], $file));
+			$class = $controller . 'Controller';
+			if (!class_exists($class, false)) {
+				throw new SystemException(sprintf(_('Could not find controller with the name "%s" in %s'), $controller, $file));
 			}
+			config::registry($class, $file);
 
-			// Register controller in config
-			config::registry($cname, _($file));
+			$instance = new $class();
 
-			// Instantiate controller
-			$c = new $cname();
-
-			// Resolve router arguments
-			$args = $this->resolveRouterArguments($c, $f[2]);
-
-			// Call requested method or fallback to index
-			if (!method_exists($c, $f[2])) {
-				if (method_exists($c, 'index')) {
-					SystemException::checkpoint(['ControllerException' => sprintf(_('In controller index'))]);
-					call_user_func_array([$c, 'index'], $args);
-				} else {
-					throw new SystemException(sprintf(_('Could not find method with the name "%s" or index in %s'), $f[2], $cname));
+			if (!method_exists($instance, $method)) {
+				if (!method_exists($instance, 'index')) {
+					throw new SystemException(sprintf(_('Could not find method with the name "%s" or index in %s'), $method, $class));
 				}
-			} else {
-				SystemException::checkpoint(['ControllerException' => sprintf(_('In controller %s'), $cname)]);
-				call_user_func_array([$c, $f[2]], $args);
+				$method = 'index';
 			}
+
+			SystemException::checkpoint(['ControllerException' => sprintf(_('In controller %s'), $class)]);
+			$instance->$method(...$this->resolveRouterArguments($instance, $method));
+
+			// The controller renders its views when it is destroyed: do it now,
+			// inside the buffer, so the views are compressed and an error in a
+			// view still reaches the error page
+			unset($instance);
 		}
 
-		// Output buffered content
-		$data = ob_get_contents();
-		ob_end_clean();
-		echo $data;
+		ob_end_flush();
 	}
 
 	/**
-	 * Initializes the default language for the system
+	 * Show the 404 page with status 404.
 	 *
-	 * Priority order for determining the language:
-	 * 1. Session language (if already set)
-	 * 2. GET parameter 'setLang' (allows user to change language)
-	 * 3. HTTP_LANGUAGE header (from server configuration)
+	 * @return void
+	 * @throws SystemException When the 404 page file is missing
+	 */
+	protected function notFound(): void
+	{
+		$page404 = config::get('404 page', true);
+
+		if (!$page404 || !is_file($page404)) {
+			throw new SystemException(_('Could not load 404 page because the file is missing.'));
+		}
+
+		http_response_code(404);
+		$this->load($page404);
+	}
+
+	/**
+	 * Set up the language for this request.
 	 *
-	 * If no language is specified in the HTTP_LANGUAGE header, the method
-	 * returns early without initializing any language.
+	 * Order: ?setLang=xx_XX (if that locale exists), then the language stored
+	 * in the visitor's session, then HTTP_language from .htaccess.
 	 *
 	 * @return void
 	 */
-	protected function initializeDefaultLanguage()
+	protected function initializeDefaultLanguage(): void
 	{
-		$defaultLanguage = $_SERVER['HTTP_language'] ?? null;
+		$language = $_SERVER['HTTP_language'] ?? '';
 
-		if (!$defaultLanguage)
+		if ($language === '') {
 			return;
+		}
 
 		$userLanguage = Language::getFromSession();
-
 		if ($userLanguage !== false) {
-			$defaultLanguage = $userLanguage;
+			$language = $userLanguage;
 		}
 
-		if (isset($_GET['setLang'])) {
-			$defaultLanguage = $_GET['setLang'];
+		// Only a locale name that has a folder in app/locales
+		$requested = $_GET['setLang'] ?? '';
+		if (is_string($requested) && preg_match('/^[a-z]{2,3}_[A-Z]{2}$/', $requested)
+			&& is_dir($_SERVER['DOCUMENT_ROOT'] . '/app/locales/' . $requested)) {
+			$language = $requested;
 		}
 
-		$lang = new Language($defaultLanguage);
-		$lang->initialize();
+		(new Language($language))->initialize();
 	}
 
 	/**
-	 * Loads a PHP file with correct HTTP headers
-	 *
-	 * Sets the following headers before including the file:
-	 * - Vary: Accept-Encoding (for proper caching with compression)
-	 * - Content-Type: text/html; charset=utf-8 (UTF-8 encoded HTML)
-	 *
-	 * Headers are only set if they haven't been sent already.
+	 * Include a page with UTF-8 HTML headers.
 	 *
 	 * @param string $file Absolute path to the PHP file to include
 	 * @return void
 	 */
-	protected function load($file)
+	protected function load(string $file): void
 	{
 		if (!headers_sent()) {
 			header('Vary: Accept-Encoding');
@@ -219,75 +177,37 @@ class Start
 	}
 
 	/**
-	 * Resolves arguments for a controller method using the @router annotation
+	 * Read URL arguments for a controller method from its @router docblock.
 	 *
-	 * Parses the @router annotation in the method's docblock to extract URL
-	 * parameters and pass them as arguments to the controller method.
+	 * Supported patterns:
+	 * - {number(1-11):id}  digits, passed as 'id'
+	 * - {string(...):name} anything but a slash, passed as 'name'
+	 * - {param}            anything but a slash
 	 *
-	 * Supported router pattern formats:
-	 * - {number(1-11):id} - Matches numeric values, captured as 'id'
-	 * - {string(...):name} - Matches string values, captured as 'name'
-	 * - {param} - Generic parameter, matches any non-slash characters
-	 *
-	 * Example annotation:
-	 * @router user/{number(1-11):id}/profile -> userProfile
-	 *
-	 * The pattern is matched against the current REQUEST_URI and extracted
-	 * parameters are returned as an array in the order they appear.
+	 * Example: @router user/{number(1-11):id}/profile -> userProfile
 	 *
 	 * @param object $controller The controller instance
-	 * @param string $method The method name to check for router annotations
-	 * @return array An array of extracted URL parameters, or empty array if no match
+	 * @param string $method     The method that will be called
+	 * @return array<int, string> The URL parts in order, or [] when nothing matches
 	 */
-	protected function resolveRouterArguments(object $controller, string $method)
+	protected function resolveRouterArguments(object $controller, string $method): array
 	{
-		$ref = new ReflectionMethod($controller, $method);
-		$doc = $ref->getDocComment();
+		$doc = (new ReflectionMethod($controller, $method))->getDocComment();
 
-		if (!$doc) {
+		if (!$doc || !str_contains($doc, '@router') || !preg_match('/@router\s+(.+?)\s*->/', $doc, $m)) {
 			return [];
 		}
 
-		// Extract @router annotation
-		if (!preg_match('/@router\s+(.+)/', $doc, $m)) {
-			return [];
-		}
-
-		$router = trim($m[1]);
-
-		// Must contain '->' separator
-		if (!str_contains($router, '->')) {
-			return [];
-		}
-
-		[$pattern] = array_map('trim', explode('->', $router));
-
-		// Get current URI path
-		$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
-		// Build regex from router pattern
-		$regex = preg_replace_callback(
-			'/\{(number|string)\([^)]+\):([^}]+)\}/', // {number(1-11):id} or {string(...):name}
-			function ($matches) {
-				$type = $matches[1];   // number|string
-				$name = $matches[2];   // parameter name
-	
-				// Return the regex pattern for each type
-				return $type === 'number' ? '(\d+)' : '([^\/]+)';
-			},
-			$pattern
-		);
-
-		// Also replace generic {param} placeholders with string pattern
+		$regex = preg_replace('/\{(number)\([^)]+\):[^}]+\}/', '(\d+)', trim($m[1]));
 		$regex = preg_replace('/\{[^}]+\}/', '([^\/]+)', $regex);
 
-		$regex = '#^' . $regex . '$#';
+		$uri = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
 
-		if (!preg_match($regex, $uri, $matches)) {
+		if (!preg_match('#^' . $regex . '$#', $uri, $matches)) {
 			return [];
 		}
 
-		array_shift($matches); // Remove full match
+		array_shift($matches);
 		return $matches;
 	}
 }

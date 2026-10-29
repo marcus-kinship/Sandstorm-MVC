@@ -247,22 +247,21 @@ abstract class IController
     }
 
     /**
-     * Render data in JSON format, optionally gzipped.
+     * Render data in JSON format.
+     *
+     * Compression is done once for the whole response by ob_gzhandler in
+     * Start, so the JSON is not gzipped here (that compressed it twice).
      *
      * @param mixed $data Data to encode as JSON
+     * @return void
      */
-    final function callback($data)
+    final function callback(mixed $data): void
     {
-        header('Content-type:application/json; charset=utf-8');
-
-        if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip') !== false) {
-            header('Content-Encoding: gzip');
-            echo gzencode(json_encode($data), 9); // Max compression
-        } else {
-            echo json_encode($data);
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
         }
 
-        return;
+        echo json_encode($data);
     }
 
     /**

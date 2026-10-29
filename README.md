@@ -98,9 +98,13 @@ All `DatabaseConnection` objects (and `Record`, `Session`, ...) in one request s
 
 ### Errors
 
-With `HTTP_devmode true` an error shows the full error page: message, source code, stack trace, POST data and loaded classes. With `HTTP_devmode false` visitors get a short page with status 500 and an error id, and warnings, notices and deprecations are logged while the page continues. Every error is written as one line to PHP's error log (with `php server.php`: the terminal), for example `[Sandstorm 34426dd6] TypeError: ... in site/default/Default.class.php:9`. Put your own page in `site/errorpages/500.php` to replace the short page; it gets the variable `$errorId`.
+With `HTTP_devmode true` an error shows the full error page: message, source code, stack trace, POST data and loaded classes. With `HTTP_devmode false` visitors get a short page with status 500 and an error id, and warnings, notices and deprecations are logged while the page continues. Every error is written as one line to PHP's error log (with `php server.php`: the terminal), for example `[Sandstorm 34426dd6] TypeError: ... in site/default/Default.class.php:9`. The visitor pages are `site/errorpages/404.php` (an address with no route, status 404) and `site/errorpages/500.php` (gets the variable `$errorId`); change them as you like.
 
 A `SystemException` can be caught with `try { } catch (SystemException $e) { }`. If nobody catches it, the error page is shown.
+
+### Session
+
+The session starts the first time you use `Session::set()`, `get()`, `add()` or `remove()`. Pages that never use it send no session cookie and write no session file. `Session::exists()` tells whether the visitor already has a session.
 
 Language, development mode, error mode and MySQL logging are set with the `SetEnv` lines at the end of `.htaccess`.
 

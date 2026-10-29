@@ -16,6 +16,42 @@ Goal: the framework should use as little CPU and memory as possible per request,
 
 **Step 2 (shared DB connection) is done.** The MySQL `Driver` keeps one connection per server, user, database and charset for the whole request; every `DatabaseConnection` still has its own `Driver` object, so settings such as `getError`, `func` and `type` do not leak between them. `DatabaseConnection` no longer closes the connection in its destructor (`->close()` does it on purpose), and `check()` reuses the open connection. Errors are logged to `ExceptionLog` again, but only when the page already has a connection open. Tested against MySQL: 20 × `new DatabaseConnection()` with a query open one connection instead of 20. `EscapeString::safe_vsprintf()` no longer has the PHP 7 branch.
 
+**Step 3 (request path) is done**, following `docs/code-standard.md`:
+
+- `Start`: no session start; one output buffer that is now really gzipped (before, the compressed buffer was thrown away and the page sent uncompressed); the controller renders inside the buffer; 404 sends status 404; `@router` arguments are read for the method that is actually called (before, a missing method failed in Reflection); `?setLang=` only accepts a locale that exists in `app/locales`.
+- `Session`: starts on first use; `Session::exists()` lets the language be read only for visitors who already have a session.
+- `config`: settings files are read once per request; the autoloader never prints (before, "Could not find class or trait" ended up on pages) and returns quietly so `class_exists()` works; `config::set()` works again (it called a class that does not exist and printed with `var_export`).
+- `IController::callback()`: no second gzip on top of `ob_gzhandler`.
+- `site/errorpages/404.php` and `500.php`: about 1 KB each, compressed.
+
+| Start page `/` (framework only) | Before | After |
+|---|---|---|
+| With opcache, median | 1.42 ms | 1.06 ms |
+| Without opcache, median | 4.2 ms | 3.8 ms |
+| Files loaded | 17 | 13 |
+| Peak memory | 786 KB | 451 KB |
+| Sent to the browser | 33 KB (not compressed) | 4.9 KB (gzip) |
+| Session file and cookie | Every visitor | Only when the session is used |
+
+The router cache from the plan was left out: PHP forgets static data between requests, and reading one docblock costs about 20 µs.
+
+## Next: code quality per group
+
+The rest of `app/` is brought up to `docs/code-standard.md` one group at a time, each committed and tested on its own:
+
+| Group | Files |
+|---|---|
+| Databases | `DatabaseConnection.php`, `DatabaseManager.php`, `DatabaseConnection/*` (Mysql Select/Insert/Update/Delete, ArgumentEscaper, QueryTemplate, ...), `Record.php`, `Record/*`, `Scheme.php`, `Querybuilder.php` |
+| Session | `Session.php`, `Session/Core.php`, `Session/Store.php`, `Session_old.php` (remove) |
+| File system | `Filesystem.php`, `FileInfo.php`, `FolderInfo.php`, `Dll/FilesystemIO.php`, `Dll/FileInfoIO.php`, `Dll/FolderInfoIO.php` |
+| Cookie | `CookieManager.php`, `Curl.php` |
+| Config | `config/config.class.php`, `config/settings/*`, `config/mysql/*` |
+| Language | `Language.php`, `app/locales/*` |
+| Controllers | `controller/ApIController.php`, `controller/IController.php`, `controller/Iproperty.php` |
+| Validation | `Dll/Validation.php` (to be developed further), together with `Sys/Request/Validator.php` |
+| Forms | `Sys/Formi.php`, `Dll/Forms/*` (text, textarea, hidden, dropmenu, time, table, tableboxs, getMessage) |
+| Listview | `Dll/Listview.php` |
+
 ## 1. What one request costs today
 
 The start page `/` loads 17 files. The framework itself (without the welcome page's MySQL check) takes:

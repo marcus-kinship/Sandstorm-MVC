@@ -1,435 +1,294 @@
 <?php
 
 /**
- * Configuration class for handling class loading and configuration values.
+ * Configuration and class loading.
  *
- * This class manages automatic class loading through the autoload function and
- * stores configuration values as well as information about loaded classes.
+ * - Autoloader: finds classes in app/Dll, app/Sys, the controller helpers and,
+ *   for namespaced classes, app/<Namespace>/<Class>.php.
+ * - Settings: config::get() reads app/config/settings/<name>.ini.php once per
+ *   request; config::set() adds a setting to that file.
+ * - Registry: which classes were loaded and when (shown on the error page).
+ * - Function files: config::loadFunction() loads app/funs/<name>.fun.php.
  *
  * @file config.class.php
  * @author Marcus Larsson
- * @version 2014.1.1
  * @copyright (c) 2011, Marcus Larsson
  * @category _("Config class")
  */
 class config
 {
 	/**
-	 * Static array for storing configuration values
+	 * Loaded classes: name => ['type' => ..., 'time' => microtime]
 	 *
-	 * @var array
+	 * @var array<string, array{type: string, time: float}>
 	 */
-	private static $Configuration = [];
+	private static array $classes = [];
 
 	/**
-	 * Static array for storing information about loaded classes
+	 * Settings that are already read in this request: ini class name => settings
 	 *
-	 * @var array
+	 * @var array<string, array<string, mixed>>
 	 */
-	private static $classes = [];
+	private static array $settings = [];
 
 	/**
-	 * Static array for storing class paths
+	 * Controller helper classes that live in app/controller/
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	private static $classPaths = [];
+	private const HELPERS = ['ApIController', 'IController', 'Iproperty'];
 
 	/**
-	 * Instance cache array
+	 * Register the autoloader.
 	 *
-	 * @var array
-	 */
-	private $cache = [];
-
-	/**
-	 * Constructor for LoaderClass that registers the autoload function
-	 *
-	 * Registers the ClassAutoLoader method with SPL autoload to enable
-	 * automatic loading of classes when they are first referenced.
-	 */
-	public function Loader()
-	{
-		spl_autoload_register(array($this, 'ClassAutoLoader'));
-	}
-
-	/**
-	 * Automatic class loader for handling class and trait loading
-	 *
-	 * This method is called automatically when a class or trait is referenced
-	 * but not yet loaded. It searches for the class in multiple locations:
-	 *
-	 * For namespaced classes:
-	 * - /app/{namespace}/{classname}.php
-	 *
-	 * For non-namespaced classes (in order):
-	 * - Dll/{classname}.php
-	 * - Sys/{classname}.php
-	 * - Controller helpers (ApIController, IController, Iproperty)
-	 *
-	 * @param string $class The fully qualified class name to load
-	 * @return void
-	 * @throws SystemException If the class file cannot be found or loaded
-	 */
-	private function ClassAutoLoader($class)
-	{
-		// Check if the class has a namespace
-		if (strpos($class, '\\') !== false) {
-			// If the class has a namespace, build the path based on namespace and class name
-			$file = $_SERVER['DOCUMENT_ROOT'] . "/app" . '/' . str_replace('\\', '/', $class) . '.php';
-			try {
-				// Check if the file exists, and include it if it does
-				if (!file_exists($file)) {
-					// If the class is not found in any of the directories, throw an exception
-					print sprintf(_("Could not find class or trait in file %s."), $file);
-				}
-
-				include_once $file;
-
-				if (!class_exists($class)) {
-					// If the class does not exist, throw an exception
-					if (!trait_exists($class)) {
-						// If it's not a trait either, throw an exception
-						print sprintf(_("Could not find class or trait in file %s."), $file);
-					}
-				}
-
-				config::registry($class, $file);
-				return;
-			} catch (SystemException $e) {
-			}
-		} else {
-			try {
-				// First check for Dll\class.php
-				$file = $_SERVER['HTTP_path_dll'] . $class . '.php';
-				if (file_exists($file)) {
-					include_once $file;
-
-					if (!class_exists($class)) {
-						// If the class does not exist, throw an exception
-						if (!trait_exists($class)) {
-							// If it's not a trait either, throw an exception
-							throw new \SystemException(sprintf(_("Could not find class or trait in file %s."), $file));
-						}
-					}
-
-					Config::registry($class, $file);
-					return;
-				}
-
-				// Check for Sys\class.php
-				$file = $_SERVER['HTTP_path_sys'] . $class . '.php';
-				if (file_exists($file)) {
-					include_once $file;
-
-					if (!class_exists($class)) {
-						// If the class does not exist, throw an exception
-						if (!trait_exists($class)) {
-							// If it's not a trait either, throw an exception
-							throw new \SystemException(sprintf(_("Could not find class or trait in file %s."), $file));
-						}
-					}
-
-					Config::registry($class, $file);
-					return;
-				}
-
-				// Additional check and inclusion for certain helper classes
-				$helper = array('ApIController', 'IController', 'Iproperty');
-
-				if (in_array($class, $helper)) {
-					config::registry($class, sprintf(_('%s class'), $class));
-					include $_SERVER['HTTP_path_controller'] . $class . '.php';
-					$helper = array();
-					return;
-				}
-
-				throw new \SystemException(sprintf(_("Could not find file %s."), $file));
-			} catch (SystemException $e) {
-			}
-		}
-	}
-
-	/**
-	 * Static method for setting configuration data
-	 *
-	 * Sets a configuration value and persists it to the appropriate .ini.php file.
-	 * Supports both simple keys (saved to default.ini.php) and namespaced keys
-	 * in the format "classname.key" (saved to classname.ini.php).
-	 *
-	 * Examples:
-	 * - config::set('timezone', 'Europe/Stockholm') - saves to default.ini.php
-	 * - config::set('database.host', 'localhost') - saves to database.ini.php
-	 *
-	 * @param string $key The key for the configuration data (supports dot notation)
-	 * @param mixed $data The data to store (string or array)
 	 * @return void
 	 */
-	public static function set($key, $data)
+	public function Loader(): void
 	{
-		$parts = explode('.', $key);
-
-		if (sizeof($parts) <= 1) {
-			// Load the default configuration file
-			include_once $_SERVER['HTTP_path_config'] . 'settings/default.ini.php';
-			$config = new default_ini();
-
-			// Check if the key exists in the configuration
-			if (!isset($config->set[$key])) {
-				$f = new \Dll\Filesystem($_SERVER['HTTP_path_config'] . 'settings/');
-				$f->open('default.ini.php');
-
-				// Insert the new configuration data after the closing parenthesis
-				if (is_array($data)) {
-					$f->insertAfter(');', "\n // Setting for $key " . "\n " . '$this->set[' . "'$key'] = " . var_export($data) . ";");
-				} else {
-					$f->insertAfter(');', "\n // Setting for $key " . "\n " . '$this->set[' . "'$key'] = '$data';");
-				}
-			}
-		} else {
-			// Generate a new configuration file for the specified class if it doesn't already exist
-			$class = $parts[0] . '_ini';
-			if (!file_exists($_SERVER['HTTP_path_config'] . 'settings/' . $parts[0] . '.ini.php')) {
-				$f = new \Dll\Filesystem($_SERVER['HTTP_path_config'] . 'settings/');
-				$f->write(
-					[
-						0 => '<?',
-						1 => '/**',
-						2 => '* ' . $class . ' data ',
-						3 => '*/',
-						4 => ' ',
-						5 => 'class ' . $class . ' {',
-						6 => '    function __construct() {',
-						7 => '',
-						8 => '        $this->set = array();',
-						9 => '        ',
-						11 => '',
-						12 => '    }',
-						13 => '}',
-						14 => '',
-						15 => '?>'
-					]
-				)->theme($parts[0] . '.ini.php');
-
-				$f->open($parts[0] . '.ini.php');
-
-				// Insert the new configuration data after the closing parenthesis
-				if (is_array($data)) {
-					$f->insertAfter(');', "\n // Setting for $parts[1] " . "\n " . '$this->set[' . "'$parts[1]'] = " . var_export($data) . ";");
-				} else {
-					$f->insertAfter(');', "\n // Setting for $parts[1] " . "\n " . '$this->set[' . "'$parts[1]'] = '$data';");
-				}
-			}
-		}
+		spl_autoload_register([$this, 'ClassAutoLoader']);
 	}
 
 	/**
-	 * Retrieves configuration values from configuration classes
+	 * Load a class or trait the first time it is used.
 	 *
-	 * Supports multiple formats for retrieving configuration data:
+	 * Namespaced:     app/<Namespace>/<Class>.php
+	 * Not namespaced: app/Dll/<Class>.php, then app/Sys/<Class>.php, then the
+	 *                 controller helpers in app/controller/.
 	 *
-	 * Examples:
+	 * Returns quietly when there is no file, so class_exists() works and PHP
+	 * reports the missing class itself.
+	 *
+	 * @param string $class Fully qualified class name
+	 * @return void
+	 */
+	private function ClassAutoLoader(string $class): void
+	{
+		if (str_contains($class, '\\')) {
+			$file = $_SERVER['DOCUMENT_ROOT'] . '/app/' . str_replace('\\', '/', $class) . '.php';
+		} elseif (is_file($_SERVER['HTTP_path_dll'] . $class . '.php')) {
+			$file = $_SERVER['HTTP_path_dll'] . $class . '.php';
+		} elseif (is_file($_SERVER['HTTP_path_sys'] . $class . '.php')) {
+			$file = $_SERVER['HTTP_path_sys'] . $class . '.php';
+		} elseif (in_array($class, self::HELPERS, true)) {
+			$file = $_SERVER['HTTP_path_controller'] . $class . '.php';
+		} else {
+			return;
+		}
+
+		if (!is_file($file)) {
+			return;
+		}
+
+		include_once $file;
+		self::registry($class, $file);
+	}
+
+	/**
+	 * Add a setting to a settings file.
+	 *
+	 * - config::set('timezone', 'Europe/Stockholm')  adds to default.ini.php
+	 * - config::set('database.host', 'localhost')     adds to database.ini.php (created if missing)
+	 *
+	 * A setting that already exists is left as it is.
+	 *
+	 * @param string $key  Setting name, optionally "file.setting"
+	 * @param mixed  $data Value (string, number, bool or array)
+	 * @return void
+	 * @throws \InvalidArgumentException If the file name is not a plain word
+	 * @throws \RuntimeException If the settings file cannot be read or written
+	 */
+	public static function set(string $key, mixed $data): void
+	{
+		[$name, $field] = self::splitKey($key);
+
+		if (!preg_match('/^\w+$/', $name)) {
+			throw new \InvalidArgumentException(sprintf(_('Invalid settings file name: %s'), $name));
+		}
+
+		if (array_key_exists($field, self::read($name, false) ?? [])) {
+			return;
+		}
+
+		$file = $_SERVER['HTTP_path_config'] . "settings/$name.ini.php";
+
+		if (!is_file($file)) {
+			$template = "<?php\n\n/**\n * $name settings, written by config::set()\n */\nclass {$name}_ini\n{\n"
+				. "\tpublic \$set = [];\n\n\tfunction __construct()\n\t{\n\t\t\$this->set = array(\n\t\t);\n\t}\n}\n";
+			if (file_put_contents($file, $template) === false) {
+				throw new \RuntimeException(sprintf(_('Could not create the settings file %s'), $file));
+			}
+		}
+
+		$code = file_get_contents($file);
+		$end = $code === false ? false : strpos($code, ');');
+		if ($end === false) {
+			throw new \RuntimeException(sprintf(_('Could not find the settings array in %s'), $file));
+		}
+
+		// Added after the settings array, so expressions in the array stay as they are
+		$line = "\n\n\t\t// Setting for $field\n\t\t\$this->set[" . var_export($field, true) . '] = ' . var_export($data, true) . ';';
+		$code = substr_replace($code, $line, $end + 2, 0);
+
+		if (file_put_contents($file, $code) === false) {
+			throw new \RuntimeException(sprintf(_('Could not write the settings file %s'), $file));
+		}
+
+		if (function_exists('opcache_invalidate')) {
+			opcache_invalidate($file, true);
+		}
+		unset(self::$settings[$name . '_ini']);
+	}
+
+	/**
+	 * Read a setting.
+	 *
 	 * <code>
-	 * // Get a value from a named configuration class
-	 * config::get('classname.value');
-	 *
-	 * // Get all values from a named configuration class
-	 * config::get('classname.*');
-	 *
-	 * // Get all values from the default configuration class
-	 * config::get('.*');
-	 *
-	 * // Get a value from the default configuration class
-	 * config::get('value');
-	 *
-	 * // Get a value from the default configuration class, return false if not found
-	 * config::get('value', true);
+	 * config::get('value');            // from default.ini.php
+	 * config::get('*');                // all of default.ini.php
+	 * config::get('classname.value');  // from classname.ini.php
+	 * config::get('classname.*');      // all of classname.ini.php
+	 * config::get('value', true);      // false instead of an exception when missing
 	 * </code>
 	 *
-	 * @param string|null $key The configuration key to retrieve (supports dot notation)
-	 * @param bool $check If true, returns false instead of throwing exception when key is not found
-	 * @return mixed The configuration value, array of values, or false if not found and $check is true
-	 * @throws SystemException If the key is not found and $check is false
+	 * @param string $key   Setting name, optionally "file.setting"
+	 * @param bool   $check True: return false when the setting or file is missing
+	 * @return mixed The value, all values for "*", or false (with $check)
+	 * @throws SystemException When the setting or file is missing and $check is false
 	 */
-	public static function get($key = null, $check = false)
+	public static function get(string $key = '', bool $check = false): mixed
 	{
-		$parts = explode('.', $key);
+		[$name, $field] = self::splitKey($key);
 
-		if (sizeof($parts) <= 1) {
-			config::registry('Default_ini', _('Configuration class'));
-			include_once $_SERVER['HTTP_path_config'] . 'settings/default.ini.php';
-			$config = new default_ini();
-			if ($parts[0] == "*") {
-				$val = $config->set;
-				unset($config);
-				return $val;
-			} else {
-				$config = new default_ini();
-				if (!isset($config->set[$key])) {
-					if ($check) {
-						return false;
-					} else {
-						throw new \SystemException(sprintf(_("Could not retrieve value %s"), $key));
-					}
-				} else {
-					$val = $config->set[$key];
-					unset($config);
-					return $val;
-				}
-			}
-		} else {
-			$class = $parts['0'] . '_ini';
-			if (!file_exists($_SERVER['HTTP_path_config'] . 'settings/' . $parts['0'] . '.ini.php')) {
-				if ($check) {
-					return false;
-				} else {
-					throw new \SystemException(sprintf(_("Could not find this file %s.ini.php."), $parts[1]));
-				}
-			}
-			config::registry(sprintf(_('%s_ini '), $parts['0']), _('Configuration class'));
-			include_once $_SERVER['HTTP_path_config'] . 'settings/' . $parts['0'] . '.ini.php';
-			$config = new $class();
-
-			if ($parts[1] == "*") {
-				$val = $config->set;
-				unset($config);
-				return $val;
-			} else {
-				if (!isset($config->set[$parts[1]])) {
-					if ($check) {
-						return false;
-					} else {
-						throw new \SystemException(sprintf(_("Could not retrieve value %s."), $parts[1]));
-					}
-				} else {
-					$val = $config->set[$parts['1']];
-					unset($config);
-					return $val;
-				}
-			}
+		$settings = self::read($name, !$check);
+		if ($settings === null) {
+			return false;
 		}
+
+		if ($field === '*') {
+			return $settings;
+		}
+
+		if (!array_key_exists($field, $settings)) {
+			if ($check) {
+				return false;
+			}
+			throw new SystemException(sprintf(_('Could not retrieve value %s'), $key));
+		}
+
+		return $settings[$field];
 	}
 
 	/**
-	 * Registers a class in the system registry
+	 * Split "file.setting" into [file, setting]; no dot means default.ini.php.
 	 *
-	 * Stores information about when a class was loaded and its type.
-	 * Used for debugging and tracking which classes have been loaded.
+	 * @param string $key
+	 * @return array{0: string, 1: string}
+	 */
+	private static function splitKey(string $key): array
+	{
+		$parts = explode('.', $key, 2);
+
+		if (count($parts) === 1) {
+			return ['default', $key];
+		}
+
+		return [$parts[0] === '' ? 'default' : $parts[0], $parts[1]];
+	}
+
+	/**
+	 * Read a settings file once per request.
 	 *
-	 * Example:
+	 * @param string $name   File name without .ini.php
+	 * @param bool   $strict Throw when the file is missing (otherwise return null)
+	 * @return array<string, mixed>|null
+	 * @throws SystemException When the file is missing and $strict is true
+	 */
+	private static function read(string $name, bool $strict): ?array
+	{
+		$class = $name . '_ini';
+
+		if (!isset(self::$settings[$class])) {
+			$file = $_SERVER['HTTP_path_config'] . "settings/$name.ini.php";
+
+			if (!is_file($file)) {
+				if ($strict) {
+					throw new SystemException(sprintf(_('Could not find this file %s.ini.php.'), $name));
+				}
+				return null;
+			}
+
+			include_once $file;
+			self::registry($class, _('Configuration class'));
+			self::$settings[$class] = (new $class())->set;
+		}
+
+		return self::$settings[$class];
+	}
+
+	/**
+	 * Note that a class was loaded (shown on the error page).
+	 *
 	 * <code>
 	 * config::registry('classname', 'type of class');
 	 * </code>
 	 *
-	 * @param string $class The name of the class to register
-	 * @param string $type The type or category of the class (default: 'dll')
+	 * @param string $class Class name
+	 * @param string $type  Kind of class or the file it came from
 	 * @return void
 	 */
-	public static function registry($class, $type = 'dll')
+	public static function registry(string $class, string $type = 'dll'): void
 	{
-		// Get current timestamp before registration
-		$startTime = microtime(true);
-		self::$classes[$class]['type'] = $type;
-		self::$classes[$class]['time'] = $startTime;
+		self::$classes[$class] = ['type' => $type, 'time' => microtime(true)];
 	}
 
 	/**
-	 * Retrieves the registry of loaded classes and configuration classes
+	 * All classes noted with registry(), in load order.
 	 *
-	 * Returns an array containing all registered classes with their types
-	 * and load times. Useful for debugging and performance analysis.
-	 *
-	 * Example:
-	 * <code>
-	 * config::getRegistry();
-	 * </code>
-	 *
-	 * @return array An associative array of all registered classes with metadata
+	 * @return array<string, array{type: string, time: float}>
 	 */
-	public static function getRegistry()
+	public static function getRegistry(): array
 	{
 		return self::$classes;
 	}
 
 	/**
-	 * Loads and calls a function from a .fun.php file
+	 * Load app/funs/<name>.fun.php (once) and call the function.
 	 *
-	 * This function dynamically loads a function file and executes it with
-	 * the provided arguments. Function files should be located in the
-	 * HTTP_path_funs directory and follow the naming convention:
-	 * {functionName}.fun.php
-	 *
-	 * The function caches loaded functions so subsequent calls don't require
-	 * re-including the file.
-	 *
-	 * Example:
 	 * <code>
 	 * $data = config::loadFunction('calculateTax', 100, 0.25);
 	 * </code>
 	 *
-	 * @param string $functionName The name of the function to load and call
-	 * @param mixed ...$args Additional arguments to pass to the function
-	 * @return mixed The result of the executed function
-	 * @throws SystemException If no function name is provided, if the function name
-	 *                         contains invalid characters, if the file is not found,
-	 *                         or if the function doesn't exist after file inclusion
+	 * @param string $functionName Function name (letters, digits and _, at most 40)
+	 * @param mixed  ...$args      Arguments for the function
+	 * @return mixed What the function returns
+	 * @throws SystemException If the name is invalid, the file is missing or the function is not in it
 	 */
-	public static function loadFunction($functionName)
+	public static function loadFunction(string $functionName, mixed ...$args): mixed
 	{
-		// Get all arguments
-		$args = func_get_args();
-
-		// Check if no arguments were provided
-		if (empty($args)) {
-			throw new SystemException(_("Specify the function name."));
-		}
-
-		// Get the function name from the first argument
-		$functionName = $args[0];
-
-		// Remove the first argument from the array
-		unset($args[0]);
-
-		// Validate that the function name contains only valid characters (a-z, A-Z, 0-9, and underscore)
-		// Maximum length of 40 characters
 		if (!preg_match('/^[a-zA-Z0-9_]{1,40}$/', $functionName)) {
-			throw new SystemException(_("Invalid characters in function name."));
+			throw new SystemException(_('Invalid characters in function name.'));
 		}
 
-		// Check if the function already exists
-		if (function_exists($functionName)) {
-			// Function already exists, call it directly
-			return call_user_func_array($functionName, $args);
-		} else {
-			// Build the path to the file based on the function name
-			$filename = $_SERVER['HTTP_path_funs'] . "{$functionName}.fun.php";
+		if (!function_exists($functionName)) {
+			$filename = $_SERVER['HTTP_path_funs'] . "$functionName.fun.php";
 
-			// Check if the file exists
-			if (file_exists($filename)) {
-				config::registry($filename, 'function');
-				// File exists, include it
-				config::registry('Config', _('Function'));
-				include_once $filename;
+			if (!is_file($filename)) {
+				throw new SystemException(sprintf(_("File '%s' was not found."), $filename));
+			}
 
-				// Check if the function now exists after inclusion
-				if (function_exists($functionName)) {
-					// Function has been loaded, call it
-					return call_user_func_array($functionName, $args);
-				} else {
-					throw new SystemException(_("Function '{$functionName}' was not found after including the file."));
-				}
-			} else {
-				throw new SystemException(_("File '{$filename}' was not found."));
+			include_once $filename;
+			self::registry($filename, _('Function'));
+
+			if (!function_exists($functionName)) {
+				throw new SystemException(sprintf(_("Function '%s' was not found after including the file."), $functionName));
 			}
 		}
+
+		return $functionName(...$args);
 	}
 }
 
-// Call the static registry method on the config class
 config::registry('Config', _('Configuration class'));
 
-// Create an instance of the config class
 $confighandler = new config();
-
-// Call the Loader method on the created instance
 $confighandler->Loader();

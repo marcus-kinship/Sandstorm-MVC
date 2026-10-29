@@ -160,6 +160,11 @@ class Language
      */
     public static function getFromSession(): string|false
     {
+        // Visitors without a session have no stored language; do not start one
+        if (!Session::exists()) {
+            return false;
+        }
+
         return Session::get('language', false);
     }
 

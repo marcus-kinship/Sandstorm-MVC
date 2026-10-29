@@ -115,7 +115,7 @@ abstract class OutputData
             $filePath = $_SERVER['HTTP_path_sys'] . 'SystemException/Views/' . $page;
         } else {
             // Ladda 500-fel för icke-utvecklarläge
-            $e500 = config::get('500 page');
+            $e500 = \config::get('500 page');
             if (file_exists($e500)) {
                 $filePath = $e500;
             } else {

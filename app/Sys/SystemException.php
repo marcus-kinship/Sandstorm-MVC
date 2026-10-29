@@ -11,10 +11,14 @@ use Sys\SystemException\ExceptionRenderer;
  * regular error messages to exceptions where possible.
  * Error handling has its own language file that can be modified.
  *
- * Started in config.class.php with:
+ * Started in Start.php with:
  * $errorhandler = new SystemException();
  * $errorhandler->register();
- * 
+ *
+ * Throwing a SystemException has no side effects, so it can be caught.
+ * An exception that is not caught reaches exceptionHandler(), which calls
+ * show(): the full error page in devmode, a short 500 page otherwise.
+ *
  * @category _("SystemException Management class")
  *
  */
@@ -29,7 +33,9 @@ class SystemException extends Exception
 	private $load = false;
 	private static ?ExceptionRenderer $renderer = null; // Static renderer
 	private static ?ExceptionLogger $logger = null; // Static logger
-	private static $pathExceptionLogger = __DIR__ . '/SystemException/ExceptionLogger.php'; 
+	private static $pathExceptionLogger = __DIR__ . '/SystemException/ExceptionLogger.php';
+	private $data = array(); // Error data collected in the constructor, used by show()
+	private static $showing = false; // True while an error page is being rendered
 
     protected static function viewPath()
     {
@@ -42,7 +48,6 @@ class SystemException extends Exception
     public static function header(): void
     {
 		if (self::$renderer === null) {
-			include_once self::$pathExceptionRenderer;
 			self::$renderer = new ExceptionRenderer(self::$_data, self::viewPath());
 		}
 		self::$renderer->header();
@@ -239,7 +244,8 @@ class SystemException extends Exception
 				list($message, $code) = array($code, $message);
 			}
 
-			$f = debug_backtrace();
+			// Without arguments: they can be large and are not shown
+			$f = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
 			if ($file == false) {
 				$line = $f[0]['line'] ?? 0;
 				$file = $f[0]['file'] ?? 'unknown';
@@ -279,8 +285,6 @@ class SystemException extends Exception
 				parent::__construct($messageStr, $code, $previous);
 			}
 
-			global $start_minne;
-
 			// Complete data with values from Exception if missing
 			if (!$data['line'] || $data['line'] === 0) {
 				$data['line'] = $this->getLine();
@@ -294,71 +298,149 @@ class SystemException extends Exception
 				$data['previous'] = $this->getPrevious();
 			}
 
-			if (ob_get_level() > 0) {
-				ob_clean();
+			// Rendering happens in show(), so the exception can be caught
+			$this->data = $data;
+		}
+	}
+
+	/**
+	 * Show the error page for this exception and stop the request
+	 *
+	 * Devmode: the full error page (source, stack, POST data, classes).
+	 * Otherwise: a short 500 page with an error id; details only go to the log.
+	 *
+	 * @return never
+	 */
+	public function show(): never
+	{
+		// An error while the error page is rendered: plain text, no new page
+		if (self::$showing) {
+			error_log('[Sandstorm] Error while showing an error: ' . $this->getMessage() . ' in ' . $this->getFile() . ':' . $this->getLine());
+			exit(1);
+		}
+		self::$showing = true;
+
+		// One log line; a wrapped TypeError etc. is logged as itself
+		$errorId = bin2hex(random_bytes(4));
+		$source = $this->getPrevious() ?? $this;
+		error_log(sprintf(
+			'[Sandstorm %s] %s: %s in %s:%d',
+			$errorId,
+			get_class($source),
+			$source->getMessage(),
+			$source === $this ? ($this->data['file'] ?? $this->getFile()) : $source->getFile(),
+			$source === $this ? ($this->data['line'] ?? $this->getLine()) : $source->getLine()
+		));
+
+		// Remove everything the page had written so far (keep gzip)
+		while (ob_get_level() > 0) {
+			$handlers = ob_list_handlers();
+			if (end($handlers) === 'ob_gzhandler') {
+				break;
 			}
+			ob_end_clean();
+		}
+		if (ob_get_level() > 0) {
+			ob_clean();
+		}
 
-			self::$_data = array_merge($data, self::$_data);
+		if (!headers_sent()) {
+			http_response_code(500);
+		}
 
-			// Initialize renderer with initial data
-			self::$renderer = new ExceptionRenderer(self::$_data, self::viewPath());
+		if (($_SERVER['HTTP_devmode'] ?? '') !== 'true') {
+			self::showProductionPage($errorId);
+		}
 
-			// Log exception to database if available
-			$logger = self::getLogger();
-			if ($logger && $logger->isAvailable()) {
-				$logger->log(self::$_data);
-			}
+		self::$_data = array_merge($this->data, self::$_data);
 
-			$result = [];
-			$messageValue = self::$_data['message'] ?? null;
+		// Initialize renderer with initial data
+		self::$renderer = new ExceptionRenderer(self::$_data, self::viewPath());
 
-			if (is_string($messageValue)) {
-				$listOfError = $this->getErrorList();
-				$documentRoot = $_SERVER["DOCUMENT_ROOT"] ?? '';
-				$result = $this->parseErrorMessage($messageValue, $listOfError, $documentRoot . '/');
-			}
+		$result = [];
+		$messageValue = self::$_data['message'] ?? null;
 
-			if ($result && !empty($result['errorType'])) {
-				self::$_data['parseErrorMessage'] = $result;
-				self::$renderer->setData(['parseErrorMessage' => $result]);
-				
-				$classname = str_replace("Uncaught ", '', $result['errorType']);
-				$classname .= "Handle";
+		if (is_string($messageValue)) {
+			$listOfError = $this->getErrorList();
+			$documentRoot = $_SERVER["DOCUMENT_ROOT"] ?? '';
+			$result = $this->parseErrorMessage($messageValue, $listOfError, $documentRoot . '/');
+		}
 
-				$fullClassName = "Sys\\SystemException\\Handles\\{$classname}";
+		if ($result && !empty($result['errorType'])) {
+			self::$_data['parseErrorMessage'] = $result;
+			self::$renderer->setData(['parseErrorMessage' => $result]);
+			
+			$classname = str_replace("Uncaught ", '', $result['errorType']);
+			$classname .= "Handle";
 
-				// Check that class exists before instantiation
-				if (class_exists($fullClassName)) {
-					if (in_array($classname, ['TypeErrorHandle', 'ErrorHandle', 'ArgumentCountErrorHandle'])) {
-						new $fullClassName($this, self::$_data);
-					} else {
-						// Fallback to DefaultHandle if class not in list
-						$this->createDefaultHandle();
-					}
+			$fullClassName = "Sys\\SystemException\\Handles\\{$classname}";
+
+			// Check that class exists before instantiation
+			if (class_exists($fullClassName)) {
+				if (in_array($classname, ['TypeErrorHandle', 'ErrorHandle', 'ArgumentCountErrorHandle'])) {
+					new $fullClassName($this, self::$_data);
 				} else {
-					// If class doesn't exist, use DefaultHandle
-					$this->createDefaultHandle();
-				}
-				die();
-			}
-
-			// Handle different error types with class existence check
-			if (is_array(self::$_data['message'])) {
-				$this->createDefaultHandle();
-			} else if (is_string(self::$_data['message'])) {
-				if (strpos(self::$_data['message'], 'Uncaught ArgumentCountError:') !== false) {
-					$this->createHandleIfExists('Sys\SystemException\Handles\ArgumentCountError');
-				} else if (strpos(self::$_data['message'], 'Uncaught Error:') !== false) {
-					$this->createHandleIfExists('Sys\SystemException\Handles\ErrorHandle');
-				} else {
+					// Fallback to DefaultHandle if class not in list
 					$this->createDefaultHandle();
 				}
 			} else {
+				// If class doesn't exist, use DefaultHandle
 				$this->createDefaultHandle();
 			}
+			die();
+		}
 
+		// Handle different error types with class existence check
+		if (is_array(self::$_data['message'])) {
+			$this->createDefaultHandle();
+		} else if (is_string(self::$_data['message'])) {
+			if (strpos(self::$_data['message'], 'Uncaught ArgumentCountError:') !== false) {
+				$this->createHandleIfExists('Sys\SystemException\Handles\ArgumentCountErrorHandle');
+			} else if (strpos(self::$_data['message'], 'Uncaught Error:') !== false) {
+				$this->createHandleIfExists('Sys\SystemException\Handles\ErrorHandle');
+			} else {
+				$this->createDefaultHandle();
+			}
+		} else {
+			$this->createDefaultHandle();
+		}
+
+		exit();
+	}
+
+	/**
+	 * Short error page for visitors (devmode off): no paths, code or data
+	 *
+	 * Uses the '500 page' file from the configuration when it exists. The
+	 * page gets $errorId, the id written to the log.
+	 *
+	 * @param string $errorId Id that is also written to the log
+	 * @return never
+	 */
+	private static function showProductionPage(string $errorId): never
+	{
+		$ajax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest'
+			|| str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
+
+		if ($ajax) {
+			if (!headers_sent()) {
+				header('Content-Type: application/json; charset=utf-8');
+			}
+			echo json_encode(['error' => 'Internal Server Error', 'id' => $errorId]);
 			exit();
 		}
+
+		$page = config::get('500 page', true);
+		if ($page && is_file($page)) {
+			include $page;
+			exit();
+		}
+
+		echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Something went wrong</title></head>'
+			. '<body style="font-family:system-ui,sans-serif;margin:4rem auto;max-width:32rem;padding:0 1rem">'
+			. '<h1>Something went wrong</h1><p>Please try again later.</p>'
+			. '<p style="color:#777">Error id: ' . $errorId . '</p></body></html>';
+		exit();
 	}
 
 	/**
@@ -398,11 +480,9 @@ class SystemException extends Exception
 	{
 		$stack = [];
 		$i = 1;
-		$trace = debug_backtrace();
-		unset($trace[0]); // Remove call to this function from stack trace
-		asort($trace);
 
-		foreach ($trace as $node) {
+		// The exception's own trace: where it was thrown, not where it is shown
+		foreach ($this->getTrace() as $node) {
 			if (array_key_exists('file', $node)) {
 				$stack[] = [
 					'stack' => "$i " . basename($node['file']) . (isset($node['class']) ? ' ' . $node['class'] . "->" : '') . ' ' . $node['function'] . "()",
@@ -479,43 +559,53 @@ class SystemException extends Exception
 
 	/**
 	 * Common error handler for PHP errors and script shutdown
+	 *
+	 * Devmode: every reported error becomes a SystemException.
+	 * Otherwise: warnings, notices and deprecations are logged and the page
+	 * continues; other errors become a SystemException.
 	 */
 	public function errorHandlerAndShutdown($code = null, $message = null, $file = null, $line = null)
 	{
 		if ($code !== null) {
-			// Check if error should be reported
+			// Check if error should be reported (not for @-suppressed errors)
 			if (!(error_reporting() & $code)) {
-				return;
+				return false;
 			}
 
-			// Log error with information from backtrace
-			$d = debug_backtrace();
-
-			// Check that backtrace has enough information
-			if (isset($d[0]['args'])) {
-				throw new SystemException($d[0]['args'][0] ?? '', $d[0]['args'][1] ?? 0, $d[0]['args'][2] ?? '', $d[0]['args'][3] ?? 0);
-			} else {
-				throw new SystemException($message, $code, $file, $line);
+			$minor = E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE | E_DEPRECATED | E_USER_DEPRECATED;
+			if (($code & $minor) && ($_SERVER['HTTP_devmode'] ?? '') !== 'true') {
+				error_log(sprintf('[Sandstorm] %s: %s in %s:%d', $this->ErrorCodeToShortText($code), $message, $file, $line));
+				return true;
 			}
+
+			throw new SystemException($message, $code, $file, $line);
 		}
 
-		// Check for script shutdown
+		// Script shutdown: only fatal errors are left here, the rest went through the handlers
 		$error = error_get_last();
-		if (
-			$error !== null && in_array($error['type'], [
-				E_ERROR,
-				E_PARSE,
-				E_WARNING,
-				E_NOTICE,
-				E_CORE_ERROR,
-				E_CORE_WARNING,
-				E_COMPILE_ERROR,
-				E_COMPILE_WARNING,
-				E_RECOVERABLE_ERROR
-			])
-		) {
-			throw new \SystemException($error['message'], (int) $error['type'], $error['file'], (int)$error['line']);
+		$fatal = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+		if ($error !== null && ($error['type'] & $fatal)) {
+			(new SystemException($error['message'], (int) $error['type'], $error['file'], (int) $error['line']))->show();
 		}
+	}
+
+	/**
+	 * Handler for exceptions that nobody caught
+	 *
+	 * A SystemException is shown as it is. Other exceptions and errors
+	 * (TypeError, ValueError, ...) are wrapped in PHP's "Uncaught ..." text,
+	 * which the Handles classes read.
+	 *
+	 * @param \Throwable $e
+	 * @return never
+	 */
+	public function exceptionHandler(\Throwable $e): never
+	{
+		if ($e instanceof SystemException) {
+			$e->show();
+		}
+
+		(new SystemException('Uncaught ' . $e, 0, $e->getFile(), $e->getLine(), $e))->show();
 	}
 
 	/**
@@ -523,14 +613,9 @@ class SystemException extends Exception
 	 */
 	public function register()
 	{
-		/*
-		ini_set('display_errors', 1);
-		ini_set('display_startup_errors', 1);
-		error_reporting(1);
-		*/
-
 		// Set common error handler for PHP errors and script shutdown
 		register_shutdown_function(array($this, 'errorHandlerAndShutdown'));
 		set_error_handler(array($this, 'errorHandlerAndShutdown'), E_ALL);
+		set_exception_handler(array($this, 'exceptionHandler'));
 	}
 }

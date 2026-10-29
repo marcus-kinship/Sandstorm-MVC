@@ -34,4 +34,6 @@ try {
     new Start;
 
 } catch (SystemException $e) {
+    // Not caught by the site: show the error page (devmode) or the 500 page
+    $e->show();
 }

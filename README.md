@@ -56,7 +56,7 @@ The framework follows classic MVC architecture and makes it easy to separate log
 
 ## 💻 System Requirements
 
-- **PHP**: 7.0 or higher to 8.4
+- **PHP**: 8.0 or higher to 8.4
 - **MySQL**: 5.6 or higher (if database is used)
 - **Web Server**: Apache with mod_rewrite enabled
 - **PHP Short Tags**: Must be enabled

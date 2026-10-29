@@ -11,13 +11,13 @@
 
 $php = escapeshellarg(PHP_BINARY);
 $flags = '';
-foreach (['gettext', 'mysqli', 'mbstring', 'curl', 'gd'] as $extension) {
+foreach (['gettext', 'mysqli', 'mbstring', 'curl', 'gd', 'fileinfo'] as $extension) {
     if (!extension_loaded($extension)) {
         $flags .= ' -d extension=' . $extension;
     }
 }
 
-$tests = ['session.php', 'record.php', 'curl.php', 'filesystem.php', 'minifier.php', 'pagination.php', 'resizing.php', 'user.php', 'validation.php'];
+$tests = ['session.php', 'record.php', 'curl.php', 'filesystem.php', 'minifier.php', 'pagination.php', 'resizing.php', 'user.php', 'validation.php', 'cache.php', 'upload.php', 'mail.php'];
 if (is_file(dirname(__DIR__) . '/app/config/mysql/test.db.php')) {
     $tests[] = 'database.php';
 } else {

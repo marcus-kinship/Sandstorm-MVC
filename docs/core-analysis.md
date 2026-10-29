@@ -65,6 +65,8 @@ Done for Pagination: `Sys\Record\Pagination` has both halves (links and sorting)
 
 Also done: `Dll/Flatdata.php` and `Dll/Comment.php` removed; `Captcha` is `Dll\Validation\Captcha` (random_int, one use, expires), `Encoding` is split into `Dll\Encoding\Utf8`, `Win1252` and `Dll\Validation\Encoding`, `Slug` has `unique()` and `Dll\Validation\Slug`, `Media` is `Dll\User\Media` (placeholders, files only in the user's own folder); Validation rules `captcha`, `utf8` and `slug` (`tests/validation.php`). The short open tag `<?` is replaced by `<?php` in all 37 files that had it: with `short_open_tag=Off` (the production default) PHP printed their source code instead of running it.
 
+Also done: `Dll/cache.php` is `Dll/Cache.php` with `Cache::remember()`, `get()`, `set()`, `forget()` and `clear()`. Values are stored as PHP files that opcache keeps in memory, written atomically, and removed when they expire. Page pieces (`new Cache($file)->save()`) are printed as text and never run as PHP (`tests/cache.php`). `UploadedFiles` is `Dll\Validation\UploadedFiles`: it checks the real content type against the extension and opens images to prove they are images; script extensions are never stored, files get random names, and the folder must be inside the project. `Dll\UploadedFiles` still works as the old name (`tests/upload.php`, with real uploads). `Mail` has a new engine: `Dll\Mail\Message` builds the mail (UTF-8, text/HTML, attachments, Bcc hidden, no header injection) and `Dll\Mail\Smtp` sends it (STARTTLS, every reply checked, the password never sent unencrypted to another machine and never logged). `send()` returns false and `error()` says why; the old `AddTo()`, `SetFrom()`, `Message` and `Send()` still work (`tests/mail.php`, against a fake SMTP server).
+
 Done for the file system: `Filesystem`, `FileInfo` and `FolderInfo` in `Sys` are the real classes, locked to the project folder; `FilesystemIO`, `FileInfoIO` and `FolderInfoIO` are aliases of them (`tests/filesystem.php`).
 
 | Files | Group |
@@ -77,10 +79,10 @@ Done for the file system: `Filesystem`, `FileInfo` and `FolderInfo` in `Sys` are
 | Group | Files |
 |---|---|
 | Forms and validation | `Sys/Formi.php`, `Dll/Forms/*` (the field classes extend `element`, which does not exist), `Dll/Validation.php`, `Dll/Listview.php` |
-| Users and content | `Dll/User.php`, `Dll/Slug.php`, `Dll/Comment.php`, `Dll/Media.php`, `Dll/UploadedFiles.php`, `Dll/Captcha.php`, `Dll/Mail.php` |
+| Users and content | `Dll/User.php`, `Dll/Slug.php`, `Dll/Comment.php`, `Dll/Media.php`, `Dll/Captcha.php` |
 | Images | `Dll/Resizing.php`, `Dll/Thumbnails.php` |
 | Text and time | `Dll/Encoding.php`, `Dll/Bb.php`, `Dll/Wtime.php`, `Dll/calendar.php` |
-| Data | `Dll/Flatdata.php`, `Dll/Searchf.php`, `Dll/cache.php`, `Sys/Mutator.php` |
+| Data | `Dll/Flatdata.php`, `Dll/Searchf.php`, `Sys/Mutator.php` |
 | Router | `Sys/RouterBuilder.php`, `Sys/SiteRouter.php`, `Sys/extendDatabasRouter.php`, `Sys/Install.php` |
 | Debugging and tools | `Sys/c.php`, `Sys/Console/Report.php`, `Dll/Backtraces.php`, `Dll/StopWatch.php`, `Sys/ServerInfo.php`, `Dll/Minifier.php`, `Sys/Curl.php` |
 | Views | `Dll/View/view.php` (uses the old `Querybuilder`) |

@@ -1,3 +1,4 @@
 /php.local
 /app/config/mysql/test.db.php
 /app/config/settings/cookie.ini.php
+/app/cache/

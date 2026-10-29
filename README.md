@@ -102,9 +102,13 @@ Language, development mode, error mode and MySQL logging are set with the `SetEn
 php server.php
 ```
 
-Open http://localhost:8000 to see the welcome page "Welcome to Sandstorm-MVC". Use another port with `php server.php 8080`.
+On Windows you can also double-click `start.bat`.
 
-`server.php` runs PHP's built-in server with short tags and gettext turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
+Open the address it prints, normally http://localhost:8000, to see the welcome page "Welcome to Sandstorm-MVC". If port 8000 is taken, for example by another project's server, Sandstorm uses the next free port (8001, 8002, ...). Choose a port yourself with `php server.php 8080`.
+
+To use a specific PHP version for this project, put the full path to `php.exe` on the first line of a file named `php.local` in the project folder; `start.bat` then uses it. The file is not committed.
+
+`server.php` runs PHP's built-in server with short tags, gettext and mysqli turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
 
 **Tip**: You can create multiple database pools by copying `default.db.php` and changing the class name.
 

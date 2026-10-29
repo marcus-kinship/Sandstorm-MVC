@@ -9,10 +9,10 @@
  * fills $_SERVER with them before handing over to index.php.
  *
  * Usage:
- *   php server.php              Start on http://localhost:8000
- *   php server.php 8080         Start on another port
+ *   php server.php              Start on the first free port from 8000
+ *   php server.php 8080         Start on port 8080
  *
- * Run "php setup.php" first to write the settings and check the system.
+ * Several projects can run at the same time: each one gets its own port.
  *
  * @file server.php
  * @author Marcus Larsson
@@ -21,20 +21,42 @@
 
 // Started from the command line: launch the built-in server with this file as router
 if (PHP_SAPI === 'cli') {
-	$port = isset($argv[1]) ? (int) $argv[1] : 8000;
+	if (isset($argv[1])) {
+		$port = (int) $argv[1];
+	} else {
+		// First free port from 8000, so other projects' servers are left alone.
+		// A port is taken when something answers on it (Windows lets two
+		// servers bind the same port, so binding is no test).
+		for ($port = 8000; $port < 8100; $port++) {
+			$inUse = false;
+			foreach (['127.0.0.1', '[::1]'] as $host) {
+				$socket = @fsockopen($host, $port, $errno, $errstr, 0.2);
+				if ($socket) {
+					fclose($socket);
+					$inUse = true;
+				}
+			}
+			if (!$inUse) {
+				break;
+			}
+		}
+	}
+
 	$options = ['-d', 'short_open_tag=On'];
 
-	// Load gettext if it is installed but not enabled in php.ini
-	if (!extension_loaded('gettext')) {
-		$options[] = '-d';
-		$options[] = 'extension=gettext';
+	// Load gettext and mysqli if they are installed but not enabled in php.ini
+	foreach (['gettext', 'mysqli'] as $extension) {
+		if (!extension_loaded($extension)) {
+			$options[] = '-d';
+			$options[] = "extension=$extension";
+		}
 	}
 
 	$command = escapeshellarg(PHP_BINARY);
 	foreach ($options as $option) {
 		$command .= ' ' . escapeshellarg($option);
 	}
-	$command .= ' -S ' . escapeshellarg("localhost:$port") . ' -t ' . escapeshellarg(__DIR__) . ' ' . escapeshellarg(__FILE__);
+	$command .= ' -S ' . escapeshellarg("127.0.0.1:$port") . ' -t ' . escapeshellarg(__DIR__) . ' ' . escapeshellarg(__FILE__);
 
 	echo "Sandstorm is running on http://localhost:$port (Ctrl+C to stop)\n";
 	passthru($command, $status);

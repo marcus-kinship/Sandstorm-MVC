@@ -98,7 +98,7 @@ Language, development mode, error mode and MySQL logging are set with the `SetEn
 php server.php
 ```
 
-Open http://localhost:8000. On the first visit Sandstorm sets itself up and shows the welcome page "Välkommen till Sandstorm-MVC". Use another port with `php server.php 8080`.
+Open http://localhost:8000. On the first visit Sandstorm sets itself up and shows the welcome page "Welcome to Sandstorm-MVC". Use another port with `php server.php 8080`.
 
 `server.php` runs PHP's built-in server with short tags and gettext turned on, and reads `.htaccess` for the settings and routes, so it works the same way as Apache. On Apache, point the DocumentRoot at the project folder and `.htaccess` is used directly. Note that the first rewrite rule in `.htaccess` redirects to `www.`, so comment it out for a local Apache.
 

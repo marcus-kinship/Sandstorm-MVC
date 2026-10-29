@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Välkommen till Sandstorm-MVC</title>
+    <title>Welcome to Sandstorm-MVC</title>
     <style>
         body {
             margin: 0;
@@ -37,11 +37,11 @@
 
 <body>
     <main>
-        <h1>Välkommen till Sandstorm-MVC</h1>
-        <p>Sandstorm är igång. Den här sidan är vyn <code>site/default/start.php</code>, som laddas av
-            <code>DefaultController::index()</code> i <code>site/default/Default.class.php</code>.</p>
-        <p>Skapa din första sida genom att lägga till en mapp i <code>site/</code> med en controller och en vy.
-            Läs mer i <code>README.md</code> och i mappen <code>help/</code>.</p>
+        <h1>Welcome to Sandstorm-MVC</h1>
+        <p>Sandstorm is running. This page is the view <code>site/default/start.php</code>, loaded by
+            <code>DefaultController::index()</code> in <code>site/default/Default.class.php</code>.</p>
+        <p>Create your first page by adding a folder in <code>site/</code> with a controller and a view.
+            Read more in <code>README.md</code> and in the <code>help/</code> folder.</p>
     </main>
 </body>
 

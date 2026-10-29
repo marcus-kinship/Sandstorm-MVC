@@ -61,6 +61,8 @@ Done: `Dll/Comments.php` and `Sys/Session_old.php` removed (after `tests/session
 
 **C. Two versions of the same thing (proposed: merge into one)**
 
+Done for Pagination: `Sys\Record\Pagination` has both halves (links and sorting) and more functions (`render()`, `summary()`, `toArray()`, `window()`, `url()`, ...); `Dll/Pagination.php` gives it the global name `Pagination` (`tests/pagination.php`). Also done: `Dll/User.php` (secure login, password upgrade, `create()`, `changePassword()`), passwords in `Dll/Validation/Password.php` (used by User and the Validation rule `password`), `Dll/Resizing.php` (`fit()`, `cover()`, `pad()`, WebP/AVIF, size limit) — `tests/user.php`, `tests/resizing.php`.
+
 Done for the file system: `Filesystem`, `FileInfo` and `FolderInfo` in `Sys` are the real classes, locked to the project folder; `FilesystemIO`, `FileInfoIO` and `FolderInfoIO` are aliases of them (`tests/filesystem.php`).
 
 | Files | Group |

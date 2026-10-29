@@ -1,434 +1,610 @@
-<?
+<?php
 
 /**
- * Klassen Resizing för bildmanipulering.
+ * Resize, crop and convert images (GD).
  *
- * @category _("Utility class")
+ * <code>
+ * (new Resizing())->load($_FILES['photo']['tmp_name'])
+ *     ->fit(1600, 1600)                       // at most 1600×1600, keeps the shape
+ *     ->save('upload/photos/42.webp', null, 80);
+ *
+ * (new Resizing())->load('upload/photos/42.webp')
+ *     ->cover(300, 300)                       // exactly 300×300, cropped from the middle
+ *     ->save('upload/thumbs/42.jpg');
+ *
+ * $logo = (new Resizing())->load('res/logo.png')->pad(200, 200, '#ffffff')->toDataUri();
+ * </code>
+ *
+ * - Reads and writes JPEG, PNG, GIF, WebP, AVIF and BMP (what this PHP's GD supports).
+ * - save() picks the type from the file extension and only writes inside the project.
+ * - Transparency is kept for PNG, GIF, WebP and AVIF; when saving as JPEG it is put on white.
+ * - Photos from phones are turned the right way (EXIF orientation) when loaded.
+ * - Images over 40 megapixels are refused before they are decoded, so a small
+ *   file cannot make PHP use gigabytes of memory (change with setMaxPixels()).
+ *
+ * @category _("Image Handling class")
  */
 class Resizing
 {
-   /**
-    * @var resource Identifierare för bildresurs.
-    */
-   private $image;
+    /** @var \GdImage|null The image */
+    private $image = null;
 
-   /**
-    * @var int Konstant för bildtyp (IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_PNG, etc.).
-    */
-   private $image_type;
+    /** @var int IMAGETYPE_* of the loaded file */
+    private $image_type = IMAGETYPE_JPEG;
 
-   /**
-    * Laddar en bild från en fil och bestämmer bildtypen.
-    *
-    * @param string $filename Filvägen till bilden.
-    *
-    * @throws SystemException Kastar ett undantag om bildtypen inte stöds.
-    */
-   function load($filename)
-   {
-      // Hämta information om bilden, inklusive bildtypen
-      $image_info = getimagesize($filename);
-      $this->image_type = $image_info[2];
+    /** @var int Largest image (width × height) that load() accepts */
+    private int $maxPixels = 40_000_000;
 
-      // Skapa en bildresurs baserat på bildtypen
-      switch ($this->image_type) {
-         case IMAGETYPE_JPEG:
-            $this->image = imagecreatefromjpeg($filename);
-            break;
-         case IMAGETYPE_GIF:
-            $this->image = imagecreatefromgif($filename);
-            break;
-         case IMAGETYPE_PNG:
-            $this->image = imagecreatefrompng($filename);
-            break;
-         case IMAGETYPE_BMP:
-            $this->image = imagecreatefrombmp($filename);
-            break;
-         case IMAGETYPE_WEBP:
-            $this->image = imagecreatefromwebp($filename);
-            break;
-         default:
-            // Kasta undantag om bildtypen inte stöds
-            throw new SystemException(sprintf(_("Bildtypen stöds inte: %s"), $this->image_type));
-      }
-   }
+    /** @var array<int, array{0: string, 1: string, 2: string}> type => [read function, write function, mime] */
+    private const TYPES = [
+        IMAGETYPE_JPEG => ['imagecreatefromjpeg', 'imagejpeg', 'image/jpeg'],
+        IMAGETYPE_PNG => ['imagecreatefrompng', 'imagepng', 'image/png'],
+        IMAGETYPE_GIF => ['imagecreatefromgif', 'imagegif', 'image/gif'],
+        IMAGETYPE_WEBP => ['imagecreatefromwebp', 'imagewebp', 'image/webp'],
+        IMAGETYPE_BMP => ['imagecreatefrombmp', 'imagebmp', 'image/bmp'],
+    ];
 
-   /**
-    * Smart ändring av storlek för att anpassa till det nya måttet och fylla överblivet område med angiven bakgrundsfärg.
-    *
-    * @param int $width Den nya bredden på bilden.
-    * @param int $height Den nya höjden på bilden.
-    * @param int $R Röd komponent för bakgrundsfärgen.
-    * @param int $G Grön komponent för bakgrundsfärgen.
-    * @param int $B Blå komponent för bakgrundsfärgen.
-    */
-   public function smartResize($width, $height, $R, $G, $B)
-   {
-      // Skapa en ny bild med angiven bredd och höjd
-      $w = $width;
-      $h = $height;
-      $redimg = imagecreatetruecolor($w, $h);
+    /** @var array<string, int> File extension => IMAGETYPE_* */
+    private const EXTENSIONS = [
+        'jpg' => IMAGETYPE_JPEG, 'jpeg' => IMAGETYPE_JPEG, 'png' => IMAGETYPE_PNG, 'gif' => IMAGETYPE_GIF,
+        'webp' => IMAGETYPE_WEBP, 'bmp' => IMAGETYPE_BMP, 'avif' => 19,
+    ];
 
-      // Sätt bakgrundsfärgen till den angivna färgen
-      $color = imagecolorallocate($redimg, $R, $G, $B);
-      imagefill($redimg, 0, 0, $color);
+    /**
+     * Largest image (width × height) that load() accepts.
+     *
+     * @param int $pixels
+     * @return $this
+     */
+    public function setMaxPixels(int $pixels)
+    {
+        $this->maxPixels = max(1, $pixels);
+        return $this;
+    }
 
-      // Hämta aktuella bredd och höjd på bilden
-      $nheight = $this->getHeight();
-      $nwidth = $this->getWidth();
+    /**
+     * Load an image file (also an upload's tmp_name, which is outside the project).
+     *
+     * @param string $filename
+     * @return $this
+     * @throws SystemException When it is not a supported image, or too large
+     */
+    public function load($filename)
+    {
+        $info = is_file($filename) ? @getimagesize($filename) : false;
+        if ($info === false) {
+            throw new SystemException(sprintf(_('Not an image: %s'), basename((string) $filename)));
+        }
 
-      // Beräkna nya mått för att behålla proportionerna
-      if ($nwidth > $nheight) {
-         $new_width = $w;
-         $new_height = intval($nheight * $w / $nwidth);
-      }
-      if ($nwidth < $nheight) {
-         $new_height = $h;
-         $new_width = intval($nwidth * $h / $nheight);
-      }
-      if ($nwidth == $nheight) {
-         $new_width = $w;
-         $new_height = $h;
-      }
+        [$width, $height, $type] = $info;
+        if ($width * $height > $this->maxPixels) {
+            throw new SystemException(sprintf(_('The image is too large (%d × %d pixels)'), $width, $height));
+        }
 
-      // Ändra storlek på bilden enligt de nya måtten
-      $this->resize($new_width, $new_height);
-      $t =  0;
+        $read = $this->functions($type)[0];
+        $image = @$read($filename);
+        if (!$image instanceof \GdImage) {
+            throw new SystemException(sprintf(_('Could not read the image %s'), basename((string) $filename)));
+        }
 
-      // Centrera bilden om överblivet utrymme finns
-      if ($new_height <= $h) {
-         $t++;
-         $w_point = ceil((($w - $new_width) / 2));
-      } else {
-         $t = 0;
-         $this->smartCrop($new_width, $h, ceil((($w - $new_width) / 2)), ceil((($h - $new_height) / 2)), ceil((($w - $new_width) / 2)), ceil((($h - $new_height) / 2)));
-      }
+        $this->image = $image;
+        $this->image_type = $type;
 
-      if ($new_width <= $w) {
-         $t++;
-         $h_point = ceil((($h - $new_height) / 2));
-      } else {
-         $t = 0;
-         $w_point = ceil((($w - $new_width) / 2));
-         $this->smartCrop($w, $new_height, ceil((($w - $new_width) / 2)), ceil((($h - $new_height) / 2)), ceil((($w - $new_width) / 2)), ceil((($h - $new_height) / 2)));
-      }
+        if ($type === IMAGETYPE_JPEG) {
+            $this->fixOrientation($filename);
+        }
 
-      // Kopiera den ändrade bilden till den nya bilden med bakgrundsfärgen
-      if ($t == 2) {
-         imagecopyresampled($redimg, $this->image, $w_point, $h_point, 0, 0, $new_width, $new_height, $new_width, $new_height);
-         $this->image = $redimg;
-      }
-   }
+        return $this;
+    }
 
-   /**
-    * Rotera bilden.
-    *
-    * @param int $degrees Grader att rotera.
-    */
-   function rotate($degrees = 0)
-   {
-      // Rotate
-      $this->image = imagerotate($this->image, $degrees, 0);
-   }
+    /**
+     * Start from a plain canvas instead of a file.
+     *
+     * @param int          $width
+     * @param int          $height
+     * @param string|array $color '#rrggbb', '#rgb' or [r, g, b]; 'transparent' for none
+     * @return $this
+     */
+    public function create(int $width, int $height, string|array $color = '#ffffff')
+    {
+        $this->image = $this->canvas($width, $height, $color);
+        $this->image_type = IMAGETYPE_PNG;
+        return $this;
+    }
 
-   /**
-    * Spara bilden till en fil.
-    *
-    * @param string $filename Utdatafilens namn.
-    * @param int|null $image_type Utdata bildtyp (IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_PNG).
-    * @param int $compression Kompressionsnivå för JPEG-bilder.
-    * @param int|null $permissions Filbehörigheter.
-    */
-   function save($filename, $image_type = null, $compression = 75, $permissions = null)
-   {
-      // Om bildformat inte anges, använd det befintliga formatet
-      if ($image_type == null) {
-         $image_type = $this->image_type;
-      }
+    /** @return int Width in pixels */
+    public function getWidth()
+    {
+        return imagesx($this->gd());
+    }
 
-      // Ställer in alfablandning och sparar alfakanalen för bilder med genomskinlighet
-      imagealphablending($this->image, false);
-      imagesavealpha($this->image, true);
+    /** @return int Height in pixels */
+    public function getHeight()
+    {
+        return imagesy($this->gd());
+    }
 
-      // Beroende på valt bildformat, spara bilden med angivet filnamn och kompressionsnivå
-      if ($image_type == IMAGETYPE_JPEG) {
-         imagejpeg($this->image, $filename, $compression);
-      } elseif ($image_type == IMAGETYPE_GIF) {
-         imagegif($this->image, $filename);
-      } elseif ($image_type == IMAGETYPE_PNG) {
-         imagepng($this->image, $filename);
-      }
+    /** @return int IMAGETYPE_* of the loaded file */
+    public function getType(): int
+    {
+        return $this->image_type;
+    }
 
-      // Om behörigheter anges, tilldela dem till den sparade filen
-      if ($permissions != null) {
-         chmod($filename, $permissions);
-      }
-   }
+    /** @return string Mime type of the loaded file */
+    public function getMime(): string
+    {
+        return image_type_to_mime_type($this->image_type);
+    }
 
-   /**
-    * Visar bilden i det valda bildformatet eller som JPEG om inget annat anges.
-    *
-    * @param int $image_type Bildformatet (IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_PNG).
-    */
-   function output($image_type = IMAGETYPE_JPEG)
-   {
-      // Ställer in alfablandning och sparar alfakanalen för bilder med genomskinlighet
-      imagealphablending($this->image, false);
-      imagesavealpha($this->image, true);
+    /**
+     * Scale to exactly this size (the shape may change).
+     *
+     * @param int|float $width
+     * @param int|float $height
+     * @return $this
+     * @throws SystemException When width or height is below 1
+     */
+    public function resize($width, $height)
+    {
+        $width = (int) round($width);
+        $height = (int) round($height);
+        if ($width < 1 || $height < 1) {
+            throw new SystemException(_('Width and height must be at least 1'));
+        }
 
-      // Beroende på valt bildformat, visar bilden
-      if ($image_type == IMAGETYPE_JPEG) {
-         imagejpeg($this->image);
-      } elseif ($image_type == IMAGETYPE_GIF) {
-         imagegif($this->image);
-      } elseif ($image_type == IMAGETYPE_PNG) {
-         imagepng($this->image);
-      }
-   }
+        $new = $this->canvas($width, $height, 'transparent');
+        imagecopyresampled($new, $this->gd(), 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
+        $this->image = $new;
 
-   /**
-    * Hämtar bredden på bilden.
-    *
-    * @return int Bredden på bilden.
-    */
-   function getWidth()
-   {
-      return imagesx($this->image);
-   }
+        return $this;
+    }
 
-   /**
-    * Hämtar höjden på bilden.
-    *
-    * @return int Höjden på bilden.
-    */
-   function getHeight()
-   {
-      return imagesy($this->image);
-   }
+    /**
+     * Scale to this width, height follows.
+     *
+     * @param int $width
+     * @return $this
+     */
+    public function resizeToWidth($width)
+    {
+        return $this->resize($width, $this->getHeight() * $width / $this->getWidth());
+    }
 
-   /**
-    * Sätter en bakgrundsfärg på bilden.
-    *
-    * @param int $g Grön komponent för bakgrundsfärgen.
-    * @param int $r Röd komponent för bakgrundsfärgen.
-    * @param int $b Blå komponent för bakgrundsfärgen.
-    * @param int $width Bredden på den nya bilden.
-    * @param int $height Höjden på den nya bilden.
-    */
-   function backgroundcolor($g, $r, $b, $width, $height)
-   {
-      $redimg = imagecreatetruecolor($width, $height);
+    /**
+     * Scale to this height, width follows.
+     *
+     * @param int $height
+     * @return $this
+     */
+    public function resizeToHeight($height)
+    {
+        return $this->resize($this->getWidth() * $height / $this->getHeight(), $height);
+    }
 
-      // Sätter bakgrundsfärgen
-      $red = imagecolorallocate($redimg, $g, $r, $b);
-      imagefill($redimg, 0, 0, $red);
+    /**
+     * Scale by a percentage (50 = half the size).
+     *
+     * @param int|float $scale
+     * @return $this
+     */
+    public function scale($scale)
+    {
+        return $this->resize($this->getWidth() * $scale / 100, $this->getHeight() * $scale / 100);
+    }
 
-      // Byter till den nya bilden med bakgrundsfärgen
-      $this->image = $redimg;
-   }
+    /**
+     * Scale to fit inside width × height, keeping the shape.
+     *
+     * @param int  $width
+     * @param int  $height
+     * @param bool $upscale Also make small images larger (default: no)
+     * @return $this
+     */
+    public function fit(int $width, int $height, bool $upscale = false)
+    {
+        $ratio = min($width / $this->getWidth(), $height / $this->getHeight());
+        if ($ratio >= 1 && !$upscale) {
+            return $this;
+        }
 
-   /**
-    * Lägger till en vattenstämpel på bilden.
-    *
-    * @param mixed $y Y-koordinat för vattenstämpeln. Kan vara "top", "bottom", numerisk koordinat.
-    * @param mixed $x X-koordinat för vattenstämpeln. Kan vara "left", "right", numerisk koordinat.
-    * @throws SystemException Om stämpelkonfigurationen saknas eller om koordinaterna inte är giltiga.
-    */
-   function watermark($y, $x)
-   {
-      $stamp = imagecreatefrompng(config::get('stamp'));
-      $sx = imagesx($stamp);
-      $sy = imagesy($stamp);
+        return $this->resize(max(1, $this->getWidth() * $ratio), max(1, $this->getHeight() * $ratio));
+    }
 
-      if ($x == "left") {
-         $marge_right = $this->getWidth() - 10;
-      } elseif (is_numeric($x)) {
-         $marge_right = $x;
-      } elseif ($x == "right") {
-         $marge_right = 10;
-      } else {
-         throw new SystemException("Ogiltig X-koordinat för vattenstämpeln");
-      }
+    /**
+     * Fill exactly width × height: scale so it covers, then crop from the middle.
+     *
+     * @param int $width
+     * @param int $height
+     * @return $this
+     */
+    public function cover(int $width, int $height)
+    {
+        $ratio = max($width / $this->getWidth(), $height / $this->getHeight());
+        $this->resize(max($width, $this->getWidth() * $ratio), max($height, $this->getHeight() * $ratio));
 
-      if ($y == "top") {
-         $marge_bottom = $this->getHeight() - 10;
-      } elseif (is_numeric($y)) {
-         $marge_bottom = $y;
-      } elseif ($y == "bottom") {
-         $marge_bottom = 10;
-      } else {
-         throw new SystemException("Ogiltig Y-koordinat för vattenstämpeln");
-      }
+        return $this->crop($width, $height, intdiv($this->getWidth() - $width, 2), intdiv($this->getHeight() - $height, 2));
+    }
 
-      // Kopierar stämpelbilden på vår bild med marginaljusteringar och bildbredden
-      imagecopy($this->image, $stamp, imagesx($this->image) - $sx - $marge_right, imagesy($this->image) - $sy - $marge_bottom, 0, 0, imagesx($stamp), imagesy($stamp));
-   }
+    /**
+     * Fit inside width × height and put it in the middle of a canvas of exactly that size.
+     *
+     * @param int          $width
+     * @param int          $height
+     * @param string|array $color Background: '#rrggbb', [r, g, b] or 'transparent'
+     * @return $this
+     */
+    public function pad(int $width, int $height, string|array $color = '#ffffff')
+    {
+        $this->fit($width, $height, true);
 
-   /**
-    * Skapar en miniatyrbild av bilden med en given storlek.
-    *
-    * @param int $size Storleken på miniatyrbilden.
-    */
-   function thumbnails($size)
-   {
-      $nheight = $this->getHeight();
-      $nwidth = $this->getWidth();
+        $canvas = $this->canvas($width, $height, $color);
+        imagecopy($canvas, $this->gd(), intdiv($width - $this->getWidth(), 2), intdiv($height - $this->getHeight(), 2), 0, 0, $this->getWidth(), $this->getHeight());
+        $this->image = $canvas;
 
-      if ($nwidth > $nheight) {
-         $new_width = $size;
-         $new_height = intval($nheight * $size / $nwidth);
-      } elseif ($nwidth < $nheight) {
-         $new_height = $size;
-         $new_width = intval($nwidth * $size / $nheight);
-      } else {
-         $new_width = $size;
-         $new_height = $size;
-      }
+        return $this;
+    }
 
-      $this->resize($new_width, $new_height);
-   }
+    /**
+     * Older name: fit inside width × height on a background of R, G, B.
+     *
+     * @param int $width
+     * @param int $height
+     * @param int $R
+     * @param int $G
+     * @param int $B
+     * @return $this
+     */
+    public function smartResize($width, $height, $R, $G, $B)
+    {
+        return $this->pad((int) $width, (int) $height, [(int) $R, (int) $G, (int) $B]);
+    }
 
-   /**
-    * Skapar en miniatyrbild av bilden med given bredd och höjd.
-    *
-    * @param int $width Bredden på miniatyrbilden.
-    * @param int $height Höjden på miniatyrbilden.
-    */
-   function thumbnailsTo($width, $height)
-   {
-      $this->resize($width, $height);
-   }
+    /**
+     * Square-ish thumbnail: the longest side becomes $size.
+     *
+     * @param int $size
+     * @return $this
+     */
+    public function thumbnails($size)
+    {
+        return $this->fit((int) $size, (int) $size, true);
+    }
 
-   /**
-    * Ändrar storleken på bilden till given höjd och behåller proportionerna.
-    *
-    * @param int $height Den önskade höjden.
-    */
-   function resizeToHeight($height)
-   {
-      $ratio = $height / $this->getHeight();
-      $width = $this->getWidth() * $ratio;
-      $this->resize($width, $height);
-   }
+    /**
+     * Older name for resize().
+     *
+     * @param int $width
+     * @param int $height
+     * @return $this
+     */
+    public function thumbnailsTo($width, $height)
+    {
+        return $this->resize($width, $height);
+    }
 
-   /**
-    * Ändrar storleken på bilden till given bredd och behåller proportionerna.
-    *
-    * @param int $width Den önskade bredden.
-    */
-   function resizeToWidth($width)
-   {
-      $ratio = $width / $this->getWidth();
-      $height = $this->getHeight() * $ratio;
-      $this->resize($width, $height);
-   }
+    /**
+     * Cut out width × height, starting at x, y.
+     *
+     * @param int $width
+     * @param int $height
+     * @param int $x
+     * @param int $y
+     * @return $this
+     * @throws SystemException When width or height is below 1
+     */
+    public function crop($width, $height, $x, $y)
+    {
+        $width = (int) $width;
+        $height = (int) $height;
+        if ($width < 1 || $height < 1) {
+            throw new SystemException(_('Width and height must be at least 1'));
+        }
 
-   /**
-    * Skalar bilden med en given faktor.
-    *
-    * @param int $scale Skalfaktorn (procent).
-    */
-   function scale($scale)
-   {
-      $width = $this->getWidth() * $scale / 100;
-      $height = $this->getHeight() * $scale / 100;
-      $this->resize($width, $height);
-   }
+        $new = $this->canvas($width, $height, 'transparent');
+        imagecopy($new, $this->gd(), 0, 0, max(0, (int) $x), max(0, (int) $y), $width, $height);
+        $this->image = $new;
 
-   /**
-    * Smart beskär bilden till önskad storlek och position.
-    *
-    * @param int $width Önskad bredd efter beskärning.
-    * @param int $height Önskad höjd efter beskärning.
-    * @param int $x X-koordinat för startpositionen.
-    * @param int $y Y-koordinat för startpositionen.
-    * @param int $x1 X-koordinat för slutpositionen.
-    * @param int $y1 Y-koordinat för slutpositionen.
-    */
-   function smartCrop($width, $height, $x, $y, $x1, $y1)
-   {
-      $new_image = imagecreatetruecolor($width, $height);
+        return $this;
+    }
 
-      if ($this->image_type == IMAGETYPE_GIF || $this->image_type == IMAGETYPE_PNG) {
-         imagealphablending($new_image, false);
-         imagesavealpha($new_image, true);
-      }
+    /**
+     * Older name: copy width × height from x, y to x1, y1 on a new canvas.
+     *
+     * @return $this
+     */
+    public function smartCrop($width, $height, $x, $y, $x1, $y1)
+    {
+        $new = $this->canvas((int) $width, (int) $height, 'transparent');
+        imagecopy($new, $this->gd(), (int) $x1, (int) $y1, (int) $x, (int) $y, $this->getWidth(), $this->getHeight());
+        $this->image = $new;
 
-      // Kopierar en del av bilden till den nya bilden med givna koordinater och storlek
-      imagecopy($new_image, $this->image, $x1, $y1, $x, $y, $this->getWidth(), $this->getHeight());
-      $this->image = $new_image;
-   }
+        return $this;
+    }
 
-   /**
-    * Beskär bilden till given bredd, höjd och position.
-    *
-    * @param int $width Önskad bredd efter beskärning.
-    * @param int $height Önskad höjd efter beskärning.
-    * @param int $x X-koordinat för startpositionen.
-    * @param int $y Y-koordinat för startpositionen.
-    * @throws SystemException Om bredd eller höjd inte är större än 0.
-    */
-   function crop($width, $height, $x, $y)
-   {
-      if ($width > 0 && $height > 0) {
-         $new_image = imagecreatetruecolor($width, $height);
-      } else {
-         throw new SystemException(_("Bredd och höjd måste vara större än 0"));
-      }
+    /**
+     * Turn the image (counter-clockwise, like imagerotate()).
+     *
+     * @param int|float $degrees
+     * @return $this
+     */
+    public function rotate($degrees = 0)
+    {
+        $transparent = imagecolorallocatealpha($this->gd(), 0, 0, 0, 127);
+        $this->image = imagerotate($this->gd(), $degrees, $transparent);
+        imagesavealpha($this->image, true);
 
-      if ($this->image_type == IMAGETYPE_GIF || $this->image_type == IMAGETYPE_PNG) {
-         imagealphablending($new_image, false);
-         imagesavealpha($new_image, true);
-      }
+        return $this;
+    }
 
-      // Kopierar en del av bilden till den nya bilden med givna koordinater och storlek
-      imagecopy($new_image, $this->image, 0, 0, $x, $y, $this->getWidth(), $this->getHeight());
-      $this->image = $new_image;
-   }
+    /**
+     * Mirror the image.
+     *
+     * @param string $direction 'horizontal' (left-right), 'vertical' or 'both'
+     * @return $this
+     */
+    public function flip(string $direction = 'horizontal')
+    {
+        $mode = match ($direction) {
+            'vertical', 'v' => IMG_FLIP_VERTICAL,
+            'both' => IMG_FLIP_BOTH,
+            default => IMG_FLIP_HORIZONTAL,
+        };
+        imageflip($this->gd(), $mode);
 
-   /**
-    * Ändrar storleken på bilden till den angivna bredden och höjden.
-    *
-    * @param int $width  Önskad bredd för den nya bilden.
-    * @param int $height Önskad höjd för den nya bilden.
-    *
-    * @throws SystemException Kastar ett undantag om bredd eller höjd är mindre än eller lika med 0.
-    */
-   function resize($width, $height)
-   {
-      // Kontrollera att både bredd och höjd är större än 0
-      if ($width > 0 && $height > 0) {
-         // Skapa en ny bildresurs med den angivna bredden och höjden
-         $new_image = imagecreatetruecolor($width, $height);
-      } else {
-         // Kasta ett undantag om bredd eller höjd är mindre än eller lika med 0
-         throw new SystemException(_("Bredd och höjd måste vara större än 0"));
-      }
+        return $this;
+    }
 
-      // Hantera transparenta färger för GIF och PNG-bilder
-      if ($this->image_type == IMAGETYPE_GIF || $this->image_type == IMAGETYPE_PNG) {
-         $current_transparent = imagecolortransparent($this->image);
+    /**
+     * Make the image black and white.
+     *
+     * @return $this
+     */
+    public function grayscale()
+    {
+        imagefilter($this->gd(), IMG_FILTER_GRAYSCALE);
+        return $this;
+    }
 
-         // Konfigurera transparent bakgrund för GIF och PNG
-         if ($this->image_type == IMAGETYPE_GIF || $this->image_type == IMAGETYPE_PNG) {
-            imagefill($new_image, 0, 0, IMG_COLOR_TRANSPARENT);
-            imagealphablending($new_image, false);
-            imagesavealpha($new_image, true);
-         }
+    /**
+     * Replace the image with a plain colour.
+     *
+     * @param int $g Red (older parameter order)
+     * @param int $r Green
+     * @param int $b Blue
+     * @param int $width
+     * @param int $height
+     * @return $this
+     */
+    public function backgroundcolor($g, $r, $b, $width, $height)
+    {
+        $this->image = $this->canvas((int) $width, (int) $height, [(int) $g, (int) $r, (int) $b]);
+        return $this;
+    }
 
-         // Återställ transparent färg om det fanns en i originalbilden
-         if ($current_transparent != -1) {
-            $transparent_color = imagecolorsforindex($this->image, $current_transparent);
-            $current_transparent = imagecolorallocate($new_image, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
-            imagefill($new_image, 0, 0, $current_transparent);
-            imagecolortransparent($new_image, $current_transparent);
-         }
-      }
+    /**
+     * Put a stamp (PNG) on the image.
+     *
+     * @param string|int  $y         'top', 'bottom' or pixels from the bottom
+     * @param string|int  $x         'left', 'right' or pixels from the right
+     * @param string|null $stampFile PNG in the project (default: config::get('stamp'))
+     * @param int         $margin    Space from the edge in pixels
+     * @return $this
+     * @throws SystemException For an invalid position or a missing stamp
+     */
+    public function watermark($y, $x, ?string $stampFile = null, int $margin = 10)
+    {
+        $stampFile ??= (string) config::get('stamp', true);
+        $stamp = $stampFile !== '' && is_file($stampFile) ? @imagecreatefrompng($stampFile) : false;
+        if (!$stamp instanceof \GdImage) {
+            throw new SystemException(sprintf(_('Could not read the watermark %s'), $stampFile));
+        }
 
-      // Kopiera och ändra storlek på bilden
-      imagecopyresampled($new_image, $this->image, 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
+        $sx = imagesx($stamp);
+        $sy = imagesy($stamp);
 
-      // Uppdatera klassens bild till den nya bilden
-      $this->image = $new_image;
-   }
+        $left = match (true) {
+            $x === 'left' => $margin,
+            $x === 'right' => $this->getWidth() - $sx - $margin,
+            is_numeric($x) => $this->getWidth() - $sx - (int) $x,
+            default => throw new SystemException(sprintf(_('Invalid x position for the watermark: %s'), $x)),
+        };
+        $top = match (true) {
+            $y === 'top' => $margin,
+            $y === 'bottom' => $this->getHeight() - $sy - $margin,
+            is_numeric($y) => $this->getHeight() - $sy - (int) $y,
+            default => throw new SystemException(sprintf(_('Invalid y position for the watermark: %s'), $y)),
+        };
+
+        imagealphablending($this->gd(), true);
+        imagecopy($this->gd(), $stamp, $left, $top, 0, 0, $sx, $sy);
+
+        return $this;
+    }
+
+    /**
+     * Save the image inside the project.
+     *
+     * @param string   $filename    Path from the project folder; the extension picks the type
+     * @param int|null $image_type  IMAGETYPE_* (null: from the extension, else the loaded type)
+     * @param int      $compression Quality 0–100 for JPEG, WebP and AVIF; for PNG 0–9 (default 6)
+     * @param int|null $permissions For example 0644
+     * @return $this
+     * @throws \RuntimeException When the path is outside the project
+     * @throws SystemException When the type is not supported or writing fails
+     */
+    public function save($filename, $image_type = null, $compression = 75, $permissions = null)
+    {
+        $path = Filesystem::resolve((string) $filename);
+        $type = $image_type ?? (self::EXTENSIONS[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? $this->image_type);
+
+        if (!is_dir(dirname($path)) && !mkdir(dirname($path), 0775, true) && !is_dir(dirname($path))) {
+            throw new SystemException(sprintf(_('Could not create the folder %s'), dirname($path)));
+        }
+
+        if (!$this->write($type, $path, (int) $compression)) {
+            throw new SystemException(sprintf(_('Could not save the image %s'), $filename));
+        }
+        if ($permissions !== null) {
+            chmod($path, $permissions);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Send the image to the browser, with its Content-Type.
+     *
+     * @param int $image_type  IMAGETYPE_*
+     * @param int $compression See save()
+     * @return void
+     */
+    public function output($image_type = IMAGETYPE_JPEG, $compression = 75)
+    {
+        if (!headers_sent()) {
+            header('Content-Type: ' . image_type_to_mime_type($image_type));
+        }
+        $this->write($image_type, null, (int) $compression);
+    }
+
+    /**
+     * The image as a data: URI, for small images in HTML or CSS.
+     *
+     * @param int $image_type  IMAGETYPE_* (default: PNG)
+     * @param int $compression See save()
+     * @return string
+     */
+    public function toDataUri($image_type = IMAGETYPE_PNG, $compression = 75): string
+    {
+        ob_start();
+        $this->write($image_type, null, (int) $compression);
+        return 'data:' . image_type_to_mime_type($image_type) . ';base64,' . base64_encode((string) ob_get_clean());
+    }
+
+    /**
+     * Write to a file, or to the output when $path is null.
+     */
+    private function write(int $type, ?string $path, int $compression): bool
+    {
+        $image = $this->gd();
+        $write = $this->functions($type)[1];
+
+        if ($type === IMAGETYPE_JPEG || $type === IMAGETYPE_BMP) {
+            // No transparency in these: put the image on white
+            $flat = $this->canvas($this->getWidth(), $this->getHeight(), '#ffffff');
+            imagealphablending($flat, true);
+            imagecopy($flat, $image, 0, 0, 0, 0, $this->getWidth(), $this->getHeight());
+            $image = $flat;
+        } else {
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+        }
+
+        $quality = max(0, min(100, $compression));
+
+        return match ($type) {
+            IMAGETYPE_JPEG, IMAGETYPE_WEBP => $write($image, $path, $quality),
+            19 => $write($image, $path, $quality),
+            IMAGETYPE_PNG => $write($image, $path, $compression >= 0 && $compression <= 9 ? $compression : 6),
+            default => $write($image, $path),
+        };
+    }
+
+    /**
+     * Read and write functions for a type.
+     *
+     * @return array{0: string, 1: string}
+     * @throws SystemException When this PHP cannot handle the type
+     */
+    private function functions(int $type): array
+    {
+        $functions = $type === 19 ? ['imagecreatefromavif', 'imageavif'] : (self::TYPES[$type] ?? null);
+
+        if ($functions === null || !function_exists($functions[0]) || !function_exists($functions[1])) {
+            throw new SystemException(sprintf(_('The image type is not supported: %s'), image_type_to_mime_type($type)));
+        }
+
+        return $functions;
+    }
+
+    /**
+     * A new true colour canvas.
+     *
+     * @param int          $width
+     * @param int          $height
+     * @param string|array $color '#rrggbb', '#rgb', [r, g, b] or 'transparent'
+     * @return \GdImage
+     */
+    private function canvas(int $width, int $height, string|array $color): \GdImage
+    {
+        $canvas = imagecreatetruecolor(max(1, $width), max(1, $height));
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+
+        if ($color === 'transparent') {
+            $fill = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        } else {
+            [$r, $g, $b] = is_array($color) ? array_values($color) + [0, 0, 0] : self::hexColor($color);
+            $fill = imagecolorallocate($canvas, (int) $r, (int) $g, (int) $b);
+        }
+        imagefilledrectangle($canvas, 0, 0, $width, $height, $fill);
+        imagealphablending($canvas, true);
+
+        return $canvas;
+    }
+
+    /**
+     * '#rrggbb' or '#rgb' to [r, g, b].
+     *
+     * @param string $hex
+     * @return array{0: int, 1: int, 2: int}
+     * @throws \InvalidArgumentException
+     */
+    private static function hexColor(string $hex): array
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (!preg_match('/^[0-9a-f]{6}$/i', $hex)) {
+            throw new \InvalidArgumentException(sprintf(_('Invalid colour: %s'), $hex));
+        }
+
+        return [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
+    }
+
+    /**
+     * Turn a JPEG the right way up from its EXIF orientation (photos from phones).
+     */
+    private function fixOrientation(string $filename): void
+    {
+        if (!function_exists('exif_read_data')) {
+            return;
+        }
+
+        $orientation = (int) (@exif_read_data($filename)['Orientation'] ?? 1);
+        match ($orientation) {
+            2 => $this->flip('horizontal'),
+            3 => $this->rotate(180),
+            4 => $this->flip('vertical'),
+            5 => $this->rotate(-90)->flip('horizontal'),
+            6 => $this->rotate(-90),
+            7 => $this->rotate(90)->flip('horizontal'),
+            8 => $this->rotate(90),
+            default => null,
+        };
+    }
+
+    /**
+     * The loaded image.
+     *
+     * @return \GdImage
+     * @throws SystemException When nothing is loaded
+     */
+    private function gd(): \GdImage
+    {
+        if (!$this->image instanceof \GdImage) {
+            throw new SystemException(_('Load an image first: load() or create()'));
+        }
+        return $this->image;
+    }
 }

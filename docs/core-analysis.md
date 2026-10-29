@@ -57,7 +57,11 @@ Inventory of 2026-10-29. "No users" means no other file in the repository uses t
 | `Dll/Table.php`, `Dll/Rtable.php` | `Record` (creates and changes tables itself) |
 | `Dll/Tagging.php` | Uses the old database API (`mysql_escape_mimic`) that no longer exists |
 
+Done: `Dll/Comments.php` and `Sys/Session_old.php` removed (after `tests/session.php` validated the new Session); `Sys/CookieManager.php` is now a real cookie class; `Sys/Curl.php` rewritten (certificate check on, only http/https, GET data sent).
+
 **C. Two versions of the same thing (proposed: merge into one)**
+
+Done for the file system: `Filesystem`, `FileInfo` and `FolderInfo` in `Sys` are the real classes, locked to the project folder; `FilesystemIO`, `FileInfoIO` and `FolderInfoIO` are aliases of them (`tests/filesystem.php`).
 
 | Files | Group |
 |---|---|

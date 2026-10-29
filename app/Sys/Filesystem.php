@@ -1,210 +1,188 @@
 <?php
 
-
 /**
- * Filesystem class for managing file and folder operations.
+ * Files and folders inside the project.
  *
- * This class provides methods for handling files and folders, such as creating folders,
- * writing to files, and inserting content into files.
+ * Every path is resolved from the project folder (DOCUMENT_ROOT) and must stay
+ * inside it: "../" that leads out, or an absolute path elsewhere, throws. So a
+ * path from a visitor can never reach other files on the server.
  *
- * @category _("Filesystem class")
+ * <code>
+ * $file   = Filesystem::path('upload/report.pdf');     // FileInfo
+ * $folder = Filesystem::path('upload');                 // FolderInfo
+ * foreach ((new Filesystem('upload'))->getDir('*.jpg') as $image) { ... }
+ * (new Filesystem('upload/old.txt'))->rename('upload/new.txt');
+ * </code>
+ *
+ * @category _("File Handling class")
  */
 class Filesystem
 {
-    
-    public $path = "";
-    
     /**
-     * Constructor for the Filesystem class.
+     * The resolved path this object works on
      *
-     * @param string $path The path to the file or folder.
-     * @param string $search The search pattern if looking for files in a folder.
+     * @var string
      */
-    function __construct($path = "", $search = ""){
-        
-        $p = array();
-        if($path != ""){
-            throw new SystemException("You must provide an address.");
-        }
-        
-        if(file_exists($path)){
-            if(is_dir($path)){
-              
-              $f = glob($path . $search); 
-              foreach($f as $k => $p){
-                if(is_dir($p)){
-                    $p[] = new FolderInfo($p);
-                }else{
-                    $p[] = new FileInfo($p);
-                }
-              }    
-            }
-            if(is_file($path)){
-              return new FileInfo($p);
-            }
-            
-        }else{
-            if(is_dir($p)){
-                return new FolderInfo($p);
-            }else{
-               return new FileInfo($p);
-            }
-        }
-    }
-    
-    /**
-     * Write data to the filesystem object.
-     *
-     * @param array $data The data to write.
-     * @return $this The current object for method chaining.
-     */
-    function write(array $data){
-        $this->write = $data;
-        return $this;
-    }
-    
-    /**
-     * Create a new file with a given name and write data to it.
-     *
-     * @param string $name The name of the file to create.
-     * @return bool True if the file creation was successful, false otherwise.
-     */
-    function theme($name){
-        $end = false;
-        if($this->path){
-           $path = $this->path; 
-              if($path[strlen($path) - 1] == '/'){
-		            $path = substr($path, 0, -1);
-		      }
-		       if(!file_exists($path)){
-    
-                    $this->makeFolder($path);
-                }
-		         $path = $path . DIRECTORY_SEPARATOR . trim($name, '/');
-        }else{
-           
-           $path = dirname($name);
-           if(!file_exists($path)){
-    
-            $this->makeFolder($path);
-            }
-            $path = $name;
-        }
-        
-         if(!file_exists($path)){
-            $myfile = fopen($path, "w");
-             
-             foreach ($this->write as $line) {
-               fwrite($myfile, $line . "\n");
-             }
-             
-            fclose($myfile);
-             $end = true;
-         }
-        
-        return $end;
-        
-    }
-    
-    /**
-     * Create a folder recursively.
-     *
-     * @param string $path The path of the folder to create.
-     * @param int $r The permissions for the created folder.
-     * @return bool True if the folder creation was successful, false otherwise.
-     */
-    function makeFolder($path, $r = 0777){
-        
-        $path = explode("/", $path);
-        $structure = '';
-      
-        foreach ($path as $dir) {
-           $structure .= "/" . trim($dir);    
-            if(!is_dir($structure) && strlen($structure > 0) && !mkdir($structure, $r, true)) {
-                throw new SystemException(_("Failed to create the folder %s"), $structure);
-            }
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Open a file or folder with the given name.
-     *
-     * @param string $name The name of the file or folder to open.
-     * @return $this The current object for method chaining.
-     */
-    function open($name){
-        if($this->path){
-           $path = $this->path; 
-              if($path[strlen($path) - 1] == '/'){
-		            $path = substr($path, 0, -1);
-		      }
-		 
-		       $path = $path . DIRECTORY_SEPARATOR . trim($name, '/');
-        }else{
-           $path = $name;
-        }
-        $this->path = $path;
-        
-        return $this;
-    }
-    
-    /**
-     * Insert data after a specified position in the file.
-     *
-     * @param string $where The position where the data should be inserted.
-     * @param mixed $data The data to insert.
-     * @return $this The current object for method chaining.
-     */
-    function insertAfter($where, $data){
-        if(file_exists($this->path)){
-            
-        $reading = fopen($this->path, 'r');
-        $writing = fopen($this->path . '.tmp', 'w');
-            
-            
-    $replaced = false;
+    protected string $source = '';
 
-    while (!feof($reading)) {
-      $line = fgets($reading);
-      
-      if (stristr($line, $where)) {
-          
-            if(is_array($data)){
-           foreach ($data as $v) {
-               $line .= "\n" . $v;
-           }
-      }else{
-           $line .= $data;
-        
-      }
-        
-       $replaced = true;
-      }
-    
-      fputs($writing, $line);
-    }
-    
-    fclose($reading); 
-    fclose($writing);
-    
-    // might as well not overwrite the file if we didn't replace anything
-    if ($replaced) 
+    /**
+     * @param string $sources Path from the project folder (or absolute inside it)
+     * @throws \RuntimeException When the path leads outside the project
+     */
+    public function __construct($sources)
     {
-      rename($this->path . '.tmp', $this->path);
-    } else {
-      unlink($this->path . '.tmp');
+        $this->source = self::resolve((string) $sources);
     }
-         
-            
-        }else{
-           throw new SystemException(_("Failed to read the file because the address is wrong or the file is write-protected %s"), $this->path); 
+
+    /**
+     * The resolved path.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * FileInfo for a file, FolderInfo for a folder (FileInfo when it does not exist yet).
+     *
+     * @param string $sources
+     * @return FileInfo|FolderInfo
+     * @throws \RuntimeException When the path leads outside the project
+     */
+    public static function path($sources)
+    {
+        $path = self::resolve((string) $sources);
+
+        return is_dir($path) ? new FolderInfo($path) : new FileInfo($path, false);
+    }
+
+    /**
+     * Paths in this folder that match a pattern.
+     *
+     * @param string $type glob() pattern, for example '*' or '*.jpg'
+     * @return string[] Full paths (empty when this is not a folder)
+     */
+    public function getDir($type = '*')
+    {
+        if (!is_dir($this->source) || str_contains((string) $type, '..')) {
+            return [];
         }
 
-        
-        return $this;
+        return glob(rtrim($this->source, '/') . '/' . $type) ?: [];
     }
 
+    /**
+     * pathinfo() of the file, null when it is not a file.
+     *
+     * @return array|null
+     */
+    public function getInfo()
+    {
+        return is_file($this->source) ? pathinfo($this->source) : null;
+    }
+
+    /**
+     * Move or rename the file to another path in the project.
+     *
+     * @param string $name New path from the project folder
+     * @return bool
+     * @throws \RuntimeException When the new path leads outside the project
+     */
+    public function rename($name)
+    {
+        return is_file($this->source) && rename($this->source, self::resolve((string) $name));
+    }
+
+    /**
+     * Copy the file to another path in the project.
+     *
+     * @param string $name Target path from the project folder
+     * @return bool
+     * @throws \RuntimeException When the target leads outside the project
+     */
+    public function copy($name)
+    {
+        return is_file($this->source) && copy($this->source, self::resolve((string) $name));
+    }
+
+    /**
+     * Delete the file (only this file, never a pattern).
+     *
+     * @return bool
+     */
+    public function remove()
+    {
+        return is_file($this->source) && unlink($this->source);
+    }
+
+    /**
+     * The project folder, with forward slashes and no trailing slash.
+     *
+     * @return string
+     * @throws \RuntimeException When DOCUMENT_ROOT is not set
+     */
+    public static function root(): string
+    {
+        $root = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+        if ($root === false || $root === '') {
+            throw new \RuntimeException(_('DOCUMENT_ROOT is not set to an existing folder'));
+        }
+
+        return rtrim(str_replace('\\', '/', $root), '/');
+    }
+
+    /**
+     * Turn a path into a full path inside the project, or throw.
+     *
+     * The path does not have to exist yet (for a new file or folder); the
+     * part of it that exists is resolved with realpath(), so symlinks and
+     * "../" cannot lead out of the project.
+     *
+     * @param string $path From the project folder, or absolute inside it
+     * @return string Full path with forward slashes
+     * @throws \RuntimeException When the path is empty or leads outside the project
+     */
+    public static function resolve(string $path): string
+    {
+        if (trim($path) === '' || str_contains($path, "\0")) {
+            throw new \RuntimeException(_('You must provide a path.'));
+        }
+
+        $root = self::root();
+        $path = str_replace('\\', '/', $path);
+        $absolute = str_starts_with($path, '/') || preg_match('#^[A-Za-z]:/#', $path);
+        $full = $absolute ? $path : $root . '/' . $path;
+
+        // Remove . and .. by hand, then resolve the part that exists
+        $parts = [];
+        foreach (explode('/', $full) as $i => $part) {
+            if ($part === '..') {
+                array_pop($parts);
+            } elseif ($part !== '.' && ($part !== '' || $i === 0)) {
+                $parts[] = $part;
+            }
+        }
+        $full = implode('/', $parts);
+
+        $existing = $full;
+        $rest = '';
+        while ($existing !== '' && $existing !== '.' && !file_exists($existing)) {
+            $rest = '/' . basename($existing) . $rest;
+            $existing = dirname($existing);
+        }
+        $real = realpath($existing);
+        $resolved = ($real === false ? $existing : str_replace('\\', '/', $real)) . $rest;
+
+        $inside = PHP_OS_FAMILY === 'Windows'
+            ? stripos($resolved . '/', $root . '/') === 0
+            : str_starts_with($resolved . '/', $root . '/');
+
+        if (!$inside) {
+            throw new \RuntimeException(sprintf(_('The path is outside the project: %s'), $path));
+        }
+
+        return rtrim($resolved, '/');
+    }
 }
-?>

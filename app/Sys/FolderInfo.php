@@ -1,200 +1,314 @@
-<?
-class FolderInfo{
+<?php
 
-	public $isDir = false;
-	public $pathName  = "";
-	public $path  = "";
-	public $baseName  = "";
-	public $fileName = "";
-	public $perms = false;
-	public $CTime = false;
-	public $MTime = false;
-	public $ATime = false;
-	public $isWritable = false;
-	public $isReadble = false;
-	public $type = "";
-	
-	protected $pointer = "";
-	
-	function __construct($path=""){
+/**
+ * A folder in the project: its properties, contents and folder operations.
+ *
+ * Paths are locked to the project folder (see Filesystem::resolve()).
+ *
+ * <code>
+ * $upload = new FolderInfo('upload');
+ * foreach ($upload->getList() as $item) { echo $item->baseName; }   // FileInfo and FolderInfo
+ * $images = $upload->search('\.(jpg|png)$', true);                  // recursive
+ * $upload->newFolder('2026');
+ * $upload->copy('backup/upload');
+ * </code>
+ *
+ * @category _("Folder Handling class")
+ */
+class FolderInfo
+{
+    /** @var bool True when the folder exists */
+    public $isDir = false;
 
-		if($path==""){
-			throw new SystemException(_("Du måste ange en adress."));
-		}
+    /** @var string Full path */
+    public $pathName = "";
 
-		if(is_dir($path)){
-			$this->pathName = $path;
-			$this->isDir = true;
-			$this->setFilProperties();
-		}else{
-			throw new SystemException(_("Det är inte någon mapp. %s"),$path);
-		}
-	}
-	
-	 public function __toString(){
+    /** @var string Parent folder */
+    public $path = "";
+
+    /** @var string Folder name */
+    public $baseName = "";
+
+    /** @var string Folder name (same as $baseName) */
+    public $fileName = "";
+
+    /** @var string|false Permissions, for example "0755" */
+    public $perms = false;
+
+    /** @var int|false Change time */
+    public $CTime = false;
+
+    /** @var int|false Modification time */
+    public $MTime = false;
+
+    /** @var int|false Access time */
+    public $ATime = false;
+
+    /** @var bool */
+    public $isWritable = false;
+
+    /** @var bool */
+    public $isReadable = false;
+
+    /** @var string Always "dir" */
+    public $type = "dir";
+
+    /**
+     * @param string $path Path from the project folder, or absolute inside it
+     * @throws \RuntimeException When the path is outside the project
+     * @throws SystemException When it is not a folder
+     */
+    public function __construct($path = "")
+    {
+        $this->pathName = Filesystem::resolve((string) $path);
+
+        if (!is_dir($this->pathName)) {
+            throw new SystemException(sprintf(_('It is not a folder: %s'), $path));
+        }
+
+        $this->refresh();
+    }
+
+    /**
+     * The full path.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
         return $this->pathName;
     }
-	
-	private function setFilProperties(){
-		$p = $this->pathName;
-		if(file_exists($p)){
-		
-			$this->perms = substr(sprintf('%o', fileperms($p)), -4);
-			$this->ATime = fileatime($p);
-			$this->CTime = filectime($p);
-			$this->MTime = filemtime($p);
-			$this->isWritable = is_writable($p);
-			$this->isReadble = is_readable($p);
-			$info = pathinfo($p);
-			$this->path = $info['dirname'];
-			$this->baseName = $info['basename'];
-			$this->fileName = $info['filename'];
-			$this->type = "dir";
-		}
-	}
-	
-	function setPerms($permissions){
-		if(preg_match('/\d{4}/', $permissions, $matches, PREG_OFFSET_CAPTURE, 0)){
-			if(!chmod($this->pathName,(int) $permissions)){
-				throw new SystemException(_("Det gick inte sätt behörigheterna som du angett du %s"),$permissions);
-			}
-		}else{
-			throw new SystemException(_("Du ange fel,Du måste ange fyra nummer. %s"),$permissions);
-		}
-	}
-	
-	function remove(){
-		if($this->isDir){
-			if(!rmdir($this->pathName)){
-				throw new SystemException(_("Det gick inte ta bort mapp filen."));
-			}else{
-				return true;
-			}
-		}else{
-			return false;
-		}
-	}
-	function newFolder($name,$r=0777){
-		if($this->isDir){
-			$name = $this->path.DIRECTORY_SEPARATOR.$name;
-			if(mkdir($name,$r)){
-				return true;
-			}else{
-				return false;
-			}
-		}else{
-			return false;
-		}
-		return $this;
-	}
-	
-	function rename($name){
-		if($this->isDir){
-			$name = $this->path.DIRECTORY_SEPARATOR.$name;
-			if(rename($this->pathName, $name)){
-				return true;
-			}else{
-				return false;
-			}
-		}else{
-			return false;
-		}
-		return $this;
-	}
-	
-	function getTree(){
-      $files = glob($this->pathName, GLOB_BRACE);
-	      foreach ($files as $k => $dir){
-	    		$files = array_merge($files, $this->getList($dir.DIRECTORY_SEPARATOR.'*'));     
-	  	  }
-	 return $files;
 
-	}
-	
-	function getList(){
-      $files = glob($this->pathName.DIRECTORY_SEPARATOR.'*', GLOB_BRACE);
-      foreach ($files as $k => $dir){
-    		if(is_file($filename)){
-				$files[] = new FileInfo($filename); 
-			}
-		    
-		    if(is_dir($filename)){
-				$files[] = new FolderInfo($filename); 
-			}   
-  	 }
-	 return $files;
+    /**
+     * Read the properties again (after a change on disk).
+     *
+     * @return $this
+     */
+    public function refresh()
+    {
+        clearstatcache(true, $this->pathName);
+        $p = $this->pathName;
 
-	}
-	
-	function search(string $regex,int $flags = 0){
-		$files  = array();
-		if($this->isDir){
-			$path = $this->path.DIRECTORY_SEPARATOR;
-			
-			if(is_file($filename)){
-				$files[] = new FileInfo($filename); 
-			}
-		    
-		    if(is_dir($filename)){
-				$files[] = new FolderInfo($filename); 
-			}
-		}
-		
-		return $files;
-	}
-	
-	function move($path){
-		if($this->isDir){
-			$files = $this->getTree();
-			
-			foreach($files as $filename) {
-				$p = pathinfo($filename);
-				$d = str_replace($this->path,"",$filename);
-				$taget = $path.DIRECTORY_SEPARATOR.$d;
-				if(!file_exists($taget) && is_dir($taget)){
-					$this->makeFolder($taget);
-				}
-				if(is_file($taget) && !rename($filename, $path.DIRECTORY_SEPARATOR.$d)){
-					return false;
-				}
-			}
+        $this->isDir = is_dir($p);
+        $this->path = dirname($p);
+        $this->baseName = $this->fileName = basename($p);
 
-		}else{
-			return false;
-		}
-	}
-	
-	function copy($path){
-		if($this->isDir){
-			$files = $this->getTree();
-			
-			foreach($files as $filename) {
-				$p = pathinfo($filename);
-					$d = str_replace($this->path,"",$filename);
-				$taget = $path.DIRECTORY_SEPARATOR.$d;
-				if(!file_exists($taget) && is_dir($taget)){
-					$this->makeFolder($taget);
-				}
-				if(is_file($taget) && !copy($filename, $path.DIRECTORY_SEPARATOR.$d)){
-					return false;
-				}
-			}
+        if ($this->isDir) {
+            $this->perms = substr(sprintf('%o', fileperms($p)), -4);
+            $this->ATime = fileatime($p);
+            $this->CTime = filectime($p);
+            $this->MTime = filemtime($p);
+            $this->isWritable = is_writable($p);
+            $this->isReadable = is_readable($p);
+        }
 
-		}else{
-			return false;
-		}
-	}
+        return $this;
+    }
 
-	function makeFolder($path,$r=0777){
+    /**
+     * Set the permissions.
+     *
+     * @param string $permissions Four octal digits, for example "0755"
+     * @return void
+     * @throws SystemException When the format is wrong or chmod fails
+     */
+    public function setPerms($permissions)
+    {
+        if (!preg_match('/^[0-7]{4}$/', (string) $permissions)) {
+            throw new SystemException(sprintf(_('Give four octal digits, for example 0755: %s'), $permissions));
+        }
+        if (!chmod($this->pathName, octdec((string) $permissions))) {
+            throw new SystemException(sprintf(_('Failed to set the permissions %s'), $permissions));
+        }
+        $this->refresh();
+    }
 
-		if($this->isDir){
-			if(!mkdir($this->pathName)){
-				throw new SystemException(_("Det gick inte skapa mapp."));
-			}else{
-				return true;
-			}
-		}else{
-			return false;
-		}
+    /**
+     * Delete the folder.
+     *
+     * @param bool $recursive True to delete everything in it too
+     * @return bool
+     * @throws SystemException When it cannot be deleted (for example not empty)
+     */
+    public function remove(bool $recursive = false)
+    {
+        if (!is_dir($this->pathName)) {
+            return false;
+        }
+
+        if ($recursive) {
+            $items = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($this->pathName, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($items as $item) {
+                $item->isDir() && !$item->isLink() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+            }
+        }
+
+        if (!@rmdir($this->pathName)) {
+            throw new SystemException(sprintf(_('Failed to remove the folder %s (is it empty?)'), $this->pathName));
+        }
+
+        $this->refresh();
+        return true;
+    }
+
+    /**
+     * Create a folder inside this folder.
+     *
+     * @param string $name Name of the new folder (may contain subfolders: "a/b")
+     * @param int    $r    Permissions
+     * @return bool True when it was created (or already existed)
+     * @throws \RuntimeException When the name leads outside the project
+     */
+    public function newFolder($name, $r = 0775)
+    {
+        $target = Filesystem::resolve($this->pathName . '/' . $name);
+
+        return is_dir($target) || mkdir($target, $r, true);
+    }
+
+    /**
+     * Rename the folder in its parent folder.
+     *
+     * @param string $name New name, without folder
+     * @return bool
+     * @throws \InvalidArgumentException When the name contains a folder
+     */
+    public function rename($name)
+    {
+        if (str_contains((string) $name, '/') || str_contains((string) $name, '\\')) {
+            throw new \InvalidArgumentException(_('rename() takes a name; use move() to change the folder'));
+        }
+
+        return $this->move($this->path . '/' . $name);
+    }
+
+    /**
+     * All files and folders inside this folder, at every level (full paths).
+     *
+     * @return string[]
+     */
+    public function getTree()
+    {
+        $paths = [];
+        $items = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->pathName, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($items as $item) {
+            $paths[] = str_replace('\\', '/', $item->getPathname());
+        }
+        sort($paths);
+        return $paths;
+    }
+
+    /**
+     * Files and folders directly in this folder.
+     *
+     * @return array<int, FileInfo|FolderInfo>
+     */
+    public function getList()
+    {
+        $list = [];
+        foreach (new FilesystemIterator($this->pathName, FilesystemIterator::SKIP_DOTS) as $item) {
+            $path = str_replace('\\', '/', $item->getPathname());
+            $list[] = $item->isDir() ? new FolderInfo($path) : new FileInfo($path);
+        }
+        usort($list, fn($a, $b) => strcmp($a->pathName, $b->pathName));
+        return $list;
+    }
+
+    /**
+     * Files (and, when not recursive, folders) whose name matches a regular expression.
+     *
+     * @param string $regex     Regular expression without delimiters, for example '\.class\.php$'
+     * @param bool   $recursive Also look in subfolders (then files only)
+     * @return array<int, FileInfo|FolderInfo>
+     */
+    public function search(string $regex, $recursive = false)
+    {
+        $pattern = '/' . str_replace('/', '\/', $regex) . '/i';
+        $found = [];
+
+        if ($recursive) {
+            $items = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->pathName, FilesystemIterator::SKIP_DOTS));
+            foreach ($items as $item) {
+                if ($item->isFile() && preg_match($pattern, $item->getFilename())) {
+                    $found[] = new FileInfo(str_replace('\\', '/', $item->getPathname()));
+                }
+            }
+        } else {
+            foreach ($this->getList() as $item) {
+                if (preg_match($pattern, $item->baseName)) {
+                    $found[] = $item;
+                }
+            }
+        }
+
+        usort($found, fn($a, $b) => strcmp($a->pathName, $b->pathName));
+        return $found;
+    }
+
+    /**
+     * Move the folder with everything in it.
+     *
+     * @param string $path New path from the project folder
+     * @return bool
+     * @throws \RuntimeException When the target is outside the project
+     */
+    public function move($path)
+    {
+        $target = Filesystem::resolve((string) $path);
+
+        if (!is_dir($this->pathName) || file_exists($target)) {
+            return false;
+        }
+        if (!is_dir(dirname($target))) {
+            mkdir(dirname($target), 0775, true);
+        }
+        if (!rename($this->pathName, $target)) {
+            return false;
+        }
+
+        $this->pathName = $target;
+        $this->refresh();
+        return true;
+    }
+
+    /**
+     * Copy the folder with everything in it.
+     *
+     * @param string $path Target path from the project folder (created when missing)
+     * @return bool
+     * @throws \RuntimeException When the target is outside the project
+     * @throws SystemException When a file cannot be copied
+     */
+    public function copy($path)
+    {
+        $target = Filesystem::resolve((string) $path);
+
+        if (!is_dir($this->pathName)) {
+            return false;
+        }
+        if (str_starts_with($target . '/', $this->pathName . '/')) {
+            throw new SystemException(_('A folder cannot be copied into itself'));
+        }
+
+        if (!is_dir($target)) {
+            mkdir($target, 0775, true);
+        }
+
+        foreach ($this->getTree() as $source) {
+            $destination = $target . substr($source, strlen($this->pathName));
+            if (is_dir($source)) {
+                is_dir($destination) || mkdir($destination, 0775, true);
+            } elseif (!copy($source, $destination)) {
+                throw new SystemException(sprintf(_('Failed to copy %s'), $source));
+            }
+        }
+
+        return true;
     }
 }
